@@ -1,0 +1,1357 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오프린트미 어패럴 리뉴얼 추이 분석 v5</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.0.1/dist/chartjs-plugin-annotation.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #181c27;
+    --surface2: #1e2335;
+    --border: #2a2f42;
+    --accent: #4f8ef7;
+    --accent2: #f7a24f;
+    --accent3: #4ff7a2;
+    --accent4: #f74f6e;
+    --text: #e8ecf4;
+    --text2: #8892aa;
+    --text3: #5a6279;
+    --event-color: #f7a24f;
+    --non-event-color: #4f8ef7;
+    --post-color: #4ff7a2;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    line-height: 1.6;
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #131929 0%, #1a2040 50%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 40px 48px 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .header::before {
+    content: '';
+    position: absolute;
+    top: -80px; right: -80px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, rgba(79,142,247,0.12) 0%, transparent 70%);
+    pointer-events: none;
+  }
+  .header-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(79,142,247,0.15);
+    border: 1px solid rgba(79,142,247,0.3);
+    color: var(--accent);
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    padding: 4px 12px;
+    border-radius: 20px;
+    margin-bottom: 14px;
+    text-transform: uppercase;
+  }
+  .header h1 {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+  .header-meta {
+    font-size: 13px;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .header-meta span { display: flex; align-items: center; gap: 5px; }
+
+  /* Timeline */
+  .timeline {
+    display: flex;
+    gap: 0;
+    padding: 0 48px;
+    margin-top: -1px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+  }
+  .timeline-item {
+    padding: 14px 20px;
+    border-right: 1px solid var(--border);
+    min-width: 160px;
+    flex-shrink: 0;
+  }
+  .timeline-item:last-child { border-right: none; }
+  .timeline-date { font-size: 11px; font-weight: 700; color: var(--accent); letter-spacing: 0.05em; margin-bottom: 4px; }
+  .timeline-label { font-size: 12px; color: var(--text2); line-height: 1.4; }
+
+  /* Main */
+  .main { padding: 40px 48px; max-width: 1400px; margin: 0 auto; }
+
+  /* KPI Strip */
+  .kpi-strip {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+    margin-bottom: 36px;
+  }
+  @media (max-width: 1100px) { .kpi-strip { grid-template-columns: repeat(3, 1fr); } }
+
+  .kpi-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .kpi-card.blue::before { background: var(--accent); }
+  .kpi-card.orange::before { background: var(--accent2); }
+  .kpi-card.green::before { background: var(--accent3); }
+  .kpi-card.red::before { background: var(--accent4); }
+  .kpi-card.purple::before { background: #b44ff7; }
+
+  .kpi-label { font-size: 11px; color: var(--text2); font-weight: 500; letter-spacing: 0.04em; margin-bottom: 8px; text-transform: uppercase; }
+  .kpi-value { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; color: var(--text); line-height: 1; margin-bottom: 6px; }
+  .kpi-sub { font-size: 12px; color: var(--text3); }
+  .kpi-delta {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 12px;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 20px;
+    margin-top: 6px;
+  }
+  .kpi-delta.up { background: rgba(79,247,162,0.12); color: var(--accent3); }
+  .kpi-delta.neutral { background: rgba(79,142,247,0.12); color: var(--accent); }
+
+  /* Section */
+  .section { margin-bottom: 40px; }
+  .section-header {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .section-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.01em;
+  }
+  .section-sub { font-size: 12px; color: var(--text3); }
+
+  /* Chart Cards */
+  .chart-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  .chart-grid-3 {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+  }
+  @media (max-width: 900px) {
+    .chart-grid-2, .chart-grid-3 { grid-template-columns: 1fr; }
+  }
+  .chart-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 24px;
+  }
+  .chart-card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+  }
+  .chart-card-desc {
+    font-size: 11px;
+    color: var(--text3);
+    margin-bottom: 18px;
+  }
+  .chart-wrap { position: relative; }
+
+  /* Table */
+  .data-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+  }
+  .data-table thead th {
+    padding: 10px 14px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    border-bottom: 1px solid var(--border);
+  }
+  .data-table thead th:not(:first-child) { text-align: right; }
+  .data-table tbody tr {
+    border-bottom: 1px solid rgba(42,47,66,0.5);
+    transition: background 0.15s;
+  }
+  .data-table tbody tr:hover { background: rgba(79,142,247,0.04); }
+  .data-table tbody tr.event-row { background: rgba(247,162,79,0.04); }
+  .data-table tbody tr.post-row { background: rgba(79,247,162,0.04); }
+  .data-table tbody tr.highlight-row { background: rgba(247,162,79,0.1); }
+  .data-table tbody td { padding: 10px 14px; color: var(--text2); }
+  .data-table tbody td:not(:first-child) { text-align: right; font-variant-numeric: tabular-nums; }
+  .data-table tbody td.main-val { color: var(--text); font-weight: 600; }
+
+  /* Tag */
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 4px;
+    letter-spacing: 0.04em;
+  }
+  .tag.pre { background: rgba(90,98,121,0.3); color: var(--text3); }
+  .tag.event { background: rgba(247,162,79,0.2); color: var(--accent2); }
+  .tag.post { background: rgba(79,247,162,0.2); color: var(--accent3); }
+
+  /* Insight Box */
+  .insight-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 20px;
+  }
+  @media (max-width: 700px) { .insight-grid { grid-template-columns: 1fr; } }
+  .insight-card {
+    border-radius: 10px;
+    padding: 16px 18px;
+    border: 1px solid;
+  }
+  .insight-card.positive { background: rgba(79,247,162,0.05); border-color: rgba(79,247,162,0.2); }
+  .insight-card.warning { background: rgba(247,162,79,0.05); border-color: rgba(247,162,79,0.2); }
+  .insight-card-title {
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .insight-card.positive .insight-card-title { color: var(--accent3); }
+  .insight-card.warning .insight-card-title { color: var(--accent2); }
+  .insight-card ul { list-style: none; padding: 0; }
+  .insight-card ul li {
+    font-size: 12px;
+    color: var(--text2);
+    padding: 5px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    padding-left: 12px;
+    position: relative;
+    line-height: 1.5;
+  }
+  .insight-card ul li::before {
+    content: '·';
+    position: absolute;
+    left: 0;
+    color: var(--text3);
+  }
+  .insight-card ul li:last-child { border-bottom: none; }
+
+  /* Category bar */
+  .cat-bar-wrap { display: flex; flex-direction: column; gap: 10px; }
+  .cat-bar-item {}
+  .cat-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    margin-bottom: 5px;
+  }
+  .cat-bar-name { color: var(--text2); }
+  .cat-bar-val { color: var(--text); font-weight: 600; font-variant-numeric: tabular-nums; }
+  .cat-bar-track { height: 6px; background: var(--surface2); border-radius: 3px; overflow: hidden; }
+  .cat-bar-fill { height: 100%; border-radius: 3px; transition: width 1s cubic-bezier(0.4,0,0.2,1); }
+
+  /* Phase indicator */
+  .phase-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .phase-chip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: var(--text2);
+    padding: 4px 12px 4px 8px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 20px;
+  }
+  .phase-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+  /* New section: post event */
+  .highlight-box {
+    background: linear-gradient(135deg, rgba(79,247,162,0.07) 0%, rgba(79,142,247,0.07) 100%);
+    border: 1px solid rgba(79,247,162,0.25);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 32px;
+  }
+  .highlight-box-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: var(--accent3);
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .highlight-metrics {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+  }
+  @media (max-width: 700px) { .highlight-metrics { grid-template-columns: repeat(2, 1fr); } }
+  .hm-item {}
+  .hm-label { font-size: 11px; color: var(--text3); margin-bottom: 4px; }
+  .hm-val { font-size: 20px; font-weight: 800; letter-spacing: -0.02em; }
+  .hm-val.green { color: var(--accent3); }
+  .hm-val.orange { color: var(--accent2); }
+  .hm-val.blue { color: var(--accent); }
+  .hm-sub { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  footer {
+    text-align: center;
+    padding: 24px;
+    font-size: 11px;
+    color: var(--text3);
+    border-top: 1px solid var(--border);
+    margin-top: 40px;
+  }
+
+  /* Compare Overview */
+  .compare-overview {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 36px;
+  }
+  .compare-label-row { margin-bottom: 18px; }
+  .compare-section-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .compare-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 900px) { .compare-grid { grid-template-columns: 1fr 1fr; } }
+  .compare-metric {}
+  .compare-metric-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text3);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    margin-bottom: 10px;
+  }
+  .compare-bars { display: flex; flex-direction: column; gap: 7px; }
+  .compare-bar-row { display: flex; align-items: center; gap: 8px; }
+  .compare-bar-label {
+    font-size: 10px;
+    font-weight: 600;
+    white-space: nowrap;
+    width: 46px;
+    flex-shrink: 0;
+  }
+  .compare-bar-label.before { color: var(--text3); }
+  .compare-bar-label.after { color: var(--accent3); }
+  .compare-bar-track {
+    flex: 1;
+    height: 8px;
+    background: var(--surface2);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .compare-bar-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1.2s cubic-bezier(0.4,0,0.2,1);
+  }
+  .compare-bar-val {
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text2);
+    white-space: nowrap;
+    width: 58px;
+    text-align: right;
+    flex-shrink: 0;
+  }
+  .compare-delta {
+    margin-top: 8px;
+    font-size: 18px;
+    font-weight: 800;
+    color: var(--accent3);
+    letter-spacing: -0.02em;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-badge">📊 오프린트미 어패럴 리뉴얼</div>
+  <h1>리뉴얼 추이 분석</h1>
+  <div class="header-meta">
+    <span>📅 분석기간 2026.02.26 ~ 03.25</span>
+    <span>🚀 리뉴얼 3/17(화) 14:00</span>
+    <span>🎁 이벤트 종료 3/24 자정</span>
+    <span>🧵 자수 오픈 3/24 14:00</span>
+    <span style="color:#4ff7a2;font-weight:600;">★ 이벤트 종료 후 1일 데이터 추가 (3/25)</span>
+  </div>
+</div>
+
+<!-- Timeline -->
+<div class="timeline">
+  <div class="timeline-item">
+    <div class="timeline-date">3/17 14:00</div>
+    <div class="timeline-label">리뉴얼 오픈 + 이벤트 시작<br>팀블링 20수/30수 오버핏</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">3/20 17:00</div>
+    <div class="timeline-label">이벤트 상품 추가<br>팀블링 20수 티셔츠(남/여), 세미크롭</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">3/24 14:00</div>
+    <div class="timeline-label">자수 카테고리 오픈<br>14개 자수 상품 신규</div>
+  </div>
+  <div class="timeline-item">
+    <div class="timeline-date">3/24 24:00</div>
+    <div class="timeline-label">이벤트 종료<br>샘플 무료 1장 마감</div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- 비이벤트 일평균 비교 -->
+  <div class="compare-overview" style="margin-bottom:12px;">
+    <div class="compare-label-row">
+      <div class="compare-section-title">비이벤트 일평균 비교 <span style="font-size:11px;font-weight:400;color:var(--text3)">· 이벤트 상품 제외 순수 비이벤트 기준 · 출처: 상품명 단위 집계</span></div>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-metric">
+        <div class="compare-metric-title">비이벤트 일평균 매출</div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-bar-label before">리뉴얼 전</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:51%;background:#5a6279"></div></div>
+            <span class="compare-bar-val">206만</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-bar-label after">리뉴얼 후</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%;background:#4ff7a2"></div></div>
+            <span class="compare-bar-val" style="color:#4ff7a2">404만</span>
+          </div>
+        </div>
+        <div class="compare-delta">+96%</div>
+      </div>
+      <div class="compare-metric">
+        <div class="compare-metric-title">비이벤트 일평균 주문수</div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-bar-label before">리뉴얼 전</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:41.5%;background:#5a6279"></div></div>
+            <span class="compare-bar-val">66건</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-bar-label after">리뉴얼 후</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%;background:#4ff7a2"></div></div>
+            <span class="compare-bar-val" style="color:#4ff7a2">159건</span>
+          </div>
+        </div>
+        <div class="compare-delta">+141%</div>
+      </div>
+      <div class="compare-metric" style="grid-column: span 2;">
+        <div class="compare-metric-title" style="margin-bottom:6px">비이벤트 기준 해석</div>
+        <div style="font-size:12px;color:var(--text2);line-height:1.7;background:var(--surface2);border-radius:8px;padding:12px 14px;">
+          리뉴얼 후(3/17~24) 이벤트 상품명 제외 순수 비이벤트 매출이 <strong style="color:var(--text)">206만→404만(+96%)</strong>, 주문수 <strong style="color:var(--text)">66→159건(+141%)</strong>으로 성장. 특히 3/23~24 비이벤트 주문 <strong style="color:#4ff7a2">300건대 돌파</strong> — 이벤트 유입이 실구매로 전환되는 신호 확인.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 리뉴얼 전후 비교 -->
+  <div class="compare-overview">
+    <div class="compare-label-row">
+      <div class="compare-section-title">리뉴얼 오픈 전후 비교 <span style="font-size:11px;font-weight:400;color:var(--text3)">· 기준: 리뉴얼 전 일평균(2/26~3/16) vs 이벤트 종료 후 첫날(3/25)</span></div>
+    </div>
+    <div class="compare-grid">
+      <div class="compare-metric">
+        <div class="compare-metric-title">일 매출 (전체)</div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-bar-label before">리뉴얼 전</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:27.3%;background:#5a6279"></div></div>
+            <span class="compare-bar-val">172만</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-bar-label after">리뉴얼 후</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%;background:#4ff7a2"></div></div>
+            <span class="compare-bar-val" style="color:#4ff7a2">628만</span>
+          </div>
+        </div>
+        <div class="compare-delta">+265%</div>
+      </div>
+      <div class="compare-metric">
+        <div class="compare-metric-title">일 주문수 (전체)</div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-bar-label before">리뉴얼 전</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:23.1%;background:#5a6279"></div></div>
+            <span class="compare-bar-val">55건</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-bar-label after">리뉴얼 후</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%;background:#4ff7a2"></div></div>
+            <span class="compare-bar-val" style="color:#4ff7a2">238건</span>
+          </div>
+        </div>
+        <div class="compare-delta">+332%</div>
+      </div>
+      <div class="compare-metric">
+        <div class="compare-metric-title">객단가</div>
+        <div class="compare-bars">
+          <div class="compare-bar-row">
+            <span class="compare-bar-label before">리뉴얼 전</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:100%;background:#5a6279"></div></div>
+            <span class="compare-bar-val">30,970원</span>
+          </div>
+          <div class="compare-bar-row">
+            <span class="compare-bar-label after">리뉴얼 후</span>
+            <div class="compare-bar-track"><div class="compare-bar-fill" style="width:85.2%;background:#f7a24f"></div></div>
+            <span class="compare-bar-val" style="color:#f7a24f">26,382원</span>
+          </div>
+        </div>
+        <div class="compare-delta" style="color:#f7a24f">-15% <span style="font-size:10px;font-weight:400;color:var(--text3)">회복 중</span></div>
+      </div>
+      <div class="compare-metric">
+        <div class="compare-metric-title">3/25 기준 요약</div>
+        <div style="display:flex;flex-direction:column;gap:5px;margin-top:6px">
+          <div style="font-size:11px;color:var(--text3)">이벤트 종료 다음날 첫 집계</div>
+          <div style="font-size:22px;font-weight:800;color:#4ff7a2;letter-spacing:-0.02em;line-height:1.1">628만원 · 238건</div>
+          <div style="font-size:11px;color:var(--text2)">객단가 <strong style="color:var(--text)">26,382원</strong> — 리뉴얼 전 수준 복귀 임박</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 이벤트 & 자수 요약 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:36px;">
+    <div class="compare-overview" style="margin-bottom:0;">
+      <div class="compare-section-title" style="margin-bottom:14px;">🎁 이벤트 총 결과 (3/17~3/24, 8일)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">총 주문수</div>
+          <div style="font-size:26px;font-weight:800;color:#f7a24f;letter-spacing:-0.02em;line-height:1">27,956건</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">일평균 3,495건</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">총 매출</div>
+          <div style="font-size:26px;font-weight:800;color:#f7a24f;letter-spacing:-0.02em;line-height:1">31.1억</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">일평균 3,883만원</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);font-size:11px;color:var(--text2);line-height:1.6;">
+        3/20 이벤트 상품 확대 후 일 5,000건+ 폭발적 증가 · 3/23 피크 7,510건
+      </div>
+    </div>
+    <div class="compare-overview" style="margin-bottom:0;">
+      <div class="compare-section-title" style="margin-bottom:14px;">🧵 자수 카테고리 초기 성과 (3/24~25)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">총 매출</div>
+          <div style="font-size:26px;font-weight:800;color:#b44ff7;letter-spacing:-0.02em;line-height:1">91.6만</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">3/24 반나절 + 3/25 하루</div>
+        </div>
+        <div>
+          <div style="font-size:10px;color:var(--text3);margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em">총 주문수</div>
+          <div style="font-size:26px;font-weight:800;color:#b44ff7;letter-spacing:-0.02em;line-height:1">26건</div>
+          <div style="font-size:11px;color:var(--text3);margin-top:3px">4개 상품 · 모자·반팔 주도</div>
+        </div>
+      </div>
+      <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr 1fr;gap:6px;font-size:11px;">
+        <div style="color:var(--text2)">자수모자 <strong style="color:var(--text)">44.4만</strong> · 13건</div>
+        <div style="color:var(--text2)">자수반팔 <strong style="color:var(--text)">38.0만</strong> · 11건</div>
+        <div style="color:var(--text2)">자수맨투맨 <strong style="color:var(--text)">5.4만</strong> · 1건</div>
+        <div style="color:var(--text2)">자수긴팔 <strong style="color:var(--text)">3.9만</strong> · 1건</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 일별 추이 차트 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">일별 매출 · 주문수 추이</div>
+      <div class="section-sub">이벤트 기간(3/17~24)은 이벤트 물량이 포함된 전체 수치</div>
+    </div>
+
+    <div class="phase-row">
+      <div class="phase-chip"><div class="phase-dot" style="background:#5a6279"></div>리뉴얼 전 (2/26~3/16)</div>
+      <div class="phase-chip"><div class="phase-dot" style="background:#f7a24f"></div>이벤트 기간 (3/17~24)</div>
+      <div class="phase-chip"><div class="phase-dot" style="background:#4ff7a2"></div>이벤트 후 (3/25)</div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-card-title">일별 매출 추이 (전체)</div>
+      <div class="chart-card-desc">이벤트 기간 압축 표시 · 이벤트 종료 후 구간 하이라이트</div>
+      <div class="chart-wrap" style="height:260px;">
+        <canvas id="salesChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-card" style="margin-bottom:16px;">
+      <div class="chart-card-title">일별 객단가 추이</div>
+      <div class="chart-card-desc">이벤트 기간 ~1만원(무료 샘플 효과) → 종료 후 2.6만→4.1만으로 회복 중</div>
+      <div class="chart-wrap" style="height:180px;">
+        <canvas id="aovChart"></canvas>
+      </div>
+    </div>
+
+    <div class="chart-grid-2">
+      <div class="chart-card">
+        <div class="chart-card-title">일별 주문수 추이</div>
+        <div class="chart-card-desc">전체 주문수 (이벤트 포함)</div>
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="orderChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">이벤트 전후 비교 (일평균)</div>
+        <div class="chart-card-desc">매출 · 주문수 · 객단가 3가지 지표 비교</div>
+        <div class="chart-wrap" style="height:200px;">
+          <canvas id="compareChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 카테고리별 매출 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">카테고리별 전체 매출 (2/26~3/25)</div>
+      <div class="section-sub">반팔 이벤트 물량 포함</div>
+    </div>
+    <div class="chart-grid-3">
+      <div class="chart-card">
+        <div class="chart-card-title">카테고리 매출 비중</div>
+        <div class="chart-card-desc">총 354,791,159원 기준</div>
+        <div class="chart-wrap" style="height:220px;">
+          <canvas id="catChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-card-title">비이벤트 카테고리 매출</div>
+        <div class="chart-card-desc">반팔·크롭 제외 순수 비이벤트</div>
+        <div class="cat-bar-wrap" id="catBars"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 상품별 TOP 10 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">리뉴얼 후 상품별 매출 TOP 10</div>
+      <div class="section-sub">3/17 ~ 3/25 기준</div>
+    </div>
+    <div class="chart-card" style="overflow-x:auto;">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>유형</th>
+            <th>상품명</th>
+            <th>카테고리</th>
+            <th>수량</th>
+            <th>주문수</th>
+            <th>매출</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr class="event-row">
+            <td style="color:var(--text);font-weight:700">1</td>
+            <td><span class="tag event">이벤트</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 30수 오버핏 티셔츠</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>10,572</td>
+            <td>10,517</td>
+            <td class="main-val">118,319,545원</td>
+          </tr>
+          <tr class="event-row">
+            <td style="color:var(--text);font-weight:700">2</td>
+            <td><span class="tag event">이벤트</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 20수 티셔츠 (남)</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>6,761</td>
+            <td>6,675</td>
+            <td class="main-val">67,373,841원</td>
+          </tr>
+          <tr class="event-row">
+            <td style="color:var(--text);font-weight:700">3</td>
+            <td><span class="tag event">이벤트</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 20수 오버핏 티셔츠</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>4,832</td>
+            <td>4,770</td>
+            <td class="main-val">51,725,795원</td>
+          </tr>
+          <tr class="event-row">
+            <td style="color:var(--text);font-weight:700">4</td>
+            <td><span class="tag event">이벤트</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 20수 티셔츠 (여)</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>4,695</td>
+            <td>4,671</td>
+            <td class="main-val">44,788,410원</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:700">5</td>
+            <td><span class="tag post">신규</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 30수 티셔츠</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>508</td>
+            <td>340</td>
+            <td class="main-val">4,084,545원</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:700">6</td>
+            <td><span class="tag post">신규</span></td>
+            <td style="color:var(--text);font-weight:600">프린트스타 17수 티셔츠</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>205</td>
+            <td>137</td>
+            <td class="main-val">3,738,271원</td>
+          </tr>
+          <tr class="event-row">
+            <td style="color:var(--text);font-weight:700">7</td>
+            <td><span class="tag event">이벤트</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 20수 세미크롭 티셔츠</td>
+            <td style="color:var(--text2)">크롭</td>
+            <td>274</td>
+            <td>265</td>
+            <td class="main-val">2,651,183원</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:700">8</td>
+            <td><span class="tag post">신규</span></td>
+            <td style="color:var(--text);font-weight:600">팀블링 루즈핏 쭈리 맨투맨</td>
+            <td style="color:var(--text2)">맨투맨/후드</td>
+            <td>113</td>
+            <td>58</td>
+            <td class="main-val">2,122,045원</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:700">9</td>
+            <td><span class="tag pre">기존</span></td>
+            <td style="color:var(--text);font-weight:600">프린트스타 17수 라운드 반팔</td>
+            <td style="color:var(--text2)">반팔</td>
+            <td>111</td>
+            <td>37</td>
+            <td class="main-val">1,571,816원</td>
+          </tr>
+          <tr>
+            <td style="color:var(--text);font-weight:700">10</td>
+            <td><span class="tag pre">기존</span></td>
+            <td style="color:var(--text);font-weight:600">오프린트미 베이직 에코백(M)</td>
+            <td style="color:var(--text2)">에코백</td>
+            <td>158</td>
+            <td>4</td>
+            <td class="main-val">1,345,819원</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 일별 데이터 테이블 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">일별 상세 데이터</div>
+      <div class="section-sub">전체 기간 (2/26~3/25)</div>
+    </div>
+    <div class="chart-card" style="overflow-x:auto;">
+      <table class="data-table" id="dailyTable">
+        <thead>
+          <tr>
+            <th>일자</th>
+            <th>구분</th>
+            <th>총 매출</th>
+            <th>총 주문수</th>
+            <th>객단가</th>
+            <th>반팔 주문수</th>
+            <th>맨투맨 주문수</th>
+            <th>에코백 주문수</th>
+            <th>전일비 매출</th>
+          </tr>
+        </thead>
+        <tbody id="dailyTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- 자수 카테고리 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">🧵 자수 카테고리 초기 성과 (3/24~25)</div>
+      <div class="section-sub">3/24 오후 오픈 · 이틀차 집계</div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-wrap" style="height:160px;">
+        <canvas id="embroideryChart"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <!-- 신규 런칭 상품 초기 성과 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">🆕 신규 런칭 상품 초기 성과</div>
+      <div class="section-sub">이벤트 제외 순수 신규 상품 · 3/17~25 기준</div>
+    </div>
+    <div class="chart-grid-2">
+      <div class="chart-card" style="overflow-x:auto;">
+        <div class="chart-card-title">매출 발생 상품 TOP 10</div>
+        <div class="chart-card-desc" style="margin-bottom:14px">이벤트 팀블링 4종 제외 · 비이벤트 신규 상품 기준</div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>상품명</th>
+              <th>카테고리</th>
+              <th>수량</th>
+              <th>주문수</th>
+              <th>매출</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td style="color:var(--text);font-weight:700">1</td><td style="color:var(--text)">UA 17수 오버핏 티셔츠</td><td style="color:var(--text2)">반팔</td><td>33</td><td>22</td><td class="main-val">712,910원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">2</td><td style="color:var(--text)">UA 17수 티셔츠</td><td style="color:var(--text2)">반팔</td><td>23</td><td>17</td><td class="main-val">400,089원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">3</td><td style="color:var(--text)">비캔버스 오버핏 쭈리 후드집업</td><td style="color:var(--text2)">맨투맨/후드</td><td>4</td><td>4</td><td class="main-val">171,272원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">4</td><td style="color:var(--text)">UA 20수 헤비웨이트 오버핏 티셔츠</td><td style="color:var(--text2)">반팔</td><td>6</td><td>6</td><td class="main-val">166,364원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">5</td><td style="color:var(--text)">UA 드라이 루즈핏 티셔츠</td><td style="color:var(--text2)">반팔</td><td>7</td><td>4</td><td class="main-val">162,636원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">6</td><td style="color:var(--text)">팀블링 루즈핏 헤비쭈리 맨투맨</td><td style="color:var(--text2)">맨투맨/후드</td><td>3</td><td>3</td><td class="main-val">119,727원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">7</td><td style="color:var(--text)">팀블링 루즈핏 헤비쭈리 후드집업</td><td style="color:var(--text2)">맨투맨/후드</td><td>2</td><td>2</td><td class="main-val">101,636원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">8</td><td style="color:var(--text)">아틀란티스 리사이클 버킷햇</td><td style="color:var(--text2)">모자</td><td>3</td><td>1</td><td class="main-val">59,727원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">9</td><td style="color:var(--text)">자수 UA 쭈리 맨투맨</td><td style="color:var(--text2)">자수</td><td>1</td><td>1</td><td class="main-val">53,545원</td></tr>
+            <tr><td style="color:var(--text);font-weight:700">10</td><td style="color:var(--text)">자수 아틀란티스 메쉬 볼캡</td><td style="color:var(--text2)">자수</td><td>3</td><td>1</td><td class="main-val">52,455원</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="chart-card" style="display:flex;flex-direction:column;gap:14px;">
+        <div class="chart-card-title">신규 상품 진단</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+          <div style="background:rgba(79,142,247,0.1);border:1px solid rgba(79,142,247,0.25);border-radius:8px;padding:12px;">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">매출 발생 신규 상품</div>
+            <div style="font-size:24px;font-weight:800;color:var(--accent)">16개</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">리뉴얼 전 5개 → <span style="color:#4f8ef7">×3.2 확대</span></div>
+          </div>
+          <div style="background:rgba(247,162,79,0.1);border:1px solid rgba(247,162,79,0.25);border-radius:8px;padding:12px;">
+            <div style="font-size:10px;color:var(--text3);margin-bottom:4px">미매출 신규 상품</div>
+            <div style="font-size:24px;font-weight:800;color:var(--accent2)">31개</div>
+            <div style="font-size:10px;color:var(--text3);margin-top:2px">지속적 디스커버리 필요</div>
+          </div>
+        </div>
+        <div style="background:var(--surface2);border-radius:8px;padding:14px;font-size:12px;color:var(--text2);line-height:1.7;">
+          <div style="font-size:11px;font-weight:700;color:var(--accent3);margin-bottom:8px">📌 브랜드별 초기 반응</div>
+          <div style="display:flex;flex-direction:column;gap:6px;">
+            <div><span style="color:var(--text);font-weight:600">UA 브랜드 반팔</span> — 71만 + 40만 + 17만으로 가장 강한 초기 반응. 오버핏 > 일반핏 > 헤비웨이트 순</div>
+            <div><span style="color:var(--text);font-weight:600">팀블링 후드/맨투맨</span> — 이벤트 없이도 루즈핏 쭈리(TOP8) 진입. 맨투맨 카테고리 견인</div>
+            <div><span style="color:var(--text);font-weight:600">자수 신규 2종</span> — 오픈 반나절+하루 만에 매출 발생. 자수모자가 반팔보다 높은 단가(52,455원/건)</div>
+            <div><span style="color:var(--text);font-weight:600">비캔버스 후드집업</span> — 4건 소량이지만 171,272원으로 건당 단가 높음</div>
+          </div>
+        </div>
+        <div style="background:rgba(247,79,110,0.07);border:1px solid rgba(247,79,110,0.2);border-radius:8px;padding:12px;font-size:12px;color:var(--text2);line-height:1.6;">
+          <span style="color:#f74f6e;font-weight:700">⚠️ 미매출 31개</span> — 이벤트 트래픽 유입 중에도 노출 부족. 이벤트 종료 후 별도 디스커버리 액션(홈 노출, 카테고리 큐레이션) 필요
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 인사이트 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-title">종합 분석 & Next Action</div>
+    </div>
+    <div class="insight-grid">
+      <div class="insight-card positive">
+        <div class="insight-card-title">✅ 긍정 시그널</div>
+        <ul>
+          <li>이벤트 종료 다음날(3/25) 매출 <strong>628만원</strong> — 리뉴얼 전 일평균(172만) 대비 <strong>+265%</strong> 유지</li>
+          <li>3/25 주문수 <strong>238건</strong> — 리뉴얼 전(55건) 대비 <strong>+332%</strong>, 이벤트→실구매 전환 확인</li>
+          <li>객단가 <strong>26,382원</strong>으로 이벤트 기간(~1만원)에서 빠르게 회복. 리뉴얼 전(30,969원) 수준 복귀 임박</li>
+          <li>맨투맨 3/25 18건 — 이벤트 효과 없이도 리뉴얼 전 일평균(11건) 대비 +64% 상회</li>
+          <li>신규 매출 발생 상품 <strong>16개</strong>로 리뉴얼 전(5개) 대비 3.2배 확대</li>
+          <li>자수 카테고리 오픈 이틀(3/24~25) <strong>83.5만원</strong> · 자수모자가 예상 외 높은 건당 단가로 선전</li>
+          <li>UA 브랜드 반팔 3종 합산 <strong>127만원</strong> — 이벤트 없이도 신규 상품 중 가장 강한 초기 반응</li>
+        </ul>
+      </div>
+      <div class="insight-card warning">
+        <div class="insight-card-title">⚠️ 주의 & Next Action</div>
+        <ul>
+          <li>이벤트 기간 총 <strong>27,956건</strong> 무료 주문 → 물류·재고 비용 정산 및 수익성 점검 필요</li>
+          <li>3/25 하루만으로 안착 여부 판단 불가 — <strong>3/26~31 주간 추이</strong>가 진짜 관측 포인트</li>
+          <li>객단가 26,382원 → 리뉴얼 전(30,969원) 갭 <strong>4,587원</strong> 존재. 맨투맨·에코백 등 고단가 상품 유도 필요</li>
+          <li>미매출 신규 31개 상품 — 이벤트 트래픽이 빠진 지금이 오히려 디스커버리 적기. <strong>홈 큐레이션 · 카테고리 배너 정비</strong> 권장</li>
+          <li>자수 카테고리 — 반나절+하루 데이터만으로 추세 판단 불가. <strong>3/31까지 1주 데이터</strong> 확보 후 정식 평가</li>
+          <li>이벤트 경험자(27,956명)를 대상으로 <strong>CRM 리타겟팅</strong>(이메일·알림톡) 집행 검토 — 재구매 유도 골든타임</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<footer>
+  오프린트미 어패럴 리뉴얼 분석 v5 · 데이터 기준일 2026.03.25 · SNAPS 내부 분석 자료
+</footer>
+
+<script>
+// ===== DATA =====
+const daily = [
+  {d:'2/26',date:'2026-02-26',매출:3203636,주문:56,반팔주문:42,맨투맨주문:10,에코백주문:1,aov:57207,phase:'pre'},
+  {d:'2/27',date:'2026-02-27',매출:754500,주문:37,반팔주문:34,맨투맨주문:1,에코백주문:0,aov:20391,phase:'pre'},
+  {d:'2/28',date:'2026-02-28',매출:1824682,주문:42,반팔주문:30,맨투맨주문:12,에코백주문:0,aov:43444,phase:'pre'},
+  {d:'3/1',date:'2026-03-01',매출:850546,주문:43,반팔주문:38,맨투맨주문:4,에코백주문:1,aov:19780,phase:'pre'},
+  {d:'3/2',date:'2026-03-02',매출:719863,주문:43,반팔주문:29,맨투맨주문:10,에코백주문:4,aov:16741,phase:'pre'},
+  {d:'3/3',date:'2026-03-03',매출:1352135,주문:75,반팔주문:50,맨투맨주문:9,에코백주문:2,aov:18028,phase:'pre'},
+  {d:'3/4',date:'2026-03-04',매출:2435137,주문:85,반팔주문:60,맨투맨주문:16,에코백주문:3,aov:28648,phase:'pre'},
+  {d:'3/5',date:'2026-03-05',매출:3181091,주문:70,반팔주문:38,맨투맨주문:24,에코백주문:6,aov:45444,phase:'pre'},
+  {d:'3/6',date:'2026-03-06',매출:1406591,주문:48,반팔주문:30,맨투맨주문:14,에코백주문:4,aov:29303,phase:'pre'},
+  {d:'3/7',date:'2026-03-07',매출:493773,주문:27,반팔주문:22,맨투맨주문:2,에코백주문:0,aov:18287,phase:'pre'},
+  {d:'3/8',date:'2026-03-08',매출:776317,주문:34,반팔주문:25,맨투맨주문:3,에코백주문:2,aov:22832,phase:'pre'},
+  {d:'3/9',date:'2026-03-09',매출:3265046,주문:78,반팔주문:42,맨투맨주문:28,에코백주문:0,aov:41859,phase:'pre'},
+  {d:'3/10',date:'2026-03-10',매출:2648998,주문:106,반팔주문:73,맨투맨주문:24,에코백주문:0,aov:24990,phase:'pre'},
+  {d:'3/11',date:'2026-03-11',매출:1290771,주문:56,반팔주문:41,맨투맨주문:9,에코백주문:0,aov:23049,phase:'pre'},
+  {d:'3/12',date:'2026-03-12',매출:1819909,주문:63,반팔주문:53,맨투맨주문:4,에코백주문:2,aov:28887,phase:'pre'},
+  {d:'3/13',date:'2026-03-13',매출:856909,주문:40,반팔주문:29,맨투맨주문:6,에코백주문:0,aov:21422,phase:'pre'},
+  {d:'3/14',date:'2026-03-14',매출:736728,주문:33,반팔주문:19,맨투맨주문:7,에코백주문:0,aov:22325,phase:'pre'},
+  {d:'3/15',date:'2026-03-15',매출:3503408,주문:59,반팔주문:30,맨투맨주문:20,에코백주문:9,aov:59379,phase:'pre'},
+  {d:'3/16',date:'2026-03-16',매출:1491045,주문:58,반팔주문:46,맨투맨주문:8,에코백주문:2,aov:25707,phase:'pre'},
+  {d:'3/17',date:'2026-03-17',매출:4209043,주문:82,반팔주문:62,맨투맨주문:16,에코백주문:1,aov:51329,phase:'event'},
+  {d:'3/18',date:'2026-03-18',매출:4210910,주문:191,반팔주문:170,맨투맨주문:5,에코백주문:6,aov:22046,phase:'event'},
+  {d:'3/19',date:'2026-03-19',매출:6928092,주문:443,반팔주문:412,맨투맨주문:21,에코백주문:1,aov:15639,phase:'event'},
+  {d:'3/20',date:'2026-03-20',매출:63803819,주문:5643,반팔주문:5591,맨투맨주문:36,에코백주문:3,aov:11306,phase:'event'},
+  {d:'3/21',date:'2026-03-21',매출:33353364,주문:3034,반팔주문:3024,맨투맨주문:4,에코백주문:5,aov:10993,phase:'event'},
+  {d:'3/22',date:'2026-03-22',매출:72073953,주문:6706,반팔주문:6685,맨투맨주문:12,에코백주문:6,aov:10747,phase:'event'},
+  {d:'3/23',date:'2026-03-23',매출:78575317,주문:7510,반팔주문:7471,맨투맨주문:18,에코백주문:7,aov:10462,phase:'event'},
+  {d:'3/24',date:'2026-03-24',매출:47481721,주문:4347,반팔주문:4307,맨투맨주문:16,에코백주문:3,aov:10922,phase:'event'},
+  {d:'3/25',date:'2026-03-25',매출:6279037,주문:238,반팔주문:195,맨투맨주문:18,에코백주문:9,aov:26382,phase:'post'},
+];
+
+const fmt = (n) => n >= 10000000 ? (n/10000000).toFixed(1)+'억' :
+  n >= 1000000 ? Math.round(n/10000)+'만' : n.toLocaleString()+'원';
+
+const fmtFull = (n) => n.toLocaleString()+'원';
+
+// ===== COLOR HELPERS =====
+function getPhaseColor(phase, alpha=1) {
+  if(phase==='pre') return `rgba(90,98,121,${alpha})`;
+  if(phase==='event') return `rgba(247,162,79,${alpha})`;
+  if(phase==='post') return `rgba(79,247,162,${alpha})`;
+  return `rgba(79,142,247,${alpha})`;
+}
+
+// ===== ANNOTATION HELPER =====
+// label indices: 3/17=index 19, 3/20=index 22, 3/24=index 26, 3/25=index 27
+const eventAnnotations = {
+  line1: {
+    type: 'line', scaleID: 'x', value: '3/17',
+    borderColor: 'rgba(79,247,162,0.7)', borderWidth: 1.5, borderDash: [4,3],
+    label: {
+      display: true, content: '🚀 리뉴얼 오픈', position: 'start',
+      backgroundColor: 'rgba(79,247,162,0.15)', color: '#4ff7a2',
+      font: { size: 10, weight: '700' }, padding: { x: 6, y: 3 },
+      borderRadius: 4, yAdjust: 6,
+    }
+  },
+  line2: {
+    type: 'line', scaleID: 'x', value: '3/20',
+    borderColor: 'rgba(247,220,79,0.7)', borderWidth: 1.5, borderDash: [4,3],
+    label: {
+      display: true, content: '➕ 이벤트 상품 추가', position: 'start',
+      backgroundColor: 'rgba(247,220,79,0.15)', color: '#f7dc4f',
+      font: { size: 10, weight: '700' }, padding: { x: 6, y: 3 },
+      borderRadius: 4, yAdjust: 28,
+    }
+  },
+  line3: {
+    type: 'line', scaleID: 'x', value: '3/24',
+    borderColor: 'rgba(247,79,110,0.7)', borderWidth: 1.5, borderDash: [4,3],
+    label: {
+      display: true, content: '🏁 이벤트 종료', position: 'start',
+      backgroundColor: 'rgba(247,79,110,0.15)', color: '#f74f6e',
+      font: { size: 10, weight: '700' }, padding: { x: 6, y: 3 },
+      borderRadius: 4, yAdjust: 50,
+    }
+  },
+};
+
+// ===== CHART 1: Sales =====
+const salesCtx = document.getElementById('salesChart').getContext('2d');
+
+// Create gradient segments
+const bgColors = daily.map(d => getPhaseColor(d.phase, 0.7));
+const borderColors = daily.map(d => getPhaseColor(d.phase, 1));
+
+new Chart(salesCtx, {
+  type: 'bar',
+  data: {
+    labels: daily.map(d=>d.d),
+    datasets: [{
+      label: '일별 매출',
+      data: daily.map(d=>d.매출),
+      backgroundColor: bgColors,
+      borderColor: borderColors,
+      borderWidth: 1,
+      borderRadius: 3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        callbacks: {
+          label: (ctx) => ' ' + fmtFull(ctx.raw),
+          afterLabel: (ctx) => {
+            const d = daily[ctx.dataIndex];
+            return ` 주문수: ${d.주문.toLocaleString()}건`;
+          }
+        },
+        backgroundColor: '#1e2335',
+        borderColor: '#2a2f42',
+        borderWidth: 1,
+        titleColor: '#e8ecf4',
+        bodyColor: '#8892aa',
+      },
+      annotation: { annotations: eventAnnotations }
+    },
+    scales: {
+      x: {
+        grid: { color: 'rgba(42,47,66,0.5)', lineWidth: 0.5 },
+        ticks: { color: '#5a6279', font: { size: 10 }, maxRotation: 45 }
+      },
+      y: {
+        grid: { color: 'rgba(42,47,66,0.5)', lineWidth: 0.5 },
+        ticks: {
+          color: '#5a6279', font: { size: 10 },
+          callback: v => v >= 10000000 ? (v/10000000).toFixed(0)+'억' : v >= 1000000 ? (v/10000).toFixed(0)+'만' : v.toLocaleString()
+        }
+      }
+    }
+  }
+});
+
+// ===== CHART 2: AOV =====
+const aovCtx = document.getElementById('aovChart').getContext('2d');
+new Chart(aovCtx, {
+  type: 'line',
+  data: {
+    labels: daily.map(d=>d.d),
+    datasets: [{
+      label: '객단가',
+      data: daily.map(d=>d.aov),
+      borderColor: '#f7dc4f',
+      backgroundColor: 'rgba(247,220,79,0.06)',
+      borderWidth: 2,
+      pointRadius: (ctx) => daily[ctx.dataIndex].phase === 'post' ? 6 : 3,
+      pointBackgroundColor: (ctx) => getPhaseColor(daily[ctx.dataIndex].phase, 1),
+      pointBorderColor: '#f7dc4f',
+      pointBorderWidth: 1,
+      fill: true,
+      tension: 0.35,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      annotation: { annotations: {
+        ...eventAnnotations,
+        line1: { ...eventAnnotations.line1, label: { ...eventAnnotations.line1.label, yAdjust: 6 } },
+        line2: { ...eventAnnotations.line2, label: { ...eventAnnotations.line2.label, yAdjust: 24 } },
+        line3: { ...eventAnnotations.line3, label: { ...eventAnnotations.line3.label, yAdjust: 42 } },
+      }},
+      tooltip: {
+        backgroundColor: '#1e2335', borderColor: '#2a2f42', borderWidth: 1,
+        titleColor: '#e8ecf4', bodyColor: '#8892aa',
+        callbacks: {
+          label: ctx => ' 객단가 ' + ctx.raw.toLocaleString() + '원',
+          afterLabel: ctx => {
+            const d = daily[ctx.dataIndex];
+            return ` 매출 ${fmt(d.매출)} / 주문 ${d.주문}건`;
+          }
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(42,47,66,0.4)' }, ticks: { color: '#5a6279', font: { size: 9 }, maxRotation: 45 } },
+      y: {
+        grid: { color: 'rgba(42,47,66,0.4)' },
+        ticks: { color: '#5a6279', font: { size: 10 }, callback: v => (v/10000).toFixed(0)+'만원' },
+        min: 0,
+      }
+    }
+  }
+});
+
+// ===== CHART 3: Orders =====
+const orderCtx = document.getElementById('orderChart').getContext('2d');
+new Chart(orderCtx, {
+  type: 'line',
+  data: {
+    labels: daily.map(d=>d.d),
+    datasets: [{
+      label: '주문수',
+      data: daily.map(d=>d.주문),
+      borderColor: '#4f8ef7',
+      backgroundColor: 'rgba(79,142,247,0.08)',
+      borderWidth: 2,
+      pointRadius: (ctx) => {
+        const phase = daily[ctx.dataIndex].phase;
+        return phase === 'post' ? 5 : 2;
+      },
+      pointBackgroundColor: (ctx) => getPhaseColor(daily[ctx.dataIndex].phase, 1),
+      fill: true,
+      tension: 0.3,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false },
+      annotation: { annotations: eventAnnotations },
+      tooltip: {
+        backgroundColor: '#1e2335', borderColor: '#2a2f42', borderWidth: 1,
+        titleColor: '#e8ecf4', bodyColor: '#8892aa',
+        callbacks: { label: ctx => ' ' + ctx.raw.toLocaleString() + '건' }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(42,47,66,0.5)' }, ticks: { color: '#5a6279', font: { size: 9 }, maxRotation: 45 } },
+      y: { grid: { color: 'rgba(42,47,66,0.5)' }, ticks: { color: '#5a6279', font: { size: 9 }, callback: v => v.toLocaleString() } }
+    }
+  }
+});
+
+// ===== CHART 4: Compare (grouped) =====
+const compareCtx = document.getElementById('compareChart').getContext('2d');
+new Chart(compareCtx, {
+  type: 'bar',
+  data: {
+    labels: ['리뉴얼 전\n일평균', '이벤트 후\n(3/25)'],
+    datasets: [
+      {
+        label: '매출',
+        data: [1716373, 6279037],
+        backgroundColor: ['rgba(90,98,121,0.75)', 'rgba(79,247,162,0.75)'],
+        borderColor: ['#5a6279', '#4ff7a2'],
+        borderWidth: 1,
+        borderRadius: 4,
+        yAxisID: 'y',
+      }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2335', borderColor: '#2a2f42', borderWidth: 1,
+        titleColor: '#e8ecf4', bodyColor: '#8892aa',
+        callbacks: {
+          afterBody: (items) => {
+            const idx = items[0].dataIndex;
+            const aovVals = [30969, 26382];
+            const orderVals = [55, 238];
+            return [`주문수: ${orderVals[idx]}건`, `객단가: ${aovVals[idx].toLocaleString()}원`];
+          },
+          label: ctx => ' 매출 ' + fmtFull(ctx.raw)
+        }
+      }
+    },
+    scales: {
+      x: { grid: { color: 'rgba(42,47,66,0.5)' }, ticks: { color: '#5a6279', font: { size: 10 } } },
+      y: { grid: { color: 'rgba(42,47,66,0.5)' }, ticks: { color: '#5a6279', font: { size: 9 }, callback: v => (v/10000).toFixed(0)+'만' } }
+    }
+  }
+});
+
+// AOV 비교 미니 스탯 (compare 카드 하단)
+const compareCard = document.getElementById('compareChart').closest('.chart-card');
+const aovCompare = document.createElement('div');
+aovCompare.style.cssText = 'display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px;';
+aovCompare.innerHTML = `
+  <div style="background:rgba(90,98,121,0.15);border:1px solid rgba(90,98,121,0.3);border-radius:8px;padding:10px 12px;">
+    <div style="font-size:10px;color:var(--text3);margin-bottom:4px">리뉴얼 전 평균 객단가</div>
+    <div style="font-size:18px;font-weight:800;color:var(--text2);letter-spacing:-0.02em">30,969원</div>
+    <div style="font-size:10px;color:var(--text3);margin-top:2px">주문수 55건/일</div>
+  </div>
+  <div style="background:rgba(79,247,162,0.08);border:1px solid rgba(79,247,162,0.25);border-radius:8px;padding:10px 12px;">
+    <div style="font-size:10px;color:var(--text3);margin-bottom:4px">이벤트 후 객단가 (3/25)</div>
+    <div style="font-size:18px;font-weight:800;color:var(--accent3);letter-spacing:-0.02em">26,382원</div>
+    <div style="font-size:10px;color:var(--text3);margin-top:2px">주문수 238건 · <span style="color:#4ff7a2">+332%</span></div>
+  </div>
+`;
+compareCard.appendChild(aovCompare);
+
+// ===== CHART 4: Category Donut =====
+const catCtx = document.getElementById('catChart').getContext('2d');
+new Chart(catCtx, {
+  type: 'doughnut',
+  data: {
+    labels: ['반팔 (이벤트포함)', '맨투맨/후드', '에코백', '자수모자', '긴팔', '자수반팔', '크롭', '기타'],
+    datasets: [{
+      data: [328249253, 16252181, 6004911, 444000, 1536451, 379636, 738680, 1186047],
+      backgroundColor: [
+        'rgba(247,162,79,0.8)', 'rgba(79,142,247,0.8)', 'rgba(79,247,162,0.8)',
+        'rgba(180,79,247,0.8)', 'rgba(247,79,110,0.8)', 'rgba(247,220,79,0.8)',
+        'rgba(79,220,247,0.8)', 'rgba(90,98,121,0.8)'
+      ],
+      borderColor: '#181c27',
+      borderWidth: 2,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    cutout: '62%',
+    plugins: {
+      legend: {
+        position: 'bottom',
+        labels: { color: '#8892aa', font: { size: 10 }, padding: 8, boxWidth: 10 }
+      },
+      tooltip: {
+        backgroundColor: '#1e2335', borderColor: '#2a2f42', borderWidth: 1,
+        titleColor: '#e8ecf4', bodyColor: '#8892aa',
+        callbacks: {
+          label: ctx => ' ' + fmtFull(ctx.raw) + ' (' + (ctx.raw/354791159*100).toFixed(1) + '%)'
+        }
+      }
+    }
+  }
+});
+
+// ===== Category Bars (non-event) =====
+const nonEventCats = [
+  { name: '맨투맨/후드', val: 16252181, color: '#4f8ef7' },
+  { name: '에코백', val: 6004911, color: '#4ff7a2' },
+  { name: '자수모자', val: 444000, color: '#b44ff7' },
+  { name: '긴팔', val: 1536451, color: '#f74f6e' },
+  { name: '자수반팔', val: 379636, color: '#f7dc4f' },
+  { name: '크롭', val: 738680, color: '#4fdcf7' },
+  { name: '파우치', val: 414546, color: '#8892aa' },
+];
+const maxVal = Math.max(...nonEventCats.map(c=>c.val));
+const barsEl = document.getElementById('catBars');
+barsEl.innerHTML = nonEventCats.map(c => `
+  <div class="cat-bar-item">
+    <div class="cat-bar-label">
+      <span class="cat-bar-name">${c.name}</span>
+      <span class="cat-bar-val">${(c.val/10000).toFixed(0)}만</span>
+    </div>
+    <div class="cat-bar-track">
+      <div class="cat-bar-fill" style="width:${(c.val/maxVal*100).toFixed(1)}%;background:${c.color}"></div>
+    </div>
+  </div>
+`).join('');
+
+// ===== Embroidery Chart =====
+const embCtx = document.getElementById('embroideryChart').getContext('2d');
+new Chart(embCtx, {
+  type: 'bar',
+  data: {
+    labels: ['자수 반팔\n(19수량/11주문)', '자수 모자\n(21수량/13주문)', '자수 맨투맨\n(1수량/1주문)', '자수 긴팔\n(1수량/1주문)'],
+    datasets: [{
+      label: '매출',
+      data: [379636, 444000, 53545, 38636],
+      backgroundColor: ['rgba(247,220,79,0.7)', 'rgba(180,79,247,0.7)', 'rgba(79,142,247,0.7)', 'rgba(79,247,162,0.7)'],
+      borderColor: ['#f7dc4f', '#b44ff7', '#4f8ef7', '#4ff7a2'],
+      borderWidth: 1,
+      borderRadius: 4,
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: {
+      legend: { display: false },
+      tooltip: {
+        backgroundColor: '#1e2335', borderColor: '#2a2f42', borderWidth: 1,
+        titleColor: '#e8ecf4', bodyColor: '#8892aa',
+        callbacks: { label: ctx => ' ' + fmtFull(ctx.raw) }
+      }
+    },
+    scales: {
+      x: { grid: { display: false }, ticks: { color: '#8892aa', font: { size: 11 } } },
+      y: { grid: { color: 'rgba(42,47,66,0.5)' }, ticks: { color: '#5a6279', font: { size: 10 }, callback: v => (v/10000).toFixed(0)+'만' } }
+    }
+  }
+});
+
+// ===== Daily Table =====
+const tbody = document.getElementById('dailyTableBody');
+let html = '';
+daily.forEach((row, i) => {
+  const prev = i > 0 ? daily[i-1].매출 : null;
+  const delta = prev ? ((row.매출 - prev) / prev * 100) : null;
+  const deltaStr = delta !== null ? (delta >= 0 ? `<span style="color:#4ff7a2">▲${delta.toFixed(0)}%</span>` : `<span style="color:#f74f6e">▼${Math.abs(delta).toFixed(0)}%</span>`) : '-';
+  
+  const rowClass = row.phase === 'event' ? 'event-row' : row.phase === 'post' ? 'post-row' : '';
+  const tagClass = row.phase === 'event' ? 'event' : row.phase === 'post' ? 'post' : 'pre';
+  const tagText = row.phase === 'event' ? '이벤트' : row.phase === 'post' ? '종료 후' : '리뉴얼 전';
+  
+  html += `<tr class="${rowClass}">
+    <td style="color:var(--text);font-weight:600">${row.d}</td>
+    <td><span class="tag ${tagClass}">${tagText}</span></td>
+    <td class="main-val">${fmt(row.매출)}</td>
+    <td>${row.주문.toLocaleString()}건</td>
+    <td style="color:${row.phase==='event'?'#f7a24f':row.phase==='post'?'#4ff7a2':'#8892aa'};font-weight:600">${row.aov.toLocaleString()}원</td>
+    <td>${row.반팔주문.toLocaleString()}</td>
+    <td>${row.맨투맨주문.toLocaleString()}</td>
+    <td>${row.에코백주문.toLocaleString()}</td>
+    <td>${deltaStr}</td>
+  </tr>`;
+});
+tbody.innerHTML = html;
+</script>
+</body>
+</html>
