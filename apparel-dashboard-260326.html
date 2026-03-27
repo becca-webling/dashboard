@@ -41,6 +41,12 @@
     position: relative;
     overflow: hidden;
   }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    position: relative;
+    z-index: 1;
+  }
   .header::before {
     content: '';
     position: absolute;
@@ -90,6 +96,13 @@
     background: var(--surface);
     border-bottom: 1px solid var(--border);
     overflow-x: auto;
+  }
+  .timeline-inner {
+    display: flex;
+    gap: 0;
+    max-width: 1400px;
+    margin: 0 auto;
+    width: 100%;
   }
   .timeline-item {
     padding: 14px 20px;
@@ -432,6 +445,7 @@
 <body>
 
 <div class="header">
+  <div class="header-inner">
   <div class="header-badge">📊 오프린트미 어패럴 리뉴얼</div>
   <h1>리뉴얼 추이 분석</h1>
   <div class="header-meta">
@@ -441,10 +455,12 @@
     <span>🧵 자수 오픈 3/24 14:00</span>
     <span style="color:#4ff7a2;font-weight:600;">★ 이벤트 종료 후 2일 데이터 추가 (3/25~26)</span>
   </div>
+  </div>
 </div>
 
 <!-- Timeline -->
 <div class="timeline">
+  <div class="timeline-inner">
   <div class="timeline-item">
     <div class="timeline-date">3/17 14:00</div>
     <div class="timeline-label">리뉴얼 오픈 + 이벤트 시작<br>팀블링 20수/30수 오버핏</div>
@@ -460,6 +476,7 @@
   <div class="timeline-item">
     <div class="timeline-date">3/24 24:00</div>
     <div class="timeline-label">이벤트 종료<br>샘플 무료 1장 마감</div>
+  </div>
   </div>
 </div>
 
