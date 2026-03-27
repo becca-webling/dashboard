@@ -427,7 +427,7 @@ tr.new-row td{background:rgba(16,185,129,0.04)}
 <!-- ── 비이벤트 카테고리 + 자수 ── -->
 <div class="grid-2">
   <div class="card">
-    <div class="card-title"><div class="dot" style="background:var(--accent)"></div>비이벤트 카테고리별 매출 비중 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">· 전체 기간 (반팔 이벤트 제외)</span></div>
+    <div class="card-title"><div class="dot" style="background:var(--accent)"></div>비이벤트 카테고리별 매출 비중 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">· 리뉴얼 이후 (3/17~26) · 이벤트 반팔 4종 제외</span></div>
     <div class="chart-wrap-md"><canvas id="catDonutChart"></canvas></div>
   </div>
   <div class="card">
@@ -804,17 +804,25 @@ tbody.innerHTML=daily.map((r,i)=>{
   </tr>`;
 }).join('');
 
-// ── Chart: Category Donut (비이벤트 카테고리) ──
+// ── Chart: Category Donut (비이벤트 카테고리, 리뉴얼 이후 3/17~26) ──
 new Chart(document.getElementById('catDonutChart'),{
   type:'doughnut',
   data:{
-    labels:['맨투맨/후드','에코백','긴팔','파우치','크롭','모자','자수 모자','자수 반팔','기타'],
+    labels:['반팔 (비이벤트)','맨투맨/후드','에코백','긴팔','자수 모자','자수 반팔','크롭','모자','파우치','에이프런','원피스·기타'],
     datasets:[{
-      data:[16252181,6004911,1536451,414546,738680,351182,444000,404089,578940],
+      data:[32992571,8744364,2793276,1134270,444000,404089,366180,351182,179092,136091,113364],
       backgroundColor:[
-        'rgba(59,130,246,.8)','rgba(16,185,129,.8)','rgba(245,158,11,.8)',
-        'rgba(139,92,246,.8)','rgba(6,182,212,.8)','rgba(239,68,68,.8)',
-        'rgba(168,85,247,.8)','rgba(251,191,36,.8)','rgba(71,85,105,.7)',
+        'rgba(59,130,246,.85)',
+        'rgba(16,185,129,.85)',
+        'rgba(6,182,212,.85)',
+        'rgba(245,158,11,.85)',
+        'rgba(168,85,247,.85)',
+        'rgba(251,191,36,.85)',
+        'rgba(239,68,68,.85)',
+        'rgba(20,184,166,.85)',
+        'rgba(99,102,241,.85)',
+        'rgba(249,115,22,.85)',
+        'rgba(71,85,105,.75)',
       ],
       borderColor:'#111827',borderWidth:2,
     }]
@@ -823,7 +831,7 @@ new Chart(document.getElementById('catDonutChart'),{
     responsive:true,maintainAspectRatio:false,
     cutout:'60%',
     plugins:{
-      legend:{position:'right',labels:{color:'#94a3b8',font:{size:11},padding:10,boxWidth:11}},
+      legend:{position:'right',labels:{color:'#94a3b8',font:{size:11},padding:8,boxWidth:11}},
       tooltip:{...tooltip,callbacks:{
         label:ctx=>{
           const total=ctx.dataset.data.reduce((a,b)=>a+b,0);
