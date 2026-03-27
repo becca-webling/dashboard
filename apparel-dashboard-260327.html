@@ -50,7 +50,7 @@ body{font-family:'Noto Sans KR',sans-serif;background:var(--bg);color:var(--text
 .grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:14px;margin-bottom:14px}
 
 /* ── KPI ── */
-.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:20px}
+.kpi-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:20px}
 .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:18px;position:relative;overflow:hidden}
 .kpi::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .kpi.green::before{background:var(--green)}
@@ -193,13 +193,6 @@ tr.new-row td{background:rgba(16,185,129,0.04)}
     </div>
     <div class="kpi-badge up">+141% ↑</div>
   </div>
-  <div class="kpi orange">
-    <div class="kpi-label">이벤트 총 주문 (3/17~24, 8일)</div>
-    <div class="kpi-row">
-      <div class="kpi-col"><div class="kpi-col-label">총합</div><div class="kpi-val-big" style="color:var(--orange)">28,140건</div></div>
-    </div>
-    <div class="kpi-badge orange">일평균 3,518건 · 총 매출 3.17억</div>
-  </div>
   <div class="kpi cyan">
     <div class="kpi-label">자수 카테고리 (3/24~26, 3일)</div>
     <div class="kpi-row">
@@ -273,17 +266,8 @@ tr.new-row td{background:rgba(16,185,129,0.04)}
   </div>
 </div>
 
-<!-- ── 이벤트 & 자수 요약 ── -->
-<div class="grid-2" style="margin-top:14px">
-  <div class="sum-card">
-    <div class="sum-card-title">🎁 이벤트 총 결과 (3/17~24, 8일)</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-      <div><div class="sum-label">총 주문수</div><div class="sum-big" style="color:var(--orange)">28,140건</div><div class="sum-sub">일평균 3,518건</div></div>
-      <div><div class="sum-label">총 매출</div><div class="sum-big" style="color:var(--orange)">3.17억</div><div class="sum-sub">일평균 3,960만원</div></div>
-    </div>
-    <div class="sum-divider"></div>
-    <div style="font-size:11px;color:var(--text-muted);line-height:1.7">3/20 이벤트 상품 확대 후 일 5,000건+ 폭발적 증가 · <strong style="color:var(--text)">3/23 피크 7,510건</strong></div>
-  </div>
+<!-- ── 자수 요약 ── -->
+<div style="margin-top:14px;margin-bottom:0">
   <div class="sum-card">
     <div class="sum-card-title">🧵 자수 카테고리 초기 성과 (3/24~26)</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
