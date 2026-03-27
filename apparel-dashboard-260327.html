@@ -303,13 +303,26 @@ tr.new-row td{background:rgba(16,185,129,0.04)}
 <div class="section-title">일별 매출 · 주문수 추이</div>
 
 <div class="card" style="margin-bottom:14px">
-  <div class="card-title"><div class="dot" style="background:var(--green)"></div>일별 매출 추이 (전체)</div>
-  <div class="phase-row">
-    <div class="phase-chip"><div class="phase-dot" style="background:#475569"></div>리뉴얼 전 (2/26~3/16)</div>
-    <div class="phase-chip"><div class="phase-dot" style="background:var(--orange)"></div>이벤트 기간 (3/17~24)</div>
-    <div class="phase-chip"><div class="phase-dot" style="background:var(--green)"></div>이벤트 후 (3/25~26)</div>
+  <div class="card-title"><div class="dot" style="background:var(--green)"></div>비이벤트 매출 & 이벤트(참고) · 전체/비이벤트 주문수</div>
+  <div class="legend-row">
+    <div class="legend-item"><div class="legend-swatch" style="background:rgba(16,185,129,0.6)"></div>비이벤트 매출 (리뉴얼 후)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:rgba(16,185,129,0.22)"></div>비이벤트 매출 (리뉴얼 전)</div>
+    <div class="legend-item"><div class="legend-swatch" style="background:rgba(245,158,11,0.35)"></div>이벤트 매출 (3/17~24)</div>
+    <div class="legend-item"><div class="legend-line" style="background:var(--orange)"></div>전체 주문수</div>
+    <div class="legend-item"><div class="legend-line" style="background:var(--purple)"></div>비이벤트 주문수</div>
   </div>
-  <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
+  <div class="chart-wrap"><canvas id="mainChart"></canvas></div>
+</div>
+
+<div class="grid-2" style="margin-bottom:14px">
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--green)"></div>비이벤트 매출 추이 (확대)</div>
+    <div class="chart-wrap-md"><canvas id="neChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--orange)"></div>이벤트 일별 주문수</div>
+    <div class="chart-wrap-md"><canvas id="evOrderChart"></canvas></div>
+  </div>
 </div>
 
 <div class="card" style="margin-bottom:14px">
@@ -318,9 +331,9 @@ tr.new-row td{background:rgba(16,185,129,0.04)}
   <div class="chart-wrap-sm"><canvas id="aovChart"></canvas></div>
 </div>
 
-<div class="grid-2">
+<div class="grid-2" style="margin-bottom:0">
   <div class="card">
-    <div class="card-title"><div class="dot" style="background:var(--accent)"></div>일별 주문수 추이</div>
+    <div class="card-title"><div class="dot" style="background:var(--accent)"></div>일별 전체 주문수 추이</div>
     <div class="chart-wrap-sm"><canvas id="orderChart"></canvas></div>
   </div>
   <div class="card">
@@ -407,15 +420,20 @@ tr.new-row td{background:rgba(16,185,129,0.04)}
 <div class="section-title">일별 상세 데이터</div>
 <div class="card" style="margin-bottom:14px;overflow-x:auto">
 <table id="dailyTable"><thead><tr>
-  <th>일자</th><th>구분</th><th style="text-align:right">총 매출</th><th style="text-align:right">주문수</th><th style="text-align:right">객단가</th><th style="text-align:right">반팔</th><th style="text-align:right">맨투맨</th><th style="text-align:right">에코백</th><th style="text-align:right">전일비</th>
+  <th>일자</th><th>구분</th><th style="text-align:right">총 매출</th><th style="text-align:right">주문수</th><th style="text-align:right">객단가</th><th style="text-align:right">전일비</th>
 </tr></thead><tbody id="dailyTableBody"></tbody></table>
 </div>
 
-<!-- ── 자수 차트 ── -->
-<div class="section-title">🧵 자수 카테고리 초기 성과 (3/24~26)</div>
-<div class="card" style="margin-bottom:14px">
-  <div class="card-title"><div class="dot" style="background:var(--purple)"></div>일별 자수 매출 · 3/24 오후 오픈 · 반팔·모자 균형 성장</div>
-  <div class="chart-wrap-sm"><canvas id="embroideryChart"></canvas></div>
+<!-- ── 비이벤트 카테고리 + 자수 ── -->
+<div class="grid-2">
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--accent)"></div>비이벤트 카테고리별 매출 비중 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">· 전체 기간 (반팔 이벤트 제외)</span></div>
+    <div class="chart-wrap-md"><canvas id="catDonutChart"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="card-title"><div class="dot" style="background:var(--purple)"></div>🧵 자수 카테고리 초기 성과 <span style="font-size:11px;font-weight:400;color:var(--text-muted)">· 3/24~26 일별</span></div>
+    <div class="chart-wrap-md"><canvas id="embroideryChart"></canvas></div>
+  </div>
 </div>
 
 <!-- ── 종합 분석 ── -->
@@ -509,36 +527,153 @@ const annotations={
 const gridColor='rgba(255,255,255,0.05)';
 const tooltip={backgroundColor:'#1a2332',borderColor:'#1e293b',borderWidth:1,titleColor:'#e2e8f0',bodyColor:'#94a3b8'};
 
-// ── Chart 1: Sales ──
-new Chart(document.getElementById('salesChart'),{
+// ── Non-event split data (ne=비이벤트만원, ev=이벤트만원, neo=비이벤트주문, evo=이벤트주문, to=전체주문)
+const NE=[
+  {d:'2/26',ne:320,ev:0,neo:56,evo:0,to:56},
+  {d:'2/27',ne:75,ev:0,neo:37,evo:0,to:37},
+  {d:'2/28',ne:182,ev:0,neo:42,evo:0,to:42},
+  {d:'3/1',ne:85,ev:0,neo:43,evo:0,to:43},
+  {d:'3/2',ne:72,ev:0,neo:43,evo:0,to:43},
+  {d:'3/3',ne:135,ev:0,neo:75,evo:0,to:75},
+  {d:'3/4',ne:244,ev:0,neo:85,evo:0,to:85},
+  {d:'3/5',ne:318,ev:0,neo:70,evo:0,to:70},
+  {d:'3/6',ne:141,ev:0,neo:48,evo:0,to:48},
+  {d:'3/7',ne:49,ev:0,neo:27,evo:0,to:27},
+  {d:'3/8',ne:78,ev:0,neo:34,evo:0,to:34},
+  {d:'3/9',ne:327,ev:0,neo:78,evo:0,to:78},
+  {d:'3/10',ne:265,ev:0,neo:106,evo:0,to:106},
+  {d:'3/11',ne:129,ev:0,neo:56,evo:0,to:56},
+  {d:'3/12',ne:182,ev:0,neo:63,evo:0,to:63},
+  {d:'3/13',ne:86,ev:0,neo:40,evo:0,to:40},
+  {d:'3/14',ne:74,ev:0,neo:33,evo:0,to:33},
+  {d:'3/15',ne:350,ev:0,neo:59,evo:0,to:59},
+  {d:'3/16',ne:149,ev:0,neo:58,evo:0,to:58},
+  // 리뉴얼 후: ne=비이벤트카테고리, ev=이벤트(반팔 이벤트 추정)
+  {d:'3/17',ne:50,ev:371,neo:20,evo:62,to:82},
+  {d:'3/18',ne:179,ev:242,neo:21,evo:170,to:191},
+  {d:'3/19',ne:96,ev:597,neo:31,evo:412,to:443},
+  {d:'3/20',ne:150,ev:6230,neo:52,evo:5591,to:5643},
+  {d:'3/21',ne:39,ev:3296,neo:10,evo:3024,to:3034},
+  {d:'3/22',ne:56,ev:7151,neo:21,evo:6685,to:6706},
+  {d:'3/23',ne:83,ev:7775,neo:39,evo:7471,to:7510},
+  {d:'3/24',ne:229,ev:4519,neo:40,evo:4307,to:4347},
+  // 이벤트 후 (이벤트 없음)
+  {d:'3/25',ne:670,ev:0,neo:256,evo:0,to:256},
+  {d:'3/26',ne:980,ev:0,neo:220,evo:0,to:220},
+];
+const ri=19; // 리뉴얼 시작 인덱스 (3/17)
+
+// ── Chart 1: Main stacked chart ──
+new Chart(document.getElementById('mainChart'),{
   type:'bar',
   data:{
-    labels:daily.map(d=>d.d),
-    datasets:[{
-      data:daily.map(d=>d.매출),
-      backgroundColor:daily.map(d=>phaseColor(d.phase,.65)),
-      borderColor:daily.map(d=>phaseColor(d.phase,1)),
-      borderWidth:1,borderRadius:3,
-    }]
+    labels:NE.map(d=>d.d),
+    datasets:[
+      {label:'비이벤트 매출',data:NE.map(d=>d.ne),
+        backgroundColor:NE.map((_,i)=>i>=ri?'rgba(16,185,129,0.6)':'rgba(16,185,129,0.22)'),
+        borderRadius:2,yAxisID:'y',stack:'s'},
+      {label:'이벤트 매출',data:NE.map(d=>d.ev),
+        backgroundColor:'rgba(245,158,11,0.4)',borderRadius:2,yAxisID:'y',stack:'s'},
+      {label:'전체 주문',data:NE.map(d=>d.to),type:'line',
+        borderColor:'#f59e0b',pointRadius:1.5,pointBackgroundColor:'#f59e0b',
+        tension:.3,borderWidth:2,yAxisID:'y1'},
+      {label:'비이벤트 주문',data:NE.map(d=>d.neo),type:'line',
+        borderColor:'#8b5cf6',pointRadius:2,pointBackgroundColor:'#8b5cf6',
+        tension:.3,borderWidth:2,yAxisID:'y1'},
+    ]
   },
   options:{
     responsive:true,maintainAspectRatio:false,
     plugins:{
       legend:{display:false},
-      annotation:{annotations},
       tooltip:{...tooltip,callbacks:{
-        label:ctx=>' '+fmtFull(ctx.raw),
-        afterLabel:ctx=>` 주문: ${daily[ctx.dataIndex].주문.toLocaleString()}건 · AOV ${daily[ctx.dataIndex].aov.toLocaleString()}원`
+        label:ctx=>{
+          if(ctx.dataset.yAxisID==='y1') return ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString()}건`;
+          return ` ${ctx.dataset.label}: ${ctx.raw.toLocaleString()}만원`;
+        }
       }}
     },
     scales:{
-      x:{grid:{display:false},ticks:{maxRotation:45}},
-      y:{grid:{color:gridColor},ticks:{callback:v=>v>=10000000?(v/10000000).toFixed(0)+'억':v>=1000000?(v/10000).toFixed(0)+'만':v}}
+      x:{stacked:true,grid:{display:false},ticks:{maxRotation:45}},
+      y:{stacked:true,grid:{color:gridColor},title:{display:true,text:'매출(만원)'}},
+      y1:{position:'right',grid:{display:false},title:{display:true,text:'주문수'}}
     }
-  }
+  },
+  plugins:[{afterDraw(c){
+    const ctx=c.ctx; ctx.save();
+    [{idx:ri,lbl:'🚀 리뉴얼'},{idx:22,lbl:'➕ 이벤트 확대'},{idx:26,lbl:'🏁 자수/이벤트 종료'}].forEach(({idx,lbl})=>{
+      const x=c.scales.x.getPixelForValue(idx);
+      ctx.strokeStyle='rgba(239,68,68,0.7)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+      ctx.beginPath();ctx.moveTo(x,c.chartArea.top);ctx.lineTo(x,c.chartArea.bottom);ctx.stroke();
+      ctx.fillStyle='#ef4444';ctx.font="10px 'Noto Sans KR'";ctx.fillText(lbl,x+3,c.chartArea.top+12);
+    });
+    ctx.restore();
+  }}]
 });
 
-// ── Chart 2: AOV ──
+// ── Chart 2: Non-event only (확대) ──
+new Chart(document.getElementById('neChart'),{
+  type:'bar',
+  data:{
+    labels:NE.map(d=>d.d),
+    datasets:[
+      {data:NE.map(d=>d.ne),
+        backgroundColor:NE.map((_,i)=>i>=ri?'rgba(16,185,129,0.65)':'rgba(16,185,129,0.22)'),
+        borderRadius:2},
+      {data:NE.map(d=>d.neo),type:'line',
+        borderColor:'#8b5cf6',pointRadius:2,pointBackgroundColor:'#8b5cf6',
+        tension:.3,borderWidth:2,yAxisID:'y1'},
+    ]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{...tooltip}},
+    scales:{
+      x:{grid:{display:false},ticks:{maxRotation:45,font:{size:10}}},
+      y:{grid:{color:gridColor},title:{display:true,text:'비이벤트 매출(만원)'}},
+      y1:{position:'right',grid:{display:false},title:{display:true,text:'비이벤트 주문'}}
+    }
+  },
+  plugins:[{afterDraw(c){
+    const ctx=c.ctx; ctx.save();
+    const x=c.scales.x.getPixelForValue(ri);
+    ctx.strokeStyle='rgba(16,185,129,0.7)';ctx.lineWidth=1.5;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(x,c.chartArea.top);ctx.lineTo(x,c.chartArea.bottom);ctx.stroke();
+    ctx.fillStyle='#10b981';ctx.font="10px 'Noto Sans KR'";ctx.fillText('리뉴얼',x+3,c.chartArea.top+12);
+    ctx.restore();
+  }}]
+});
+
+// ── Chart 3: Event orders ──
+new Chart(document.getElementById('evOrderChart'),{
+  type:'bar',
+  data:{
+    labels:['3/17','3/18','3/19','3/20','3/21','3/22','3/23','3/24'],
+    datasets:[{
+      data:[62,170,412,5591,3024,6685,7471,4307],
+      backgroundColor:'rgba(245,158,11,0.55)',borderRadius:3,
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    plugins:{legend:{display:false},tooltip:{...tooltip,callbacks:{label:ctx=>` ${ctx.raw.toLocaleString()}건`}}},
+    scales:{
+      x:{grid:{display:false}},
+      y:{grid:{color:gridColor},title:{display:true,text:'이벤트 주문수'}}
+    }
+  },
+  plugins:[{afterDraw(c){
+    const ctx=c.ctx; ctx.save();
+    const x=c.scales.x.getPixelForValue(3);
+    ctx.strokeStyle='rgba(239,68,68,0.7)';ctx.lineWidth=1;ctx.setLineDash([4,3]);
+    ctx.beginPath();ctx.moveTo(x,c.chartArea.top);ctx.lineTo(x,c.chartArea.bottom);ctx.stroke();
+    ctx.fillStyle='#ef4444';ctx.font="10px 'Noto Sans KR'";ctx.fillText('상품 추가',x+3,c.chartArea.top+12);
+    ctx.restore();
+  }}]
+});
+
+
+// ── Chart 5: AOV ──
 new Chart(document.getElementById('aovChart'),{
   type:'line',
   data:{
@@ -665,12 +800,39 @@ tbody.innerHTML=daily.map((r,i)=>{
     <td class="num" style="color:#e2e8f0;font-weight:600">${fmtW(r.매출)}</td>
     <td class="num">${r.주문.toLocaleString()}건</td>
     <td class="num" style="color:${r.phase==='event'?'#f59e0b':r.phase==='post'?'#10b981':'#94a3b8'}">${r.aov.toLocaleString()}원</td>
-    <td class="num">${r.반팔주문.toLocaleString()}</td>
-    <td class="num">${r.맨투맨주문.toLocaleString()}</td>
-    <td class="num">${r.에코백주문.toLocaleString()}</td>
     <td class="num">${deltaHtml}</td>
   </tr>`;
 }).join('');
+
+// ── Chart: Category Donut (비이벤트 카테고리) ──
+new Chart(document.getElementById('catDonutChart'),{
+  type:'doughnut',
+  data:{
+    labels:['맨투맨/후드','에코백','긴팔','파우치','크롭','모자','자수 모자','자수 반팔','기타'],
+    datasets:[{
+      data:[16252181,6004911,1536451,414546,738680,351182,444000,404089,578940],
+      backgroundColor:[
+        'rgba(59,130,246,.8)','rgba(16,185,129,.8)','rgba(245,158,11,.8)',
+        'rgba(139,92,246,.8)','rgba(6,182,212,.8)','rgba(239,68,68,.8)',
+        'rgba(168,85,247,.8)','rgba(251,191,36,.8)','rgba(71,85,105,.7)',
+      ],
+      borderColor:'#111827',borderWidth:2,
+    }]
+  },
+  options:{
+    responsive:true,maintainAspectRatio:false,
+    cutout:'60%',
+    plugins:{
+      legend:{position:'right',labels:{color:'#94a3b8',font:{size:11},padding:10,boxWidth:11}},
+      tooltip:{...tooltip,callbacks:{
+        label:ctx=>{
+          const total=ctx.dataset.data.reduce((a,b)=>a+b,0);
+          return ` ${ctx.label}: ${(ctx.raw/10000).toFixed(0)}만원 (${(ctx.raw/total*100).toFixed(1)}%)`;
+        }
+      }}
+    }
+  }
+});
 </script>
 </body>
 </html>
