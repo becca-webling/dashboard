@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>공동 포토북 간소화 — 프로토타입</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:#f0f0f0;min-height:100vh;display:flex;flex-direction:column;align-items:center;padding:24px 16px 40px}
+.meta{font-size:12px;color:#999;margin-bottom:20px;text-align:center;line-height:1.6}
+.meta strong{color:#333;font-weight:500}
+.controls{display:flex;flex-direction:column;align-items:center;gap:10px;margin-bottom:20px;width:100%}
+.tab-row{display:flex;gap:0;border:1px solid #ddd;border-radius:8px;overflow:hidden;background:#fff}
+.tab-btn{padding:7px 12px;border:none;background:transparent;font-size:11px;color:#888;cursor:pointer;font-family:inherit;border-right:1px solid #ddd;white-space:nowrap}
+.tab-btn:last-child{border-right:none}
+.tab-btn.active{background:#111;color:#fff;font-weight:500}
+.toggle-row{display:flex;align-items:center;gap:8px;font-size:12px;color:#888}
+.tl{color:#111;font-weight:600}
+.tr{color:#bbb}
+.track{width:38px;height:20px;border-radius:10px;background:#ddd;position:relative;cursor:pointer;transition:background .2s;border:1px solid #ccc;flex-shrink:0}
+.track.on{background:#111;border-color:#111}
+.thumb{width:14px;height:14px;border-radius:50%;background:#fff;position:absolute;top:2px;left:2px;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+.track.on .thumb{transform:translateX(18px)}
+.phone{width:375px;background:#fff;border-radius:40px;border:8px solid #222;box-shadow:0 12px 40px rgba(0,0,0,.18);overflow:hidden;position:relative}
+.status-bar{height:44px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 24px;border-bottom:1px solid #f5f5f5}
+.status-time{font-size:15px;font-weight:600;color:#111}
+.status-right{font-size:12px;color:#111}
+.nav{display:flex;align-items:center;padding:12px 16px;border-bottom:1px solid #f0f0f0;background:#fff;min-height:48px}
+.nav-back{font-size:24px;color:#111;cursor:pointer;width:32px;line-height:1;flex-shrink:0}
+.nav-title{flex:1;text-align:center;font-size:16px;font-weight:600;color:#111}
+.nav-more{width:32px;text-align:right;font-size:18px;color:#111;cursor:pointer;flex-shrink:0}
+.screen{display:none;flex-direction:column;min-height:580px;background:#fff}
+.screen.on{display:flex}
+.scroll{flex:1;overflow-y:auto}
+.scroll::-webkit-scrollbar{width:2px}
+.scroll::-webkit-scrollbar-thumb{background:#ddd}
+.btn-black{width:100%;padding:15px;background:#111;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:pointer;font-family:inherit}
+.btn-black:active{opacity:.85}
+.toast-base{position:absolute;bottom:76px;left:50%;transform:translateX(-50%);background:#111;color:#fff;font-size:13px;padding:10px 20px;border-radius:999px;white-space:nowrap;opacity:0;transition:opacity .3s;pointer-events:none;z-index:200;max-width:300px;text-align:center}
+.toast-base.show{opacity:1}
+.modal-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;z-index:100;padding:24px}
+.modal-overlay.hide{display:none}
+.modal-overlay.bottom{align-items:flex-end;padding:0}
+.modal{background:#fff;border-radius:14px;padding:24px 20px 20px;width:100%;max-width:320px;position:relative}
+.modal-close{position:absolute;top:14px;right:14px;width:26px;height:26px;border-radius:50%;background:#f0f0f0;border:none;font-size:16px;cursor:pointer;color:#666;display:flex;align-items:center;justify-content:center;line-height:1}
+.modal-title{font-size:17px;font-weight:700;color:#111;margin-bottom:6px;padding-right:30px}
+.modal-desc{font-size:13px;color:#666;line-height:1.6;margin-bottom:16px}
+.modal-input{width:100%;padding:12px 14px;border:1px solid #ddd;border-radius:8px;font-size:15px;font-family:inherit;color:#111;outline:none;transition:border .15s}
+.modal-input:focus{border-color:#111}
+.modal-input::placeholder{color:#bbb}
+.modal-hint{font-size:12px;color:#aaa;margin:6px 0 14px}
+.modal-row{display:flex;gap:8px;margin-top:16px}
+.modal-cancel{flex:1;padding:12px;border:1px solid #ddd;border-radius:8px;font-size:15px;color:#333;background:#fff;cursor:pointer;font-family:inherit;font-weight:500}
+.modal-confirm{flex:1;padding:12px;border:none;border-radius:8px;font-size:15px;color:#fff;background:#111;cursor:pointer;font-family:inherit;font-weight:600}
+.modal-confirm.gray{background:#bbb;cursor:default}
+.sheet-inner{background:#fff;border-radius:16px 16px 0 0;padding:20px;width:100%}
+.sheet-handle{width:36px;height:3px;background:#e0e0e0;border-radius:2px;margin:0 auto 16px}
+
+/* S0 */
+.s0-hero{width:100%;height:200px;background:#f5f5f5;display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.book-wrap{position:relative;width:200px;height:140px}
+.bk{position:absolute;width:140px;height:100px;background:#fff;border:1px solid #e0e0e0;border-radius:3px;box-shadow:2px 2px 8px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:26px}
+.bk.l{top:20px;left:0;transform:rotate(-7deg);background:#f9f9f9}
+.bk.r{top:20px;right:0;transform:rotate(6deg);background:#f9f9f9}
+.bk.c{top:5px;left:30px;z-index:2;background:#fff;box-shadow:3px 3px 12px rgba(0,0,0,.12)}
+.s0-body{padding:24px 20px 8px;text-align:center}
+.s0-t{font-size:22px;font-weight:700;color:#111;margin-bottom:8px}
+.s0-d{font-size:14px;color:#666;line-height:1.65;margin-bottom:28px}
+.s0-st{font-size:15px;font-weight:600;color:#111;text-align:left;margin-bottom:12px}
+.step-item{display:flex;align-items:center;gap:12px;padding:13px 14px;background:#f8f8f8;border-radius:10px;margin-bottom:8px}
+.step-icon{width:42px;height:42px;background:#fff;border:1px solid #eee;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.step-text{font-size:13px;color:#333;line-height:1.5}
+.cta-pad{padding:16px 20px 28px}
+
+/* S1 공유앨범 인트로 */
+.s1-pad{padding:22px 20px 0}
+.s1-title{font-size:20px;font-weight:700;color:#111;line-height:1.45;margin-bottom:14px}
+.s1-badge{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#f5f5f5;border-radius:8px;margin-bottom:24px}
+.s1-badge-icon{width:28px;height:28px;border-radius:50%;background:#ddd;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.s1-badge-text{font-size:13px;color:#555}
+.s1-st{font-size:15px;font-weight:600;color:#111;margin-bottom:12px}
+
+/* S2 리스트 */
+.album-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;padding:14px 14px 0}
+.a-card{border-radius:0;cursor:pointer}
+.a-thumb{width:100%;aspect-ratio:1/1;background:#f0f0f0;position:relative;display:flex;align-items:center;justify-content:center;border-radius:8px;overflow:hidden}
+.a-thumb .more-btn{position:absolute;top:8px;right:8px;width:26px;height:26px;background:rgba(255,255,255,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:13px;color:#333;cursor:pointer;z-index:2}
+.a-thumb .link-dot{position:absolute;bottom:8px;left:8px;width:24px;height:24px;background:rgba(255,255,255,.92);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;z-index:2}
+.a-thumb .link-dot.dark{background:rgba(60,60,60,.82);color:#fff}
+.a-thumb-empty{width:48px;height:48px;background:#e4e4e4;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:24px}
+.a-info{padding:7px 2px 4px}
+.a-name{font-size:13px;font-weight:600;color:#111;margin-bottom:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.a-meta{font-size:12px;color:#888}
+.a-exp{font-size:11px;color:#bbb;margin-top:1px}
+.a-share{margin-top:6px;width:100%;padding:7px;border:1px solid #ddd;border-radius:6px;font-size:12px;color:#444;background:#fff;cursor:pointer;font-family:inherit}
+.list-cta-pad{padding:14px 14px 28px}
+
+/* S3 상세 */
+.chip-row{display:flex;gap:8px;padding:12px 16px;border-bottom:1px solid #f0f0f0;overflow-x:auto}
+.chip-row::-webkit-scrollbar{display:none}
+.chip{padding:6px 13px;border:1px solid #ddd;border-radius:999px;font-size:12px;color:#333;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.chip.red{color:#d33}
+.s3-empty-area{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:36px 20px;gap:14px}
+.s3-empty-icon{width:74px;height:74px;background:#f0f0f0;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:32px;position:relative}
+.s3-empty-icon .i-dot{position:absolute;bottom:-3px;right:-3px;width:24px;height:24px;background:#555;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;color:#fff;border:2px solid #fff}
+.s3-empty-text{font-size:14px;color:#555;line-height:1.65;text-align:center}
+.s3-share-pill{padding:9px 22px;border:1px solid #ccc;border-radius:999px;font-size:14px;color:#333;background:#fff;cursor:pointer;font-family:inherit}
+.notice-bar{font-size:11px;color:#888;text-align:center;padding:10px 20px;background:#f8f8f8;margin:0 16px;border-radius:8px}
+.s3-bottom{padding:12px 16px 28px;display:flex;gap:8px}
+.btn-outline-sm{flex:1;padding:13px;border:1.5px solid #111;border-radius:10px;font-size:15px;font-weight:600;color:#111;background:#fff;cursor:pointer;font-family:inherit}
+.btn-black-sm{flex:2;padding:13px;background:#111;color:#fff;border:none;border-radius:10px;font-size:15px;font-weight:600;cursor:pointer;font-family:inherit}
+
+/* S4 멤버 */
+.s4-logo{padding:16px 20px 0;font-size:19px;font-weight:800;color:#111;letter-spacing:-.5px}
+.s4-hero{display:flex;flex-direction:column;align-items:center;padding:24px 20px 12px}
+.envelope-icon{width:80px;height:80px;background:#f0f0f0;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;margin-bottom:18px}
+.s4-msg{font-size:17px;font-weight:600;color:#111;line-height:1.6;text-align:center}
+.s4-msg .hl{color:#4a90e2}
+.s4-deadline-hl{font-size:13px;color:#4a90e2;font-weight:600;text-align:center;padding:0 20px 4px}
+.s4-deadline-sub{font-size:13px;color:#666;text-align:center;padding:0 20px 16px}
+.s4-notice{margin:0 20px 12px;background:#f8f8f8;border-radius:10px;padding:14px 16px}
+.s4-notice-t{font-size:13px;font-weight:600;color:#111;margin-bottom:8px}
+.s4-notice-li{font-size:12px;color:#666;line-height:1.65;padding-left:12px;position:relative}
+.s4-notice-li::before{content:'•';position:absolute;left:0;color:#aaa}
+.s4-notice-li .hl{color:#4a90e2}
+.s4-agree{display:flex;align-items:center;gap:8px;padding:10px 20px;cursor:pointer}
+.agree-box{width:18px;height:18px;border:1.5px solid #ccc;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:11px;background:#fff;flex-shrink:0;color:transparent}
+.agree-box.on{background:#111;border-color:#111;color:#fff}
+.agree-text{font-size:12px;color:#555;flex:1}
+.agree-arrow{font-size:14px;color:#bbb}
+.s4-cta{padding:8px 20px 28px}
+.btn-disabled{width:100%;padding:15px;background:#e0e0e0;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:default;font-family:inherit}
+.btn-disabled.on{background:#111;cursor:pointer}
+
+/* 비밀번호 모달 (멤버) */
+.pw-bottom{position:absolute;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;z-index:100}
+.pw-bottom.hide{display:none}
+.pw-bottom-inner{background:#fff;border-radius:16px 16px 0 0;padding:20px 20px 28px;width:100%;position:relative}
+.pw-bottom-title{font-size:17px;font-weight:700;color:#111;margin-bottom:14px;padding-right:30px}
+.pw-bottom-input{width:100%;padding:13px 14px;border:1.5px solid #111;border-radius:8px;font-size:16px;font-family:inherit;color:#111;outline:none;letter-spacing:1px;margin-bottom:12px}
+.pw-bottom-input::placeholder{color:#bbb;letter-spacing:0;font-size:14px}
+.pw-bottom-btn{width:100%;padding:14px;background:#ddd;color:#fff;border:none;border-radius:10px;font-size:16px;font-weight:600;cursor:default;font-family:inherit}
+.pw-bottom-btn.on{background:#111;cursor:pointer}
+</style>
+</head>
+<body>
+
+<div class="meta"><strong>공동 포토북 간소화</strong> — 팀 싱크용 프로토타입 · 스냅스 UI 기반 · 2026.03.31</div>
+
+<div class="controls">
+  <div class="tab-row">
+    <button class="tab-btn active" data-s="0">공동 포토북 상세</button>
+    <button class="tab-btn" data-s="1">공유 앨범 인트로</button>
+    <button class="tab-btn" data-s="2">앨범 리스트</button>
+    <button class="tab-btn" data-s="3">앨범 상세</button>
+    <button class="tab-btn" data-s="4">멤버 진입</button>
+  </div>
+  <div class="toggle-row" id="toggleWrap">
+    <span class="tl" id="tL">앨범 없는 유저</span>
+    <div class="track" id="track" onclick="toggleState()"><div class="thumb"></div></div>
+    <span class="tr" id="tR">앨범 있는 유저</span>
+  </div>
+</div>
+
+<div class="phone">
+  <div class="status-bar">
+    <div class="status-time">9:41</div>
+    <div class="status-right">●●● WiFi 🔋</div>
+  </div>
+
+  <!-- S0: 공동 포토북 상세 -->
+  <div class="screen on" id="s0">
+    <div class="nav"><div class="nav-back">‹</div><div class="nav-title">공동 포토북</div><div class="nav-more"></div></div>
+    <div class="scroll">
+      <div class="s0-hero">
+        <div class="book-wrap">
+          <div class="bk l">👩‍👧‍👦</div>
+          <div class="bk r">🌸</div>
+          <div class="bk c">📸</div>
+        </div>
+      </div>
+      <div class="s0-body">
+        <div class="s0-t">공동 포토북</div>
+        <div class="s0-d">모임 사진, 모으는 것부터 힘들었다면.<br>링크/카톡으로 초대하고 각자 사진만 업로드하세요.</div>
+        <div class="s0-st">이렇게 만들어 보세요.</div>
+        <div class="step-item"><div class="step-icon">🖼</div><div class="step-text">1. 공유 앨범을 만들어 주세요.</div></div>
+        <div class="step-item"><div class="step-icon">👥</div><div class="step-text">2. 링크를 친구, 가족에게 공유해 주세요.</div></div>
+        <div class="step-item"><div class="step-icon">📖</div><div class="step-text">3. 모인 사진들로 AI가 포토북을 만들어요.</div></div>
+      </div>
+      <div class="cta-pad"><button class="btn-black" onclick="handleS0()">공동 포토북 만들기</button></div>
+    </div>
+    <div class="toast-base" id="t0"></div>
+  </div>
+
+  <!-- S1: 공유 앨범 인트로 -->
+  <div class="screen" id="s1">
+    <div class="nav"><div class="nav-back" onclick="goTo(0)">‹</div><div class="nav-title">공유 앨범</div><div class="nav-more"></div></div>
+    <div class="scroll">
+      <div class="s1-pad">
+        <div class="s1-title">친구, 가족들과 함께 사진을 모아<br>포토북을 만들 수 있어요.</div>
+        <div class="s1-badge"><div class="s1-badge-icon">🔗</div><div class="s1-badge-text">링크 하나로, 로그인 없이 사진 업로드 가능</div></div>
+        <div class="s1-st">3단계로 만드는 포토북</div>
+        <div class="step-item"><div class="step-icon">🖼</div><div class="step-text">1. 공유 앨범을 만들어 주세요.</div></div>
+        <div class="step-item"><div class="step-icon">👥</div><div class="step-text">2. 링크를 친구, 가족에게 공유해 주세요.</div></div>
+        <div class="step-item"><div class="step-icon">🤖</div><div class="step-text">3. 모인 사진들로 AI가 포토북을 만들어요.</div></div>
+      </div>
+      <div class="cta-pad"><button class="btn-black" onclick="openModal('createM1')">공유 앨범 만들기</button></div>
+    </div>
+    <!-- 생성 모달 -->
+    <div class="modal-overlay hide" id="createM1" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('createM1')">×</button>
+        <div class="modal-title">공유 앨범 만들기</div>
+        <div style="height:10px"></div>
+        <input class="modal-input" type="text" placeholder="앨범명을 입력해주세요.">
+        <div class="modal-hint">입력하지 않아도 앨범이 생성돼요</div>
+        <div class="modal-row">
+          <button class="modal-cancel" onclick="closeModal('createM1')">취소</button>
+          <button class="modal-confirm" onclick="doCreate('t1')">추가</button>
+        </div>
+      </div>
+    </div>
+    <div class="toast-base" id="t1"></div>
+  </div>
+
+  <!-- S2: 앨범 리스트 -->
+  <div class="screen" id="s2">
+    <div class="nav"><div class="nav-back" onclick="goTo(0)">‹</div><div class="nav-title">공유 앨범</div><div class="nav-more"></div></div>
+    <div class="scroll">
+      <div class="album-grid">
+        <div class="a-card">
+          <div class="a-thumb"><div class="a-thumb-empty">🖼</div><div class="more-btn">···</div><div class="link-dot">🔗</div></div>
+          <div class="a-info"><div class="a-name">1234</div><div class="a-meta">0장 · 미공유</div><div class="a-exp">2026.04.30 만료</div><button class="a-share" onclick="openModal('pwM2')">공유 하기</button></div>
+        </div>
+        <div class="a-card">
+          <div class="a-thumb"><div class="a-thumb-empty">🖼</div><div class="more-btn">···</div><div class="link-dot">🔗</div></div>
+          <div class="a-info"><div class="a-name">1234</div><div class="a-meta">0장 · 미공유</div><div class="a-exp">2026.04.30 만료</div><button class="a-share" onclick="openModal('pwM2')">공유 하기</button></div>
+        </div>
+        <div class="a-card">
+          <div class="a-thumb"><div class="a-thumb-empty">🖼</div><div class="more-btn">···</div><div class="link-dot dark">🔗</div></div>
+          <div class="a-info"><div class="a-name">1234</div><div class="a-meta">0장 · 공유됨</div></div>
+        </div>
+        <div class="a-card" onclick="goTo(3)">
+          <div class="a-thumb" style="background:#c8b89a;font-size:40px">☕<div class="more-btn">···</div><div class="link-dot dark">🔗</div></div>
+          <div class="a-info"><div class="a-name">테스트</div><div class="a-meta">28장 · 공유됨</div></div>
+        </div>
+      </div>
+      <div class="list-cta-pad"><button class="btn-black" onclick="openModal('createM2')">공유 앨범 만들기</button></div>
+    </div>
+    <!-- 리스트에서 생성 모달 -->
+    <div class="modal-overlay hide" id="createM2" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('createM2')">×</button>
+        <div class="modal-title">공유 앨범 만들기</div>
+        <div style="height:10px"></div>
+        <input class="modal-input" type="text" placeholder="앨범명을 입력해주세요.">
+        <div class="modal-hint">입력하지 않아도 앨범이 생성돼요</div>
+        <div class="modal-row">
+          <button class="modal-cancel" onclick="closeModal('createM2')">취소</button>
+          <button class="modal-confirm" onclick="doCreate('t2')">추가</button>
+        </div>
+      </div>
+    </div>
+    <!-- 비밀번호 설정 모달 (TO-BE) -->
+    <div class="modal-overlay hide" id="pwM2" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('pwM2')">×</button>
+        <div class="modal-title">공유 앨범 비밀번호 설정</div>
+        <div class="modal-desc">다른 멤버들은 설정한 비밀번호를<br>입력해야만 공유 앨범을 볼 수 있어요.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f5f5f5;border-radius:8px;margin-bottom:8px">
+          <div style="font-size:12px;color:#777">자동 생성된 비밀번호</div>
+          <div style="font-size:18px;font-weight:700;color:#111;letter-spacing:3px">7241</div>
+        </div>
+        <input class="modal-input" type="text" maxlength="6" placeholder="숫자 4~6자리로 직접 변경 가능">
+        <div class="modal-row">
+          <button class="modal-cancel" onclick="closeModal('pwM2')">취소</button>
+          <button class="modal-confirm" onclick="doPwShare('t2')">확인</button>
+        </div>
+      </div>
+    </div>
+    <!-- 공유 수단 -->
+    <div class="modal-overlay bottom hide" id="shareS2" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="sheet-inner">
+        <div class="sheet-handle"></div>
+        <div style="font-size:16px;font-weight:600;color:#111;margin-bottom:14px">링크 공유하기</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="showToast('t2','링크가 복사되었어요!')" style="flex:1;padding:13px;border:1px solid #ddd;border-radius:10px;font-size:14px;color:#333;background:#fff;cursor:pointer;font-family:inherit">🔗 링크 복사</button>
+          <button onclick="showToast('t2','카카오톡으로 공유했어요!')" style="flex:1;padding:13px;background:#fee500;border:none;border-radius:10px;font-size:14px;font-weight:600;color:#3c1e1e;cursor:pointer;font-family:inherit">💬 카카오 공유</button>
+        </div>
+      </div>
+    </div>
+    <div class="toast-base" id="t2"></div>
+  </div>
+
+  <!-- S3: 앨범 상세 -->
+  <div class="screen" id="s3">
+    <div class="nav"><div class="nav-back" onclick="goTo(2)">‹</div><div class="nav-title">1234</div><div class="nav-more">···</div></div>
+    <div class="chip-row">
+      <div class="chip">🕐 2026.04.30 만료</div>
+      <div class="chip red">사진 삭제</div>
+      <div class="chip">AI 포토북 만들기</div>
+    </div>
+    <div class="s3-empty-area">
+      <div class="s3-empty-icon">🖼<div class="i-dot">🔗</div></div>
+      <div class="s3-empty-text">포토북에 담을 사진을 추가해 보세요.<br>다른 사람들과 함께 사진을 올리고 싶다면<br>초대 링크를 공유해 보세요.</div>
+      <button class="s3-share-pill" onclick="openModal('pwM3')">공유하기</button>
+    </div>
+    <div class="notice-bar">한번에 사진을 많이 추가하면 로딩 지연이 발생할 수 있어요.</div>
+    <div style="height:12px;background:#fff"></div>
+    <div class="s3-bottom">
+      <button class="btn-outline-sm" onclick="openModal('pwM3')">공유하기</button>
+      <button class="btn-black-sm" onclick="showToast('t3','사진 업로드 화면으로 이동해요')">사진 추가</button>
+    </div>
+    <!-- 비밀번호 모달 -->
+    <div class="modal-overlay hide" id="pwM3" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="modal">
+        <button class="modal-close" onclick="closeModal('pwM3')">×</button>
+        <div class="modal-title">공유 앨범 비밀번호 설정</div>
+        <div class="modal-desc">다른 멤버들은 설정한 비밀번호를<br>입력해야만 공유 앨범을 볼 수 있어요.</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:#f5f5f5;border-radius:8px;margin-bottom:8px">
+          <div style="font-size:12px;color:#777">자동 생성된 비밀번호</div>
+          <div style="font-size:18px;font-weight:700;color:#111;letter-spacing:3px">7241</div>
+        </div>
+        <input class="modal-input" type="text" maxlength="6" placeholder="숫자 4~6자리로 직접 변경 가능">
+        <div class="modal-row">
+          <button class="modal-cancel" onclick="closeModal('pwM3')">취소</button>
+          <button class="modal-confirm" onclick="doPwShare('t3')">확인</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-overlay bottom hide" id="shareS3" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="sheet-inner">
+        <div class="sheet-handle"></div>
+        <div style="font-size:16px;font-weight:600;color:#111;margin-bottom:14px">링크 공유하기</div>
+        <div style="display:flex;gap:8px">
+          <button onclick="showToast('t3','링크가 복사되었어요!')" style="flex:1;padding:13px;border:1px solid #ddd;border-radius:10px;font-size:14px;color:#333;background:#fff;cursor:pointer;font-family:inherit">🔗 링크 복사</button>
+          <button onclick="showToast('t3','카카오톡으로 공유했어요!')" style="flex:1;padding:13px;background:#fee500;border:none;border-radius:10px;font-size:14px;font-weight:600;color:#3c1e1e;cursor:pointer;font-family:inherit">💬 카카오 공유</button>
+        </div>
+      </div>
+    </div>
+    <div class="toast-base" id="t3"></div>
+  </div>
+
+  <!-- S4: 멤버 진입 -->
+  <div class="screen" id="s4">
+    <div class="s4-logo">snaps</div>
+    <div class="s4-hero">
+      <div class="envelope-icon">💌</div>
+      <div class="s4-msg">배채윤님이 당신을 공유 앨범<br><span class="hl">&lt;1234&gt;</span> 으로<br>초대했어요.</div>
+    </div>
+    <div class="s4-deadline-hl">2026년 04월 30일까지</div>
+    <div class="s4-deadline-sub">포토북에 담을 사진을 업로드해 주세요.</div>
+    <div class="s4-notice">
+      <div class="s4-notice-t">유의사항</div>
+      <div class="s4-notice-li">업로드한 사진은 <span class="hl">배채윤님의 포토북 제작에 사용</span>될 수 있습니다.</div>
+      <div class="s4-notice-li">해당 공유 앨범은 <span class="hl">2026년 04월 30일</span>에 만료됩니다.</div>
+    </div>
+    <div class="s4-agree" onclick="toggleAgree()">
+      <div class="agree-box on" id="agreeBox">✓</div>
+      <div class="agree-text">[필수] 공유 앨범 서비스를 위한 개인정보 수집·이용동의</div>
+      <div class="agree-arrow">›</div>
+    </div>
+    <div class="s4-cta">
+      <button class="btn-disabled on" id="uploadBtn" onclick="openPwBottom()">사진 올리기</button>
+    </div>
+    <!-- 비밀번호 바텀시트 (멤버) -->
+    <div class="pw-bottom hide" id="pwBottom" onclick="if(event.target===this)this.classList.add('hide')">
+      <div class="pw-bottom-inner">
+        <button class="modal-close" onclick="closeAll()">×</button>
+        <div class="pw-bottom-title">비밀번호를 입력해주세요.</div>
+        <input class="pw-bottom-input" type="text" maxlength="6" placeholder="비밀번호 입력 (숫자 4~6자리)" id="memberPw" oninput="updateMemberBtn()">
+        <button class="pw-bottom-btn" id="memberBtn" onclick="doMemberEnter()">확인</button>
+      </div>
+    </div>
+    <div class="toast-base" id="t4"></div>
+  </div>
+</div><!-- /phone -->
+
+<script>
+let hasAlbum=false,agreed=true;
+document.querySelectorAll('.tab-btn').forEach(b=>b.addEventListener('click',()=>goTo(parseInt(b.dataset.s))));
+function goTo(n){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+  document.getElementById('s'+n).classList.add('on');
+  document.querySelectorAll('.tab-btn').forEach((b,i)=>b.classList.toggle('active',i===n));
+  document.getElementById('toggleWrap').style.display=n===0?'flex':'none';
+}
+function toggleState(){
+  hasAlbum=!hasAlbum;
+  document.getElementById('track').classList.toggle('on',hasAlbum);
+  document.getElementById('tL').style.color=hasAlbum?'#bbb':'#111';
+  document.getElementById('tL').style.fontWeight=hasAlbum?'400':'600';
+  document.getElementById('tR').style.color=hasAlbum?'#111':'#bbb';
+  document.getElementById('tR').style.fontWeight=hasAlbum?'600':'400';
+}
+function handleS0(){
+  if(hasAlbum){goTo(2);}
+  else{showToast('t0','앨범이 자동으로 생성되었어요!');setTimeout(()=>goTo(3),1300);}
+}
+function openModal(id){document.getElementById(id).classList.remove('hide');}
+function closeModal(id){document.getElementById(id).classList.add('hide');}
+function closeAll(){document.querySelectorAll('.modal-overlay,.pw-bottom').forEach(e=>e.classList.add('hide'));}
+function showToast(id,msg){
+  const t=document.getElementById(id);
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2200);
+}
+function doCreate(tid){
+  closeAll();
+  showToast(tid,'앨범이 생성되었어요!');
+  setTimeout(()=>goTo(3),1300);
+}
+function doPwShare(tid){
+  closeAll();
+  const sId=tid==='t2'?'shareS2':'shareS3';
+  setTimeout(()=>openModal(sId),200);
+}
+function toggleAgree(){
+  agreed=!agreed;
+  const b=document.getElementById('agreeBox');
+  b.classList.toggle('on',agreed);
+  b.textContent=agreed?'✓':'';
+  document.getElementById('uploadBtn').classList.toggle('on',agreed);
+}
+function openPwBottom(){
+  if(!agreed)return;
+  openModal('pwBottom');
+}
+function updateMemberBtn(){
+  const v=document.getElementById('memberPw').value;
+  document.getElementById('memberBtn').classList.toggle('on',v.length>=4);
+}
+function doMemberEnter(){
+  const v=document.getElementById('memberPw').value;
+  if(v.length<4)return;
+  closeAll();
+  showToast('t4','앨범에 참여했어요!');
+  setTimeout(()=>goTo(3),1300);
+}
+</script>
+</body>
+</html>
