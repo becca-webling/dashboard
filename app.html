@@ -336,6 +336,27 @@ body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #EDED
 .m-cta-main.outline { background: var(--white); color: var(--black); border: 2px solid var(--black); }
 .m-cta-hint { font-size: 11px; color: var(--gray-400); text-align: center; }
 
+/* 사이즈 선택 UI (랜딩 내) */
+.size-select-wrap { margin-bottom: 16px; }
+.size-select-label { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.size-select-label .size-guide-link { font-size: 11px; color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: underline; }
+.size-btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
+.size-opt { font-family: inherit; font-size: 13px; font-weight: 700; padding: 10px 4px; border-radius: var(--r); border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500); cursor: pointer; text-align: center; transition: all .12s; }
+.size-opt:hover { border-color: var(--gray-400); color: var(--black); }
+.size-opt.selected { background: var(--black); color: var(--white); border-color: var(--black); }
+.size-opt.disabled { background: var(--gray-50); color: var(--gray-300); cursor: not-allowed; text-decoration: line-through; }
+/* 모바일 사이즈 선택 */
+.m-size-select-wrap { padding: 0 14px 4px; }
+.m-size-select-label { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
+.m-size-guide-link { font-size: 11px; color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: underline; }
+.m-size-btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
+.m-size-opt { font-family: inherit; font-size: 13px; font-weight: 700; padding: 10px 4px; border-radius: var(--r); border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500); cursor: pointer; text-align: center; transition: all .12s; }
+.m-size-opt.selected { background: var(--black); color: var(--white); border-color: var(--black); }
+/* 담기 버튼 비활성 상태 */
+.cta-btn-main.disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
+.cta-btn-main.disabled:hover { opacity: 1; }
+.m-cta-main.disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
+
 /* 로그인 후 상태 */
 .m-added { margin: 0 14px 10px; background: var(--success-light); border: 1px solid #A7F3D0; border-radius: var(--r); padding: 10px 12px; font-size: 12px; color: var(--success); font-weight: 700; display: flex; align-items: center; gap: 6px; }
 </style>
@@ -780,21 +801,33 @@ body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #EDED
             <div class="cat">글리머 드라이 폴로셔츠</div>
             <h2>2026 러닝크루<br>공식 티셔츠</h2>
             <p class="desc">
-              모임장이 완성한 디자인을 베이스로 제공합니다.<br>
-              그대로 주문할 수도 있고, 에디터에서 원하는 대로 수정한 후 주문할 수도 있어요.<br>
-              개별 결제 · 개별 배송으로 진행됩니다.
+              모임장이 완성한 디자인으로 각자 개별 주문·결제·배송을 진행해요.<br>
+              사이즈를 선택하고 장바구니에 담으면 됩니다.
             </p>
             <!-- 비로그인 안내 -->
             <div class="login-notice">
               <span class="icon">🔒</span>
-              <p><strong>로그인이 필요한 서비스예요.</strong><br>장바구니에 담거나 디자인을 수정하려면 로그인 후 이용할 수 있어요. 지금 바로 미리보기는 가능합니다.</p>
+              <p><strong>로그인이 필요한 서비스예요.</strong><br>미리보기는 누구나 가능하지만 장바구니에 담으려면 로그인이 필요합니다.</p>
+            </div>
+            <!-- 사이즈 선택 -->
+            <div class="size-select-wrap">
+              <div class="size-select-label">
+                사이즈 선택 <span style="color:var(--orange)">*</span>
+                <span class="size-guide-link" onclick="toast('사이즈 가이드를 불러옵니다')">📏 사이즈 가이드</span>
+              </div>
+              <div class="size-btn-grid">
+                <button class="size-opt" onclick="selectSize3(this)">S</button>
+                <button class="size-opt" onclick="selectSize3(this)">M</button>
+                <button class="size-opt" onclick="selectSize3(this)">L</button>
+                <button class="size-opt" onclick="selectSize3(this)">XL</button>
+                <button class="size-opt" onclick="selectSize3(this)">2XL</button>
+              </div>
             </div>
             <!-- CTA 버튼 -->
             <div class="cta-area">
-              <button class="cta-btn-main black" onclick="handleCTA('cart')">🛒 장바구니에 담기</button>
-              <button class="cta-btn-main outline" onclick="handleCTA('editor')">✏️ 디자인 수정하기</button>
+              <button class="cta-btn-main black disabled" id="cartBtn3" onclick="handleCTA('cart')">🛒 장바구니에 담기</button>
             </div>
-            <p class="cta-hint">두 버튼 모두 로그인 후 이용 가능합니다</p>
+            <p class="cta-hint" id="ctaHint3">사이즈를 선택하면 담기 버튼이 활성화됩니다 · 로그인 후 이용 가능</p>
             <!-- 만료 안내 -->
             <div class="expire-notice" style="margin-top:16px">
               ⏰ 이 링크는 <strong style="margin:0 4px">2026.04.29</strong>에 만료됩니다 (28일 남음)
@@ -824,12 +857,25 @@ body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #EDED
           <div class="m-preview-info"><h4>글리머 드라이 폴로셔츠</h4></div>
         </div>
         <div class="m-login-notice">
-          🔒 <strong>로그인 후 이용 가능해요.</strong><br>미리보기는 누구나 가능하지만 담기·수정은 로그인이 필요합니다.
+          🔒 <strong>로그인 후 이용 가능해요.</strong><br>미리보기는 누구나 가능하지만 담기는 로그인이 필요합니다.
+        </div>
+        <!-- 모바일 사이즈 선택 -->
+        <div class="m-size-select-wrap" style="padding:0 14px 10px">
+          <div class="m-size-select-label">
+            사이즈 선택 <span style="color:var(--orange)">*</span>
+            <span class="m-size-guide-link" onclick="toast('사이즈 가이드')">📏 사이즈 가이드</span>
+          </div>
+          <div class="m-size-btn-grid">
+            <button class="m-size-opt" onclick="mSelectSize3(this)">S</button>
+            <button class="m-size-opt" onclick="mSelectSize3(this)">M</button>
+            <button class="m-size-opt" onclick="mSelectSize3(this)">L</button>
+            <button class="m-size-opt" onclick="mSelectSize3(this)">XL</button>
+            <button class="m-size-opt" onclick="mSelectSize3(this)">2XL</button>
+          </div>
         </div>
         <div class="m-cta-area">
-          <button class="m-cta-main black" onclick="handleCTA('cart')">🛒 장바구니에 담기</button>
-          <button class="m-cta-main outline" onclick="handleCTA('editor')">✏️ 디자인 수정하기</button>
-          <p class="m-cta-hint">로그인 후 이용 가능합니다</p>
+          <button class="m-cta-main black disabled" id="mCartBtn3" onclick="handleCTA('cart')">🛒 장바구니에 담기</button>
+          <p class="m-cta-hint">사이즈 선택 후 활성화 · 로그인 후 이용 가능</p>
           <div style="background:var(--orange-light);border:1px solid var(--orange-mid);border-radius:4px;padding:9px 12px;font-size:11px;color:var(--orange);font-weight:600;text-align:center">
             ⏰ 링크 만료: 2026.04.29 (28일 남음)
           </div>
@@ -866,20 +912,32 @@ body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #EDED
             <div class="cat">글리머 드라이 폴로셔츠</div>
             <h2>2026 러닝크루<br>공식 티셔츠</h2>
             <p class="desc">
-              모임장이 완성한 디자인을 베이스로 제공합니다.<br>
-              그대로 주문할 수도 있고, 에디터에서 원하는 대로 수정한 후 주문할 수도 있어요.<br>
-              개별 결제 · 개별 배송으로 진행됩니다.
+              모임장이 완성한 디자인으로 각자 개별 주문·결제·배송을 진행해요.<br>
+              사이즈를 선택하고 장바구니에 담으면 됩니다.
             </p>
-            <!-- 담기 완료 알림 (첫 상태) -->
+            <!-- 담기 완료 알림 -->
             <div class="added-notice" id="addedNotice" style="display:none">
-              ✅ 내 장바구니에 담겼습니다. 지금 바로 주문하거나 나중에 결제할 수 있어요.
+              ✅ 장바구니에 담겼습니다. 장바구니에서 주문을 완료해주세요.
+            </div>
+            <!-- 사이즈 선택 -->
+            <div class="size-select-wrap" id="sizeWrap4">
+              <div class="size-select-label">
+                사이즈 선택 <span style="color:var(--orange)">*</span>
+                <span class="size-guide-link" onclick="toast('사이즈 가이드를 불러옵니다')">📏 사이즈 가이드</span>
+              </div>
+              <div class="size-btn-grid">
+                <button class="size-opt" onclick="selectSize4(this)">S</button>
+                <button class="size-opt" onclick="selectSize4(this)">M</button>
+                <button class="size-opt" onclick="selectSize4(this)">L</button>
+                <button class="size-opt" onclick="selectSize4(this)">XL</button>
+                <button class="size-opt" onclick="selectSize4(this)">2XL</button>
+              </div>
             </div>
             <!-- CTA 버튼 -->
             <div class="cta-area">
-              <button class="cta-btn-main black" id="cartBtn" onclick="handleLoggedCTA('cart')">🛒 장바구니에 담기</button>
-              <button class="cta-btn-main outline" onclick="handleLoggedCTA('editor')">✏️ 디자인 수정하기</button>
+              <button class="cta-btn-main black disabled" id="cartBtn" onclick="handleLoggedCTA('cart')">🛒 장바구니에 담기</button>
             </div>
-            <p class="cta-hint">모임장 디자인이 내 장바구니에 복사됩니다. 원본은 변경되지 않아요.</p>
+            <p class="cta-hint" id="ctaHint4">사이즈를 선택하면 담기 버튼이 활성화됩니다 · 모임장 디자인이 복사됩니다</p>
             <div class="expire-notice" style="margin-top:16px">
               ⏰ 이 링크는 <strong style="margin:0 4px">2026.04.29</strong>에 만료됩니다 (28일 남음)
             </div>
@@ -907,14 +965,27 @@ body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #EDED
           <div class="m-preview-img">👕</div>
           <div class="m-preview-info"><h4>글리머 드라이 폴로셔츠</h4></div>
         </div>
-        <div id="mAddedNotice" class="m-added" style="display:none">✅ 내 장바구니에 담겼습니다!</div>
+        <div id="mAddedNotice" class="m-added" style="display:none">✅ 장바구니에 담겼습니다! 장바구니에서 주문을 완료해주세요.</div>
         <div class="m-login-notice" style="background:var(--success-light);border-color:#A7F3D0;color:var(--success)">
-          ✅ 로그인 상태입니다. 바로 담거나 수정할 수 있어요.
+          ✅ 로그인 상태입니다. 사이즈를 선택하고 담으세요.
+        </div>
+        <!-- 모바일 사이즈 선택 -->
+        <div id="mSizeWrap4" class="m-size-select-wrap" style="padding:0 14px 10px">
+          <div class="m-size-select-label">
+            사이즈 선택 <span style="color:var(--orange)">*</span>
+            <span class="m-size-guide-link" onclick="toast('사이즈 가이드')">📏 사이즈 가이드</span>
+          </div>
+          <div class="m-size-btn-grid">
+            <button class="m-size-opt" onclick="mSelectSize4(this)">S</button>
+            <button class="m-size-opt" onclick="mSelectSize4(this)">M</button>
+            <button class="m-size-opt" onclick="mSelectSize4(this)">L</button>
+            <button class="m-size-opt" onclick="mSelectSize4(this)">XL</button>
+            <button class="m-size-opt" onclick="mSelectSize4(this)">2XL</button>
+          </div>
         </div>
         <div class="m-cta-area">
-          <button class="m-cta-main black" id="mCartBtn" onclick="handleMLoggedCTA('cart')">🛒 장바구니에 담기</button>
-          <button class="m-cta-main outline" onclick="handleMLoggedCTA('editor')">✏️ 디자인 수정하기</button>
-          <p class="m-cta-hint">모임장 디자인이 내 장바구니에 복사됩니다. 원본은 변경되지 않아요.</p>
+          <button class="m-cta-main black disabled" id="mCartBtn" onclick="handleMLoggedCTA('cart')">🛒 장바구니에 담기</button>
+          <p class="m-cta-hint" id="mCtaHint4">사이즈를 선택하면 담기 버튼이 활성화됩니다</p>
         </div>
       </div>
     </div>
@@ -1090,6 +1161,8 @@ function go(n) {
 
 // 참여자 랜딩 — 비로그인 상태에서 버튼 클릭
 function handleCTA(type) {
+  // 비활성 상태면 무시
+  const btn = document.getElementById('cartBtn3') || document.getElementById('mCartBtn3');
   pendingCTA = type;
   document.getElementById('loginModal').classList.add('show');
 }
@@ -1100,44 +1173,85 @@ function doLogin() {
   showLoading();
   setTimeout(() => {
     hideLoading();
-    go(4); // 로그인 후 S4로 이동
-    toast('로그인되었습니다. 이제 담기·수정이 가능해요!');
+    go(4); // 로그인 후 S4로 이동 (사이즈 선택 상태 유지)
+    toast('로그인되었습니다. 사이즈를 선택하고 담으세요!');
   }, 1200);
 }
 
-// 참여자 랜딩 — 로그인 상태에서 버튼 클릭
+// 참여자 랜딩 — 로그인 상태에서 담기 클릭
 function handleLoggedCTA(type) {
-  showLoading();
-  setTimeout(() => {
-    hideLoading();
-    if (type === 'cart') {
+  if (type === 'cart') {
+    showLoading();
+    setTimeout(() => {
+      hideLoading();
+      // 사이즈 선택 영역 숨기기
+      const sw = document.getElementById('sizeWrap4');
+      if (sw) sw.style.display = 'none';
       document.getElementById('addedNotice').style.display = 'flex';
       const btn = document.getElementById('cartBtn');
       btn.textContent = '✅ 장바구니에 담았어요';
+      btn.classList.remove('disabled');
       btn.style.background = 'var(--success)';
-      btn.disabled = true;
-      toast('내 장바구니에 담겼습니다! 사이즈·수량은 장바구니에서 선택하세요.');
-    } else {
-      toast('에디터로 이동합니다. 모임장 디자인이 복사됩니다.');
-    }
-  }, 900);
+      btn.onclick = () => toast('장바구니로 이동합니다');
+      document.getElementById('ctaHint4').textContent = '에디터에서 추가 수정도 가능해요';
+      toast('장바구니에 담겼습니다! 장바구니에서 주문을 완료해주세요.');
+    }, 900);
+  }
 }
 
 function handleMLoggedCTA(type) {
-  showLoading();
-  setTimeout(() => {
-    hideLoading();
-    if (type === 'cart') {
+  if (type === 'cart') {
+    showLoading();
+    setTimeout(() => {
+      hideLoading();
+      const sw = document.getElementById('mSizeWrap4');
+      if (sw) sw.style.display = 'none';
       document.getElementById('mAddedNotice').style.display = 'flex';
       const btn = document.getElementById('mCartBtn');
       btn.textContent = '✅ 장바구니에 담았어요';
+      btn.classList.remove('disabled');
       btn.style.background = 'var(--success)';
-      btn.disabled = true;
-      toast('내 장바구니에 담겼습니다!');
-    } else {
-      toast('에디터로 이동합니다.');
-    }
-  }, 900);
+      btn.onclick = () => toast('장바구니로 이동합니다');
+      document.getElementById('mCtaHint4').textContent = '장바구니에서 주문을 완료해주세요';
+      toast('장바구니에 담겼습니다!');
+    }, 900);
+  }
+}
+
+// S3 사이즈 선택 (비로그인)
+function selectSize3(el) {
+  document.querySelectorAll('#s3 .size-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  // 담기 버튼 활성화 — 클릭하면 로그인 유도
+  const btn = document.getElementById('cartBtn3');
+  btn.classList.remove('disabled');
+  btn.onclick = () => { document.getElementById('loginModal').classList.add('show'); };
+  document.getElementById('ctaHint3').textContent = '로그인 후 장바구니에 담을 수 있어요';
+}
+function mSelectSize3(el) {
+  document.querySelectorAll('#mob3 .m-size-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn = document.getElementById('mCartBtn3');
+  btn.classList.remove('disabled');
+  btn.onclick = () => { document.getElementById('loginModal').classList.add('show'); };
+}
+
+// S4 사이즈 선택 (로그인)
+function selectSize4(el) {
+  document.querySelectorAll('#s4 .size-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn = document.getElementById('cartBtn');
+  btn.classList.remove('disabled');
+  btn.onclick = () => handleLoggedCTA('cart');
+  document.getElementById('ctaHint4').textContent = '모임장 디자인이 내 장바구니에 복사됩니다';
+}
+function mSelectSize4(el) {
+  document.querySelectorAll('#mob4 .m-size-opt').forEach(b => b.classList.remove('selected'));
+  el.classList.add('selected');
+  const btn = document.getElementById('mCartBtn');
+  btn.classList.remove('disabled');
+  btn.onclick = () => handleMLoggedCTA('cart');
+  document.getElementById('mCtaHint4').textContent = '모임장 디자인이 내 장바구니에 복사됩니다';
 }
 
 function closeModal() {
