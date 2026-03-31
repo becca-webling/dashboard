@@ -13,6 +13,7 @@
             --border: #E8E8E8;
             --success: #00A67E;
             --blue: #1A56DB;
+            --kakao: #FEE500;
         }
 
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -78,7 +79,7 @@
         /* 버튼 시스템 */
         .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
         .btn {
-            padding: 10px;
+            padding: 12px;
             border: 1px solid var(--border);
             border-radius: 6px;
             font-size: 12px;
@@ -87,10 +88,15 @@
             background: white;
             color: #444;
             text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
         }
         .btn-primary { background: var(--black); color: white; border: none; }
         .btn-accent { background: var(--orange); color: white; border: none; }
         .btn-share { border-color: var(--blue); color: var(--blue); }
+        .btn-kakao { background: var(--kakao); color: #111; border: none; width: 100%; margin-bottom: 8px; }
 
         /* 장바구니 아이템 */
         .cart-item { border-bottom: 1px solid var(--border); padding: 16px 0; }
@@ -106,24 +112,52 @@
         .spinner { width: 40px; height: 40px; border: 4px solid var(--gray-100); border-top-color: var(--orange); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { to { transform: rotate(360deg); } }
 
+        /* 복사중 아이템 (스켈레톤 느낌) */
+        .copying-item {
+            background: #F8FAFF;
+            border: 1px solid #DCE7FF;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .copying-content { display: flex; align-items: center; gap: 12px; }
+        .copying-text { flex: 1; }
+        .copying-status { font-size: 13px; font-weight: 700; color: var(--blue); margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
+        .copying-desc { font-size: 11px; color: #7890BC; }
+        
+        .refresh-btn {
+            background: white;
+            border: 1px solid #DCE7FF;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--blue);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+        }
+
         /* 랜딩/미리보기 */
         .preview-box { background: var(--gray-bg); border-radius: 12px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 100px; margin-bottom: 20px; }
         .size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 15px 0; }
         .size-btn { border: 1px solid #ddd; padding: 12px 0; text-align: center; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; }
         .size-btn.selected { background: var(--black); color: white; border-color: var(--black); }
 
-        /* 공유 화면 모달/섹션 */
-        .share-box { background: #F0F7FF; border: 1px solid #CDE2FF; border-radius: 12px; padding: 20px; text-align: center; }
-        .share-url { background: white; padding: 10px; border: 1px solid #DDD; border-radius: 6px; font-family: monospace; font-size: 12px; margin: 15px 0; color: var(--blue); }
-
-        /* 복사중 안내 */
-        .copy-banner { background: #EBF2FF; color: var(--blue); padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
+        /* 공유 화면 */
+        .share-box { background: #F8F9FA; border: 1px solid #EEE; border-radius: 16px; padding: 24px 20px; text-align: center; }
+        .share-url { background: white; padding: 12px; border: 1px solid #DDD; border-radius: 8px; font-family: monospace; font-size: 13px; margin: 16px 0; color: var(--blue); font-weight: 600; box-shadow: inset 0 2px 4px rgba(0,0,0,0.03); }
 
         /* 섹션 구분 */
         .section-title { font-size: 14px; font-weight: 800; margin: 20px 0 10px; color: #666; }
 
         /* 토스트 */
-        .toast { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; display: none; z-index: 1000; }
+        .toast { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 10px 20px; border-radius: 20px; font-size: 12px; display: none; z-index: 1000; box-shadow: 0 4px 12px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body>
@@ -153,7 +187,6 @@
                         <div class="item-price">24,500원</div>
                     </div>
                 </div>
-                <!-- 버튼 구성: 모임장/참여자 동일 -->
                 <div class="btn-grid">
                     <button class="btn btn-primary" onclick="alert('주문 페이지로 이동')">주문하기</button>
                     <button class="btn" onclick="alert('편집기 실행')">편집하기</button>
@@ -175,19 +208,31 @@
         </div>
     </div>
 
-    <!-- 3. 링크 공유 화면 -->
+    <!-- 3. 링크 공유 관리 -->
     <div id="scr-3" class="screen">
         <div class="content">
             <div class="title">그룹 주문 공유</div>
             <div class="share-box">
-                <div style="font-size: 40px; margin-bottom: 10px;">🔗</div>
-                <h3 style="margin: 0; font-size: 16px;">링크가 준비되었습니다!</h3>
-                <p style="font-size: 12px; color: #666; margin-top: 8px;">참여자들에게 링크를 공유하면<br>각자 사이즈를 골라 주문할 수 있습니다.</p>
+                <div style="font-size: 40px; margin-bottom: 12px;">🔗</div>
+                <h3 style="margin: 0; font-size: 17px; font-weight: 800;">그룹 주문 링크가 생성되었습니다</h3>
+                <p style="font-size: 12px; color: #777; margin: 10px 0 20px; line-height: 1.5;">참여자들이 각자 사이즈를 선택하고<br>직접 결제할 수 있도록 링크를 전달하세요.</p>
+                
                 <div class="share-url">ohprint.me/g/RUN_CREW_2026</div>
-                <button class="btn btn-accent" style="width: 100%;" onclick="copyAndNext()">링크 복사 후 참여자 화면 보기</button>
+                
+                <button class="btn btn-kakao" onclick="simulateKakaoShare()">
+                    <span>💬</span> 카카오톡으로 공유
+                </button>
+                <button class="btn btn-outline" style="width: 100%; border-width: 1.5px; border-color: #DDD;" onclick="copyLinkAndNext()">
+                    <span>🔗</span> 링크 복사
+                </button>
+
             </div>
-            <div style="margin-top: 20px; border-top: 1px solid #EEE; padding-top: 20px;">
-                <button class="btn" style="width: 100%;" onclick="go(1)">관리 종료 (장바구니로)</button>
+            <div style="margin-top: 24px; padding: 0 10px;">
+                <p style="font-size: 11px; color: #999; text-align: center; line-height: 1.5;">
+                    공유 링크는 생성 후 30일간 유효합니다.<br>
+                    관리 종료 후에도 장바구니에서 다시 확인할 수 있습니다.
+                </p>
+                <button class="btn" style="width: 100%; margin-top: 16px; border: none; text-decoration: underline; color: #888;" onclick="go(1)">장바구니로 돌아가기</button>
             </div>
         </div>
     </div>
@@ -211,18 +256,29 @@
         </div>
     </div>
 
-    <!-- 5. 모임원 장바구니 (모임장과 동일한 구성) -->
+    <!-- 5. 모임원 장바구니 -->
     <div id="scr-5" class="screen">
         <div class="content">
             <div class="title">장바구니</div>
             
-            <!-- 프로젝트 복사중 안내 -->
-            <div class="copy-banner" id="copy-banner">
-                <span class="spinner" style="width: 16px; height: 16px; border-width: 2px; margin-bottom: 0;"></span>
-                모임장의 디자인을 내 프로젝트로 복사 중입니다...
+            <!-- 복사중 아이템 영역 (요청하신 동일 영역 구성) -->
+            <div id="copy-status-area">
+                <div class="copying-item">
+                    <div class="copying-content">
+                        <div class="spinner" style="width: 32px; height: 32px; border-width: 3px; margin-bottom: 0;"></div>
+                        <div class="copying-text">
+                            <div class="copying-status">프로젝트 복사 중</div>
+                            <div class="copying-desc">모임장의 디자인을 내 보관함으로 가져오고 있습니다.</div>
+                        </div>
+                    </div>
+                    <button class="refresh-btn" onclick="refreshCopyState()">
+                        🔄 새로고침
+                    </button>
+                </div>
             </div>
 
-            <div class="cart-item">
+            <!-- 실제 상품 카드 (복사 완료 시 노출) -->
+            <div id="final-cart-item" class="cart-item" style="display:none;">
                 <div class="item-row">
                     <div class="item-img">👕</div>
                     <div class="item-info">
@@ -232,7 +288,6 @@
                         <div class="item-price">24,500원</div>
                     </div>
                 </div>
-                <!-- 참여자도 동일한 6가지 버튼 제공 -->
                 <div class="btn-grid">
                     <button class="btn btn-accent" onclick="alert('주문 페이지로 이동')">주문하기</button>
                     <button class="btn" onclick="alert('나의 편집기로 이동')">편집하기</button>
@@ -243,7 +298,6 @@
                 </div>
             </div>
 
-            <!-- 다른 프로젝트 출력 -->
             <div class="section-title">다른 프로젝트</div>
             <div class="cart-item">
                 <div class="item-row">
@@ -263,6 +317,7 @@
 
 <script>
     let currentSize = "L";
+    let copyTimer = null;
 
     function go(n) {
         document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
@@ -270,19 +325,33 @@
         document.querySelectorAll('.proto-nav button').forEach(b => b.classList.remove('active'));
         document.getElementById('nav-' + n).classList.add('active');
 
-        // 참여자 장바구니 재진입 시 배너 상태 초기화 (시뮬레이션용)
         if(n === 5) {
-            const banner = document.getElementById('copy-banner');
-            banner.style.background = '#EBF2FF';
-            banner.style.color = '#1A56DB';
-            banner.innerHTML = '<span class="spinner" style="width: 16px; height: 16px; border-width: 2px; margin-bottom: 0;"></span> 모임장의 디자인을 내 프로젝트로 복사 중입니다...';
-            
-            setTimeout(() => {
-                banner.style.background = '#E6F7F3';
-                banner.style.color = '#00A67E';
-                banner.innerHTML = '✅ 프로젝트 복사가 완료되었습니다.';
-            }, 3000);
+            startCopySimulation();
+        } else {
+            clearTimeout(copyTimer);
         }
+    }
+
+    // 복사 시뮬레이션 시작
+    function startCopySimulation() {
+        const copyArea = document.getElementById('copy-status-area');
+        const itemArea = document.getElementById('final-cart-item');
+        
+        copyArea.style.display = 'block';
+        itemArea.style.display = 'none';
+
+        clearTimeout(copyTimer);
+        copyTimer = setTimeout(() => {
+            copyArea.style.display = 'none';
+            itemArea.style.display = 'block';
+            showToast("프로젝트 복사가 완료되었습니다.");
+        }, 3000);
+    }
+
+    // 새로고침 버튼 클릭 시
+    function refreshCopyState() {
+        showToast("상태를 갱신합니다.");
+        startCopySimulation();
     }
 
     function generateLinkFlow() {
@@ -290,13 +359,19 @@
         setTimeout(() => { go(3); }, 1500);
     }
 
-    function copyAndNext() {
-        const toast = document.getElementById('toast');
-        toast.style.display = 'block';
+    function simulateKakaoShare() {
+        showToast("카카오톡 실행 중...");
         setTimeout(() => {
-            toast.style.display = 'none';
+            alert("카카오톡 공유 메시지가 발송되었습니다.");
             go(4);
         }, 1000);
+    }
+
+    function copyLinkAndNext() {
+        showToast("링크가 복사되었습니다.");
+        setTimeout(() => {
+            go(4);
+        }, 1200);
     }
 
     function selectSize(el) {
@@ -309,6 +384,15 @@
     function copyToMemberCart() {
         document.getElementById('sel-size').innerText = currentSize;
         go(5);
+    }
+
+    function showToast(msg) {
+        const toast = document.getElementById('toast');
+        toast.innerText = msg;
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+        }, 2000);
     }
 </script>
 
