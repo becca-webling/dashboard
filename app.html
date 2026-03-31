@@ -1,1325 +1,316 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>함께주문하기 프로토타입 — 오프린트미</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-<style>
-/* ── 오프린트미 디자인 토큰 ── */
-:root {
-  --black: #111;
-  --orange: #FF5A1F;
-  --orange-light: #FFF2ED;
-  --orange-mid: #FFD4C2;
-  --white: #fff;
-  --gray-50: #F8F8F8;
-  --gray-100: #F2F2F2;
-  --gray-200: #E8E8E8;
-  --gray-300: #D0D0D0;
-  --gray-400: #AAAAAA;
-  --gray-500: #888;
-  --gray-600: #666;
-  --gray-700: #444;
-  --blue: #1A56DB;
-  --blue-light: #EBF2FF;
-  --success: #00A67E;
-  --success-light: #E6F7F3;
-  --r: 6px;
-  --rl: 10px;
-  --shadow: 0 2px 12px rgba(0,0,0,.07);
-  --shadow-lg: 0 8px 32px rgba(0,0,0,.12);
-}
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-body { font-family: 'Noto Sans KR', -apple-system, sans-serif; background: #EDEDED; color: var(--black); font-size: 14px; }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>오프린트미 | 그룹 주문 상세 프로토타입</title>
+    <style>
+        :root {
+            --orange: #FF5A1F;
+            --black: #111;
+            --gray-bg: #F5F5F5;
+            --gray-100: #F2F2F2;
+            --border: #E8E8E8;
+            --success: #00A67E;
+            --blue: #1A56DB;
+        }
 
-/* ── 프로토타입 컨트롤 바 ── */
-.proto-bar {
-  position: fixed; top: 0; left: 0; right: 0; height: 44px; z-index: 9999;
-  background: #1A1A1A; display: flex; align-items: center; padding: 0 14px; gap: 10px;
-  border-bottom: 1px solid #333;
-}
-.pb-logo { font-size: 12px; font-weight: 900; color: #fff; letter-spacing: .06em; flex-shrink: 0; }
-.pb-sep { width: 1px; height: 18px; background: #444; flex-shrink: 0; }
-.pb-mode { display: flex; background: #2D2D2D; border-radius: 5px; padding: 3px; gap: 2px; flex-shrink: 0; }
-.pb-mode button { font-family: inherit; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 3px; border: none; cursor: pointer; color: #888; background: transparent; transition: all .12s; }
-.pb-mode button.on { background: var(--white); color: #1A1A1A; }
-.pb-screens { display: flex; gap: 4px; flex: 1; overflow-x: auto; scrollbar-width: none; align-items: center; }
-.pb-screens::-webkit-scrollbar { display: none; }
-.pb-label { font-size: 10px; color: #666; font-weight: 700; letter-spacing: .05em; white-space: nowrap; flex-shrink: 0; }
-.pb-btn { font-family: inherit; font-size: 11px; font-weight: 600; padding: 4px 10px; border-radius: 4px; border: 1px solid #444; background: transparent; color: #888; cursor: pointer; white-space: nowrap; transition: all .12s; flex-shrink: 0; }
-.pb-btn.on { background: var(--orange); color: #fff; border-color: var(--orange); }
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, "Noto Sans KR", sans-serif; background: #DDD; margin: 0; display: flex; justify-content: center; align-items: center; min-height: 100vh; flex-direction: column; }
 
-/* ── 화면 전환 ── */
-.screen { display: none; }
-.screen.on { display: block; }
-.viewport { margin-top: 44px; }
+        /* 프로토타입 내비게이션 */
+        .proto-nav {
+            background: #222;
+            padding: 10px;
+            display: flex;
+            gap: 5px;
+            overflow-x: auto;
+            width: 100%;
+            max-width: 420px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            scrollbar-width: none;
+        }
+        .proto-nav::-webkit-scrollbar { display: none; }
+        .proto-nav button {
+            flex-shrink: 0;
+            background: #444;
+            color: #ccc;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+        }
+        .proto-nav button.active { background: var(--orange); color: white; font-weight: bold; }
 
-/* ── 공통 GNB (오프린트미 실제 구조) ── */
-.gnb-top { height: 34px; background: var(--white); border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; padding: 0 20px; gap: 20px; }
-.gnb-top-logo { font-size: 11px; font-weight: 700; color: var(--black); letter-spacing: .02em; }
-.gnb-top-links { display: flex; gap: 14px; }
-.gtl { font-size: 11px; color: var(--gray-400); cursor: pointer; }
-.gtl.active { color: var(--black); font-weight: 700; }
-.gtl .badge { display: inline-block; background: var(--orange); color: #fff; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 8px; margin-left: 2px; }
-.gnb-top-right { margin-left: auto; display: flex; gap: 14px; }
-.gnb-top-right span { font-size: 11px; color: var(--gray-400); cursor: pointer; }
+        /* 모바일 기기 프레임 */
+        .phone-frame {
+            width: 375px;
+            height: 780px;
+            background: white;
+            border-radius: 36px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
 
-.gnb-main { height: 62px; background: var(--white); border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; padding: 0 20px; gap: 0; }
-.gnb-logo { font-size: 20px; font-weight: 900; color: var(--black); letter-spacing: -.02em; margin-right: 24px; }
-.gnb-tabs { display: flex; gap: 4px; }
-.gnb-tab { padding: 6px 14px; border-radius: 20px; font-size: 13px; font-weight: 600; color: var(--gray-400); cursor: pointer; border: 1.5px solid transparent; }
-.gnb-tab.active { background: var(--black); color: var(--white); }
-.gnb-tab .new { display: inline-block; background: var(--orange); color: #fff; font-size: 8px; font-weight: 800; padding: 1px 4px; border-radius: 8px; margin-left: 3px; vertical-align: middle; }
-.gnb-right { margin-left: auto; display: flex; gap: 18px; align-items: center; }
-.gnb-right span { font-size: 13px; color: var(--gray-600); cursor: pointer; font-weight: 500; }
-.cart-icon { position: relative; cursor: pointer; }
-.cart-badge { position: absolute; top: -6px; right: -8px; width: 16px; height: 16px; background: var(--orange); border-radius: 50%; font-size: 9px; font-weight: 800; color: #fff; display: flex; align-items: center; justify-content: center; }
+        .status-bar {
+            height: 44px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 900;
+            border-bottom: 1px solid var(--border);
+            flex-shrink: 0;
+        }
 
-.gnb-nav { height: 46px; background: var(--white); border-bottom: 1px solid var(--gray-200); display: flex; align-items: center; padding: 0 20px; gap: 28px; }
-.gnb-nav-item { font-size: 13px; font-weight: 500; color: var(--gray-700); cursor: pointer; white-space: nowrap; padding: 4px 0; position: relative; }
-.gnb-nav-item:hover { color: var(--black); }
-.gnb-nav-item.active { font-weight: 700; color: var(--black); }
-.gnb-nav-item.active::after { content: ''; position: absolute; bottom: -4px; left: 0; right: 0; height: 2px; background: var(--black); }
-.nav-badge { display: inline-block; font-size: 8px; font-weight: 800; padding: 1px 5px; border-radius: 8px; margin-left: 3px; vertical-align: middle; }
-.nb-new { background: var(--orange); color: #fff; }
-.nb-rec { background: #5B5BF8; color: #fff; }
-.nb-sale { background: #E53E3E; color: #fff; }
-.gnb-phone { margin-left: auto; font-size: 13px; font-weight: 900; color: var(--orange); white-space: nowrap; }
+        .screen { display: none; flex: 1; flex-direction: column; overflow-y: auto; background: white; }
+        .screen.active { display: flex; }
 
-/* ── 공통 컴포넌트 ── */
-.page-wrap { max-width: 1180px; margin: 0 auto; padding: 0 20px; }
-.btn-black { font-family: inherit; font-size: 14px; font-weight: 700; color: var(--white); background: var(--black); border: none; border-radius: var(--r); padding: 11px 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .12s; }
-.btn-black:hover { opacity: .85; }
-.btn-black.full { width: 100%; justify-content: center; }
-.btn-black.lg { font-size: 15px; padding: 14px 24px; }
-.btn-outline { font-family: inherit; font-size: 14px; font-weight: 600; color: var(--black); background: var(--white); border: 1.5px solid var(--gray-300); border-radius: var(--r); padding: 10px 18px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all .12s; }
-.btn-outline:hover { border-color: var(--black); }
-.btn-outline.full { width: 100%; justify-content: center; }
-.btn-orange { font-family: inherit; font-size: 14px; font-weight: 700; color: var(--white); background: var(--orange); border: none; border-radius: var(--r); padding: 11px 20px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: opacity .12s; }
-.btn-orange.full { width: 100%; justify-content: center; }
-.sz-pill { display: inline-block; background: var(--black); color: var(--white); font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 3px; }
-.tag { display: inline-flex; align-items: center; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 3px; }
-.tag-orange { background: var(--orange-light); color: var(--orange); }
-.tag-blue { background: var(--blue-light); color: var(--blue); }
-.tag-green { background: var(--success-light); color: var(--success); }
-.tag-gray { background: var(--gray-100); color: var(--gray-600); }
+        .content { padding: 16px; }
+        .title { font-size: 20px; font-weight: 800; margin-bottom: 16px; }
 
-/* 이미지 플레이스홀더 */
-.img-ph { background: var(--gray-100); border: 1px solid var(--gray-200); display: flex; align-items: center; justify-content: center; color: var(--gray-400); font-size: 11px; font-weight: 600; border-radius: var(--r); }
+        /* 버튼 시스템 */
+        .btn-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 12px; }
+        .btn {
+            padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            background: white;
+            color: #444;
+            text-align: center;
+        }
+        .btn-primary { background: var(--black); color: white; border: none; }
+        .btn-accent { background: var(--orange); color: white; border: none; }
+        .btn-share { border-color: var(--blue); color: var(--blue); }
 
-/* ── 토스트 ── */
-.toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(60px); background: rgba(17,17,17,.92); color: #fff; padding: 11px 20px; border-radius: 4px; font-size: 13px; font-weight: 600; white-space: nowrap; transition: transform .25s cubic-bezier(.34,1.56,.64,1); z-index: 99999; pointer-events: none; }
-.toast.show { transform: translateX(-50%) translateY(0); }
+        /* 장바구니 아이템 */
+        .cart-item { border-bottom: 1px solid var(--border); padding: 16px 0; }
+        .item-row { display: flex; gap: 12px; }
+        .item-img { width: 70px; height: 70px; background: var(--gray-bg); border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 32px; flex-shrink: 0; }
+        .item-info { flex: 1; }
+        .item-cat { font-size: 11px; color: #999; }
+        .item-name { font-size: 14px; font-weight: 700; margin: 3px 0; }
+        .item-price { font-size: 14px; font-weight: 800; color: var(--orange); }
 
-/* ── 모달 오버레이 ── */
-.modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.6); z-index: 1000; align-items: center; justify-content: center; }
-.modal-overlay.show { display: flex; }
-.modal-box { background: var(--white); border-radius: 16px; width: 100%; max-width: 480px; box-shadow: var(--shadow-lg); overflow: hidden; }
-.modal-header { padding: 20px 24px 16px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--gray-100); }
-.modal-header h3 { font-size: 16px; font-weight: 800; }
-.modal-close { width: 28px; height: 28px; border-radius: 50%; border: none; background: var(--gray-100); cursor: pointer; font-size: 16px; display: flex; align-items: center; justify-content: center; color: var(--gray-600); }
-.modal-body { padding: 20px 24px; }
+        /* 로딩 화면 */
+        .loading-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; background: white; }
+        .spinner { width: 40px; height: 40px; border: 4px solid var(--gray-100); border-top-color: var(--orange); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
 
-/* 로그인 모달 */
-.login-modal .modal-box { max-width: 400px; }
-.login-info { background: var(--gray-50); border-radius: var(--r); padding: 14px 16px; margin-bottom: 16px; font-size: 13px; color: var(--gray-600); line-height: 1.6; }
-.login-info strong { color: var(--black); font-weight: 700; }
+        /* 랜딩/미리보기 */
+        .preview-box { background: var(--gray-bg); border-radius: 12px; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 100px; margin-bottom: 20px; }
+        .size-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; margin: 15px 0; }
+        .size-btn { border: 1px solid #ddd; padding: 12px 0; text-align: center; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 700; }
+        .size-btn.selected { background: var(--black); color: white; border-color: var(--black); }
 
-/* 로딩 오버레이 */
-.loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,.7); z-index: 2000; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
-.loading-overlay.show { display: flex; }
-.spinner { width: 36px; height: 36px; border: 3px solid var(--gray-200); border-top-color: var(--orange); border-radius: 50%; animation: spin .8s linear infinite; }
-@keyframes spin { to { transform: rotate(360deg); } }
+        /* 공유 화면 모달/섹션 */
+        .share-box { background: #F0F7FF; border: 1px solid #CDE2FF; border-radius: 12px; padding: 20px; text-align: center; }
+        .share-url { background: white; padding: 10px; border: 1px solid #DDD; border-radius: 6px; font-family: monospace; font-size: 12px; margin: 15px 0; color: var(--blue); }
 
-/* ════════════════════════════════
-   S1: 모임장 장바구니
-════════════════════════════════ */
-.cart-title-area { padding: 28px 0 16px; text-align: center; }
-.cart-title-area h1 { font-size: 22px; font-weight: 900; margin-bottom: 4px; }
-.cart-title-area p { font-size: 13px; color: var(--gray-400); }
-.cart-count { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 12px; }
+        /* 복사중 안내 */
+        .copy-banner { background: #EBF2FF; color: var(--blue); padding: 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 8px; margin-bottom: 15px; }
 
-.cart-banner { background: #000F31; border-radius: var(--rl); padding: 12px 20px; color: var(--white); text-align: center; margin-bottom: 14px; font-size: 13px; font-weight: 700; letter-spacing: -.01em; }
-.cart-banner strong { color: #60A5FA; }
+        /* 섹션 구분 */
+        .section-title { font-size: 14px; font-weight: 800; margin: 20px 0 10px; color: #666; }
 
-.cart-toolbar { display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--gray-200); border-bottom: 1px solid var(--gray-200); padding: 10px 0; margin-bottom: 0; background: var(--white); position: sticky; top: 148px; z-index: 10; }
-.cart-toolbar-btns { display: flex; gap: 6px; }
-.ct-btn { font-family: inherit; font-size: 11px; font-weight: 600; padding: 6px 12px; border-radius: var(--r); border: 1px solid var(--gray-200); background: var(--white); cursor: pointer; color: var(--gray-600); }
-.ct-btn:hover { background: var(--gray-50); }
-.cart-col-header { display: flex; font-size: 11px; font-weight: 700; color: var(--gray-400); padding: 10px 0; border-bottom: 1px solid var(--gray-200); text-transform: uppercase; letter-spacing: .04em; background: var(--gray-50); }
-.cc-chk { width: 48px; text-align: center; }
-.cc-info { flex: 1; padding-left: 8px; }
-.cc-qty { width: 160px; text-align: center; }
-.cc-price { width: 110px; text-align: center; }
-.cc-date { width: 100px; text-align: center; }
-.cc-action { width: 110px; text-align: center; }
-
-/* 섹션 헤더 */
-.section-bar { padding: 8px 14px; font-size: 11px; font-weight: 800; letter-spacing: .04em; display: flex; align-items: center; gap: 8px; }
-.section-bar.sharing { background: #EFF6FF; color: var(--blue); border-radius: var(--r) var(--r) 0 0; border: 1px solid #DBEAFE; border-bottom: none; }
-.section-bar.normal { background: var(--gray-100); color: var(--gray-600); border-radius: var(--r) var(--r) 0 0; }
-.section-share-badge { background: var(--blue); color: #fff; font-size: 9px; font-weight: 800; padding: 2px 7px; border-radius: 20px; }
-
-/* 장바구니 아이템 행 */
-.cart-row { display: flex; align-items: center; padding: 18px 0; border-bottom: 1px solid var(--gray-100); background: var(--white); gap: 0; transition: background .12s; }
-.cart-row:hover { background: var(--gray-50); }
-.cart-row.shared { background: #F0F7FF; }
-.cart-row.shared:hover { background: #E8F2FF; }
-.cr-chk { width: 48px; display: flex; justify-content: center; flex-shrink: 0; }
-.cr-chk input { width: 15px; height: 15px; cursor: pointer; accent-color: var(--black); }
-.cr-img { width: 80px; height: 80px; flex-shrink: 0; }
-.cr-detail { flex: 1; padding: 0 14px; }
-.cr-cat { font-size: 11px; color: var(--gray-400); margin-bottom: 3px; }
-.cr-name { font-size: 14px; font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px; }
-.cr-edit-icon { font-size: 12px; color: var(--gray-400); cursor: pointer; }
-.cr-meta { font-size: 11px; color: var(--gray-500); line-height: 1.6; }
-.cr-links { display: flex; gap: 10px; margin-top: 6px; }
-.cr-link { font-size: 11px; color: var(--blue); font-weight: 600; text-decoration: underline; cursor: pointer; }
-.cr-qty { width: 160px; padding: 0 10px; flex-shrink: 0; }
-.cr-qty-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 6px; }
-.cr-qty-label { font-size: 11px; color: var(--gray-400); }
-.cr-size-sel { font-size: 11px; border: 1px solid var(--gray-200); border-radius: 4px; padding: 4px 8px; cursor: pointer; display: flex; align-items: center; gap: 4px; background: var(--white); }
-.cr-counter { display: flex; border: 1px solid var(--gray-200); border-radius: 4px; overflow: hidden; }
-.cr-counter button { width: 28px; height: 28px; border: none; background: var(--gray-100); cursor: pointer; font-size: 14px; color: var(--gray-600); display: flex; align-items: center; justify-content: center; }
-.cr-counter span { width: 32px; height: 28px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; border-left: 1px solid var(--gray-200); border-right: 1px solid var(--gray-200); }
-.cr-price { width: 110px; text-align: center; flex-shrink: 0; }
-.cr-price .final { font-size: 15px; font-weight: 800; color: var(--orange); }
-.cr-price .orig { font-size: 11px; color: var(--gray-400); text-decoration: line-through; }
-.cr-date { width: 100px; text-align: center; font-size: 11px; color: var(--gray-400); flex-shrink: 0; }
-.cr-actions { width: 110px; flex-shrink: 0; padding: 0 6px; display: flex; flex-direction: column; gap: 4px; }
-.cr-action-btn { font-family: inherit; font-size: 11px; font-weight: 600; padding: 6px 0; border-radius: 4px; border: 1px solid var(--gray-200); background: var(--white); cursor: pointer; color: var(--gray-600); text-align: center; transition: all .1s; }
-.cr-action-btn:hover { border-color: var(--gray-400); }
-.cr-action-btn.order { background: var(--black); color: var(--white); border-color: var(--black); }
-.cr-action-btn.order:hover { opacity: .85; }
-.cr-action-btn.share { background: var(--white); color: var(--blue); border-color: var(--blue); }
-.cr-action-btn.share:hover { background: var(--blue-light); }
-.cr-action-btn.share.active { background: var(--blue); color: var(--white); }
-
-/* 공유 팝업 모달 스타일 */
-.share-before { text-align: center; padding: 8px 0 4px; }
-.share-before .illust { font-size: 40px; margin-bottom: 12px; }
-.share-before h4 { font-size: 15px; font-weight: 800; margin-bottom: 6px; }
-.share-before p { font-size: 13px; color: var(--gray-500); line-height: 1.6; margin-bottom: 20px; }
-.share-active-badge { display: inline-flex; align-items: center; gap: 6px; background: #EFF6FF; color: var(--blue); font-size: 11px; font-weight: 800; padding: 5px 12px; border-radius: 20px; margin-bottom: 14px; }
-.share-link-box { background: var(--gray-50); border: 1.5px solid var(--gray-200); border-radius: var(--r); padding: 11px 14px; display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
-.share-link-url { flex: 1; font-size: 12px; color: var(--blue); font-weight: 600; font-family: 'Courier New', monospace; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.share-copy-btn { font-family: inherit; font-size: 12px; font-weight: 700; color: var(--white); background: var(--blue); border: none; border-radius: 4px; padding: 6px 14px; cursor: pointer; flex-shrink: 0; }
-.share-action-row { display: flex; gap: 8px; margin-bottom: 12px; }
-.sa-btn { flex: 1; font-family: inherit; font-size: 13px; font-weight: 700; padding: 11px 8px; border-radius: var(--r); border: 1px solid; cursor: pointer; text-align: center; }
-.sa-btn.kakao { background: #FEE500; color: #111; border-color: #FEE500; }
-.sa-btn.stop { background: var(--white); color: #DC2626; border-color: #FECACA; }
-.sa-btn.stop:hover { background: #FEF2F2; }
-.share-expire-row { font-size: 11px; color: var(--gray-400); text-align: center; }
-
-/* ════════════════════════════════
-   S2: 참여자 랜딩
-════════════════════════════════ */
-.landing-wrap { min-height: calc(100vh - 180px); background: var(--white); }
-.landing-inner { max-width: 1000px; margin: 0 auto; padding: 0 20px; }
-.landing-top { padding: 32px 0 24px; display: flex; align-items: center; gap: 12px; }
-.landing-top .org-badge { font-size: 11px; font-weight: 700; color: var(--gray-400); letter-spacing: .08em; }
-.landing-main { display: grid; grid-template-columns: 1fr 420px; gap: 32px; padding-bottom: 48px; align-items: start; }
-.landing-preview { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--rl); overflow: hidden; }
-.preview-img { width: 100%; aspect-ratio: 1; display: flex; align-items: center; justify-content: center; font-size: 80px; background: linear-gradient(135deg, var(--gray-50), var(--gray-100)); }
-.preview-tabs { display: flex; border-top: 1px solid var(--gray-200); }
-.preview-tab { flex: 1; padding: 10px; font-family: inherit; font-size: 12px; font-weight: 700; border: none; cursor: pointer; background: var(--white); color: var(--gray-400); transition: all .12s; border-right: 1px solid var(--gray-200); }
-.preview-tab:last-child { border-right: none; }
-.preview-tab.active { background: var(--black); color: var(--white); }
-
-.landing-info { }
-.landing-info .cat { font-size: 12px; color: var(--gray-400); margin-bottom: 6px; }
-.landing-info h2 { font-size: 22px; font-weight: 900; margin-bottom: 10px; letter-spacing: -.02em; }
-.landing-info .desc { font-size: 13px; color: var(--gray-600); line-height: 1.7; margin-bottom: 20px; }
-
-/* 비로그인 안내 배너 */
-.login-notice { background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--r); padding: 12px 16px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; }
-.login-notice .icon { font-size: 16px; flex-shrink: 0; }
-.login-notice p { font-size: 12px; color: var(--gray-600); line-height: 1.5; }
-.login-notice p strong { color: var(--black); font-weight: 700; }
-
-/* 주요 CTA 버튼 영역 */
-.cta-area { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
-.cta-btn-main { font-family: inherit; font-size: 15px; font-weight: 800; padding: 15px 20px; border-radius: var(--r); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all .12s; }
-.cta-btn-main.black { background: var(--black); color: var(--white); }
-.cta-btn-main.black:hover { opacity: .85; }
-.cta-btn-main.outline { background: var(--white); color: var(--black); border: 2px solid var(--black); }
-.cta-btn-main.outline:hover { background: var(--gray-50); }
-.cta-hint { font-size: 11px; color: var(--gray-400); text-align: center; margin-top: 2px; }
-
-/* 공유 링크 만료 안내 */
-.expire-notice { background: var(--orange-light); border: 1px solid var(--orange-mid); border-radius: var(--r); padding: 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--orange); font-weight: 600; }
-
-/* 로그인 후 담기 완료 상태 */
-.added-notice { background: var(--success-light); border: 1px solid #A7F3D0; border-radius: var(--r); padding: 12px 16px; display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--success); font-weight: 700; margin-bottom: 12px; }
-
-/* ════════════════════════════════
-   참여자 링크 만료 화면
-════════════════════════════════ */
-.expired-wrap { max-width: 480px; margin: 80px auto; text-align: center; padding: 0 20px; }
-.expired-icon { font-size: 56px; margin-bottom: 20px; }
-.expired-wrap h2 { font-size: 22px; font-weight: 900; margin-bottom: 8px; }
-.expired-wrap p { font-size: 14px; color: var(--gray-500); line-height: 1.7; margin-bottom: 28px; }
-
-/* ── 모바일 폰 프레임 ── */
-.phone-wrap { display: flex; justify-content: center; padding: 20px 16px 48px; background: #EDEDED; }
-.phone { width: 390px; background: var(--white); border-radius: 36px; box-shadow: 0 20px 70px rgba(0,0,0,.2), 0 0 0 1px rgba(0,0,0,.05); overflow: hidden; }
-.phone-notch { height: 40px; background: #000; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 6px; }
-.phone-pill { width: 110px; height: 28px; background: #000; border-radius: 0 0 18px 18px; }
-.phone-top { height: 40px; background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 14px; border-bottom: 1px solid var(--gray-100); }
-.phone-top-logo { font-size: 13px; font-weight: 900; color: var(--black); }
-.phone-body { height: 720px; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; background: var(--gray-50); }
-.phone-body::-webkit-scrollbar { display: none; }
-
-/* 모바일 공통 */
-.m-bar { display: flex; align-items: center; padding: 10px 14px 12px; border-bottom: 1px solid var(--gray-100); background: var(--white); position: sticky; top: 0; z-index: 10; gap: 8px; }
-.m-back { width: 28px; height: 28px; font-size: 20px; cursor: pointer; display: flex; align-items: center; }
-.m-bar-title { font-size: 15px; font-weight: 800; flex: 1; }
-.m-bar-action { font-size: 13px; font-weight: 700; color: var(--orange); cursor: pointer; }
-.m-sec { padding: 12px 14px; }
-.m-card { background: var(--white); border-radius: var(--rl); border: 1px solid var(--gray-200); padding: 14px; margin-bottom: 10px; box-shadow: var(--shadow); }
-
-/* 모바일 장바구니 */
-.m-cart-item { background: var(--white); border-bottom: 1px solid var(--gray-100); }
-.m-cart-item.shared { background: #F0F7FF; }
-.m-cart-inner { display: flex; gap: 10px; padding: 12px 14px; }
-.m-cart-img { width: 64px; height: 64px; flex-shrink: 0; }
-.m-cart-detail { flex: 1; }
-.m-cart-cat { font-size: 10px; color: var(--gray-400); margin-bottom: 2px; }
-.m-cart-name { font-size: 13px; font-weight: 700; margin-bottom: 3px; }
-.m-cart-meta { font-size: 11px; color: var(--gray-500); }
-.m-cart-price { font-size: 14px; font-weight: 800; color: var(--orange); margin-top: 4px; }
-.m-cart-actions { padding: 0 14px 12px; display: flex; gap: 6px; }
-.m-act-btn { flex: 1; font-family: inherit; font-size: 11px; font-weight: 700; padding: 7px 4px; border-radius: 4px; border: 1px solid var(--gray-200); background: var(--white); cursor: pointer; color: var(--gray-600); text-align: center; }
-.m-act-btn.order { background: var(--black); color: var(--white); border-color: var(--black); }
-.m-act-btn.share { color: var(--blue); border-color: var(--blue); }
-.m-act-btn.share.active { background: var(--blue); color: var(--white); }
-
-/* 모바일 공유 패널 */
-.m-share-panel { background: #EFF6FF; border-top: 1px solid #BFDBFE; padding: 12px 14px; }
-.m-share-url { font-size: 11px; color: var(--blue); font-family: monospace; background: var(--white); border: 1px solid #BFDBFE; border-radius: 4px; padding: 7px 10px; margin-bottom: 8px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.m-share-btns { display: flex; gap: 6px; margin-bottom: 8px; }
-.m-sp-btn { flex: 1; font-family: inherit; font-size: 11px; font-weight: 700; padding: 8px 4px; border-radius: 4px; border: 1px solid; cursor: pointer; text-align: center; }
-.m-sp-btn.copy { background: var(--blue); color: var(--white); border-color: var(--blue); }
-.m-sp-btn.kakao { background: #FEE500; color: #111; border-color: #FEE500; }
-.m-sp-btn.stop { color: #DC2626; border-color: #FECACA; background: var(--white); }
-.m-cart-links { display: flex; gap: 10px; padding: 0 14px 10px; }
-.m-cart-link { font-size: 11px; color: var(--blue); font-weight: 600; text-decoration: underline; cursor: pointer; }
-.m-share-expire { font-size: 10px; color: var(--gray-400); }
-
-/* 모바일 참여자 현황 */
-.m-member-status { background: var(--white); border-top: 1px solid #BFDBFE; }
-.m-ms-header { padding: 8px 14px; background: #DBEAFE; font-size: 10px; font-weight: 800; color: var(--blue); letter-spacing: .04em; display: flex; justify-content: space-between; }
-.m-ms-row { display: flex; align-items: center; padding: 9px 14px; border-bottom: 1px solid var(--gray-100); gap: 8px; font-size: 12px; }
-.m-ms-row:last-child { border-bottom: none; }
-.m-ms-name { flex: 1; font-weight: 600; }
-.m-ms-status-done { font-size: 10px; font-weight: 700; color: var(--success); }
-.m-ms-status-wait { font-size: 10px; font-weight: 700; color: var(--gray-400); }
-
-/* 모바일 참여자 랜딩 */
-.m-landing-hero { background: var(--black); padding: 20px 14px; }
-.m-landing-hero .org { font-size: 10px; font-weight: 700; color: rgba(255,255,255,.35); letter-spacing: .08em; margin-bottom: 8px; }
-.m-landing-hero h2 { font-size: 20px; font-weight: 900; color: var(--white); margin-bottom: 6px; letter-spacing: -.02em; }
-.m-landing-hero p { font-size: 12px; color: rgba(255,255,255,.5); line-height: 1.6; }
-.m-preview { border: 1px solid var(--gray-200); border-radius: var(--rl); overflow: hidden; margin: 12px 14px; }
-.m-preview-img { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; font-size: 60px; background: var(--gray-50); }
-.m-preview-info { padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; border-top: 1px solid var(--gray-100); }
-.m-preview-info h4 { font-size: 13px; font-weight: 700; }
-.m-preview-tabs { display: flex; padding: 8px 14px; gap: 6px; }
-.m-preview-tab { flex: 1; padding: 8px; font-family: inherit; font-size: 11px; font-weight: 700; border-radius: 4px; border: 1.5px solid var(--gray-200); background: var(--white); cursor: pointer; color: var(--gray-400); text-align: center; }
-.m-preview-tab.active { background: var(--black); color: var(--white); border-color: var(--black); }
-.m-login-notice { margin: 0 14px 10px; background: var(--gray-50); border: 1px solid var(--gray-200); border-radius: var(--r); padding: 10px 12px; font-size: 11px; color: var(--gray-600); line-height: 1.5; }
-.m-login-notice strong { color: var(--black); font-weight: 700; }
-.m-cta-area { padding: 0 14px 20px; display: flex; flex-direction: column; gap: 8px; }
-.m-cta-main { font-family: inherit; font-size: 14px; font-weight: 800; padding: 14px; border-radius: var(--r); border: none; cursor: pointer; text-align: center; }
-.m-cta-main.black { background: var(--black); color: var(--white); }
-.m-cta-main.outline { background: var(--white); color: var(--black); border: 2px solid var(--black); }
-.m-cta-hint { font-size: 11px; color: var(--gray-400); text-align: center; }
-
-/* 사이즈 선택 UI (랜딩 내) */
-.size-select-wrap { margin-bottom: 16px; }
-.size-select-label { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-.size-select-label .size-guide-link { font-size: 11px; color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: underline; }
-.size-btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 7px; }
-.size-opt { font-family: inherit; font-size: 13px; font-weight: 700; padding: 10px 4px; border-radius: var(--r); border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500); cursor: pointer; text-align: center; transition: all .12s; }
-.size-opt:hover { border-color: var(--gray-400); color: var(--black); }
-.size-opt.selected { background: var(--black); color: var(--white); border-color: var(--black); }
-.size-opt.disabled { background: var(--gray-50); color: var(--gray-300); cursor: not-allowed; text-decoration: line-through; }
-/* 모바일 사이즈 선택 */
-.m-size-select-wrap { padding: 0 14px 4px; }
-.m-size-select-label { font-size: 12px; font-weight: 700; color: var(--black); margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; }
-.m-size-guide-link { font-size: 11px; color: var(--blue); font-weight: 600; cursor: pointer; text-decoration: underline; }
-.m-size-btn-grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 6px; }
-.m-size-opt { font-family: inherit; font-size: 13px; font-weight: 700; padding: 10px 4px; border-radius: var(--r); border: 1.5px solid var(--gray-200); background: var(--white); color: var(--gray-500); cursor: pointer; text-align: center; transition: all .12s; }
-.m-size-opt.selected { background: var(--black); color: var(--white); border-color: var(--black); }
-/* 담기 버튼 비활성 상태 */
-.cta-btn-main.disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
-.cta-btn-main.disabled:hover { opacity: 1; }
-.m-cta-main.disabled { background: var(--gray-200); color: var(--gray-400); cursor: not-allowed; }
-
-/* 로그인 후 상태 */
-.m-added { margin: 0 14px 10px; background: var(--success-light); border: 1px solid #A7F3D0; border-radius: var(--r); padding: 10px 12px; font-size: 12px; color: var(--success); font-weight: 700; display: flex; align-items: center; gap: 6px; }
-</style>
+        /* 토스트 */
+        .toast { position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: white; padding: 8px 16px; border-radius: 20px; font-size: 12px; display: none; z-index: 1000; }
+    </style>
 </head>
 <body>
 
-<!-- 프로토타입 컨트롤 바 -->
-<div class="proto-bar">
-  <span class="pb-logo">OHPRINT.ME</span>
-  <div class="pb-sep"></div>
-  <div class="pb-mode">
-    <button class="on" id="modePC" onclick="setMode('pc')">💻 PC</button>
-    <button id="modeMobile" onclick="setMode('mobile')">📱 모바일</button>
-  </div>
-  <div class="pb-sep"></div>
-  <div class="pb-screens">
-    <span class="pb-label">모임장</span>
-    <button class="pb-btn on" id="pn1" onclick="go(1)">① 장바구니 (공유 전)</button>
-    <button class="pb-btn" id="pn2" onclick="go(2)">② 장바구니 (공유 중)</button>
-    <div style="width:1px;height:18px;background:#444;flex-shrink:0"></div>
-    <span class="pb-label">참여자</span>
-    <button class="pb-btn" id="pn3" onclick="go(3)">③ 랜딩 (비로그인)</button>
-    <button class="pb-btn" id="pn4" onclick="go(4)">④ 랜딩 (로그인 후)</button>
-    <button class="pb-btn" id="pn5" onclick="go(5)">⑤ 링크 만료</button>
-  </div>
+<!-- 상단 플로우 내비게이션 -->
+<div class="proto-nav">
+    <button id="nav-1" class="active" onclick="go(1)">1. 모임장 카트</button>
+    <button id="nav-2" onclick="go(2)">2. 생성 중</button>
+    <button id="nav-3" onclick="go(3)">3. 공유 관리</button>
+    <button id="nav-4" onclick="go(4)">4. 참여자 랜딩</button>
+    <button id="nav-5" onclick="go(5)">5. 멤버 카트</button>
 </div>
 
-<div class="viewport">
+<div class="phone-frame">
+    <div class="status-bar">OH PRINT.ME</div>
 
-<!-- ══════════ 공통 GNB ══════════ -->
-<div id="gnb-pc">
-  <div class="gnb-top">
-    <span class="gnb-top-logo">OH PRINT.ME</span>
-    <div class="gnb-top-links">
-      <span class="gtl active">오프린트미</span>
-      <span class="gtl">어패럴 <span class="badge">NEW</span></span>
+    <!-- 1. 모임장 장바구니 -->
+    <div id="scr-1" class="screen active">
+        <div class="content">
+            <div class="title">장바구니</div>
+            <div class="cart-item">
+                <div class="item-row">
+                    <div class="item-img">👕</div>
+                    <div class="item-info">
+                        <div class="item-cat">글리머 드라이 폴로셔츠</div>
+                        <div class="item-name">2026 러닝크루 공식 티셔츠</div>
+                        <div class="item-price">24,500원</div>
+                    </div>
+                </div>
+                <!-- 버튼 구성: 모임장/참여자 동일 -->
+                <div class="btn-grid">
+                    <button class="btn btn-primary" onclick="alert('주문 페이지로 이동')">주문하기</button>
+                    <button class="btn" onclick="alert('편집기 실행')">편집하기</button>
+                    <button class="btn" onclick="alert('프로젝트 복사 완료')">복사하기</button>
+                    <button class="btn btn-share" onclick="generateLinkFlow()">공유/구매</button>
+                    <button class="btn" onclick="alert('옵션 변경 팝업')">옵션 변경</button>
+                    <button class="btn" onclick="alert('색상 추가 팝업')">색상 추가</button>
+                </div>
+            </div>
+        </div>
     </div>
-    <div class="gnb-top-right"><span>로그아웃</span><span>이벤트</span></div>
-  </div>
-  <div class="gnb-main">
-    <span class="gnb-logo">OH PRINT.ME</span>
-    <div class="gnb-tabs">
-      <span class="gnb-tab active">오프린트미</span>
-      <span class="gnb-tab">어패럴 <span class="new">NEW</span></span>
+
+    <!-- 2. 링크 생성중 (로딩) -->
+    <div id="scr-2" class="screen">
+        <div class="loading-wrap">
+            <div class="spinner"></div>
+            <p style="font-weight: 700; color: #444;">공유 링크를 생성하고 있습니다</p>
+            <p style="font-size: 12px; color: #999; margin-top: 5px;">잠시만 기다려주세요.</p>
+        </div>
     </div>
-    <div class="gnb-right">
-      <span>대량구매</span><span>브랜드 굿즈</span><span>All about 오프린트미</span>
-      <div class="cart-icon"><span style="font-size:20px">🛒</span><span class="cart-badge">3</span></div>
-      <span style="font-size:20px;cursor:pointer">👤</span>
+
+    <!-- 3. 링크 공유 화면 -->
+    <div id="scr-3" class="screen">
+        <div class="content">
+            <div class="title">그룹 주문 공유</div>
+            <div class="share-box">
+                <div style="font-size: 40px; margin-bottom: 10px;">🔗</div>
+                <h3 style="margin: 0; font-size: 16px;">링크가 준비되었습니다!</h3>
+                <p style="font-size: 12px; color: #666; margin-top: 8px;">참여자들에게 링크를 공유하면<br>각자 사이즈를 골라 주문할 수 있습니다.</p>
+                <div class="share-url">ohprint.me/g/RUN_CREW_2026</div>
+                <button class="btn btn-accent" style="width: 100%;" onclick="copyAndNext()">링크 복사 후 참여자 화면 보기</button>
+            </div>
+            <div style="margin-top: 20px; border-top: 1px solid #EEE; padding-top: 20px;">
+                <button class="btn" style="width: 100%;" onclick="go(1)">관리 종료 (장바구니로)</button>
+            </div>
+        </div>
     </div>
-  </div>
-  <div class="gnb-nav">
-    <span class="gnb-nav-item">카테고리 ▾</span>
-    <span class="gnb-nav-item">티셔츠</span>
-    <span class="gnb-nav-item">맨투맨/후드/집업</span>
-    <span class="gnb-nav-item">모자 <span class="nav-badge nb-new">NEW</span></span>
-    <span class="gnb-nav-item">잡화</span>
-    <span class="gnb-nav-item">자수 <span class="nav-badge nb-new">NEW</span></span>
-    <span class="gnb-nav-item">단체 추천 <span class="nav-badge nb-rec">추천</span></span>
-    <span class="gnb-nav-item">클리어런스 <span class="nav-badge nb-sale">SALE</span></span>
-    <span class="gnb-phone">☎ 어패럴 문의 1811-7155</span>
-  </div>
+
+    <!-- 4. 링크 진입 화면 (참여자) -->
+    <div id="scr-4" class="screen">
+        <div class="content">
+            <div class="preview-box">👕</div>
+            <div class="item-cat">글리머 드라이 폴로셔츠</div>
+            <div class="title" style="margin-bottom: 10px;">2026 러닝크루 공식 티셔츠</div>
+            <p style="font-size: 13px; color: #666; line-height: 1.5;">모임장이 디자인한 단체 티셔츠입니다.<br>본인의 사이즈를 선택해 장바구니에 담아주세요.</p>
+            
+            <div class="size-grid">
+                <div class="size-btn" onclick="selectSize(this)">S</div>
+                <div class="size-btn" onclick="selectSize(this)">M</div>
+                <div class="size-btn" onclick="selectSize(this)">L</div>
+                <div class="size-btn" onclick="selectSize(this)">XL</div>
+                <div class="size-btn" onclick="selectSize(this)">2XL</div>
+            </div>
+            <button id="add-btn" class="btn btn-primary" style="width: 100%; padding: 16px;" disabled onclick="copyToMemberCart()">장바구니에 담기</button>
+        </div>
+    </div>
+
+    <!-- 5. 모임원 장바구니 (모임장과 동일한 구성) -->
+    <div id="scr-5" class="screen">
+        <div class="content">
+            <div class="title">장바구니</div>
+            
+            <!-- 프로젝트 복사중 안내 -->
+            <div class="copy-banner" id="copy-banner">
+                <span class="spinner" style="width: 16px; height: 16px; border-width: 2px; margin-bottom: 0;"></span>
+                모임장의 디자인을 내 프로젝트로 복사 중입니다...
+            </div>
+
+            <div class="cart-item">
+                <div class="item-row">
+                    <div class="item-img">👕</div>
+                    <div class="item-info">
+                        <div class="item-cat">글리머 드라이 폴로셔츠</div>
+                        <div class="item-name">2026 러닝크루 공식 티셔츠</div>
+                        <div style="font-size: 12px; color: #666;">사이즈: <span id="sel-size">L</span> / 1개</div>
+                        <div class="item-price">24,500원</div>
+                    </div>
+                </div>
+                <!-- 참여자도 동일한 6가지 버튼 제공 -->
+                <div class="btn-grid">
+                    <button class="btn btn-accent" onclick="alert('주문 페이지로 이동')">주문하기</button>
+                    <button class="btn" onclick="alert('나의 편집기로 이동')">편집하기</button>
+                    <button class="btn" onclick="alert('프로젝트 복사 완료')">복사하기</button>
+                    <button class="btn btn-share" onclick="alert('본인의 공유 링크 생성 가능')">공유/구매</button>
+                    <button class="btn" onclick="alert('옵션 변경 팝업')">옵션 변경</button>
+                    <button class="btn" onclick="alert('색상 추가 팝업')">색상 추가</button>
+                </div>
+            </div>
+
+            <!-- 다른 프로젝트 출력 -->
+            <div class="section-title">다른 프로젝트</div>
+            <div class="cart-item">
+                <div class="item-row">
+                    <div class="item-img" style="font-size: 24px;">🎴</div>
+                    <div class="item-info">
+                        <div class="item-cat">명함</div>
+                        <div class="item-name">개인 비즈니스 명함</div>
+                        <div style="font-size: 12px; color: #999;">기본 / 50매</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">링크가 복사되었습니다.</div>
 </div>
-
-<!-- ══════════ S1: 장바구니 (공유 전) ══════════ -->
-<div class="screen on" id="s1">
-  <!-- PC -->
-  <div class="pc-view on" id="pc1">
-    <div class="page-wrap">
-      <div class="cart-title-area"><h1>장바구니</h1><p>내가 저장한 상품을 관리하고 주문할 수 있어요.</p></div>
-      <p class="cart-count">담은 상품 3개</p>
-      <div class="cart-banner">[업.계.최.초] 오프린트미에선 <strong>오늘 주문하면, 내일 바로 출고!</strong></div>
-      <div class="cart-toolbar">
-        <div class="cart-toolbar-btns">
-          <button class="ct-btn">전체 선택</button>
-          <button class="ct-btn">선택 삭제</button>
-          <button class="ct-btn">선택 견적서 발급</button>
-        </div>
-        <button class="ct-btn" style="background:var(--gray-100);color:var(--gray-400);cursor:not-allowed">선택 주문하기</button>
-      </div>
-      <div class="cart-col-header">
-        <div class="cc-chk"></div><div class="cc-info">상품 정보</div>
-        <div class="cc-qty">수량</div><div class="cc-price">가격</div>
-        <div class="cc-date">최종 편집일</div><div class="cc-action">비고</div>
-      </div>
-
-      <!-- MY PROJECTS 섹션 -->
-      <div class="section-bar normal" style="margin-top:16px">MY PROJECTS</div>
-
-      <!-- 아이템 1 — 공유하기 버튼 있음 -->
-      <div class="cart-row">
-        <div class="cr-chk"><input type="checkbox" checked></div>
-        <div class="cr-img"><div class="img-ph" style="width:80px;height:80px">👕</div></div>
-        <div class="cr-detail">
-          <div class="cr-cat">글리머 드라이 폴로셔츠</div>
-          <div class="cr-name">2026 러닝크루 공식 티셔츠 <span class="cr-edit-icon">✎</span></div>
-          <div class="cr-meta">인쇄 위치: 앞면(가슴), 뒷면(등판)<br>색상: 화이트</div>
-          <div class="cr-links"><span class="cr-link">옵션 변경</span><span class="cr-link">색상 추가</span></div>
-        </div>
-        <div class="cr-qty">
-          <div class="cr-qty-row"><span class="cr-qty-label">사이즈</span><div class="cr-size-sel">XL ▾</div></div>
-          <div class="cr-qty-row" style="margin-top:6px">
-            <div class="cr-counter"><button>−</button><span>1</span><button>+</button></div>
-            <div style="text-align:right"><span style="font-size:12px;font-weight:700">24,500원</span><br><span style="font-size:10px;color:var(--gray-400)">(총 수량: 1)</span></div>
-          </div>
-        </div>
-        <div class="cr-price"><div class="cr-price final">24,500원</div></div>
-        <div class="cr-date">2026.03.30</div>
-        <div class="cr-actions">
-          <button class="cr-action-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-          <button class="cr-action-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-          <button class="cr-action-btn" onclick="toast('복사되었습니다')">복사하기</button>
-          <button class="cr-action-btn share" onclick="openShareModal(false)">공유하기</button>
-        </div>
-      </div>
-
-      <!-- 아이템 2 -->
-      <div class="cart-row">
-        <div class="cr-chk"><input type="checkbox" checked></div>
-        <div class="cr-img"><div class="img-ph" style="width:80px;height:80px">👔</div></div>
-        <div class="cr-detail">
-          <div class="cr-cat">어패럴 베이직</div>
-          <div class="cr-name">팀블링 30수 티셔츠 <span class="cr-edit-icon">✎</span></div>
-          <div class="cr-meta">인쇄 위치: 앞면<br>색상: 네이비</div>
-          <div class="cr-links"><span class="cr-link">옵션 변경</span><span class="cr-link">색상 추가</span></div>
-        </div>
-        <div class="cr-qty">
-          <div class="cr-qty-row"><span class="cr-qty-label">사이즈</span><div class="cr-size-sel">XL ▾</div></div>
-          <div class="cr-qty-row" style="margin-top:6px">
-            <div class="cr-counter"><button>−</button><span>1</span><button>+</button></div>
-            <div style="text-align:right"><span style="font-size:12px;font-weight:700;color:var(--gray-400);text-decoration:line-through">13,500원</span><br><span style="font-size:12px;font-weight:800;color:var(--orange)">6,750원</span></div>
-          </div>
-        </div>
-        <div class="cr-price"><div class="final" style="font-size:15px;font-weight:800;color:var(--orange)">6,750원</div></div>
-        <div class="cr-date">2026.03.26</div>
-        <div class="cr-actions">
-          <button class="cr-action-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-          <button class="cr-action-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-          <button class="cr-action-btn" onclick="toast('복사되었습니다')">복사하기</button>
-          <button class="cr-action-btn share" onclick="openShareModal(false)">공유하기</button>
-        </div>
-      </div>
-
-      <!-- 아이템 3 -->
-      <div class="cart-row" style="margin-bottom:40px">
-        <div class="cr-chk"><input type="checkbox"></div>
-        <div class="cr-img"><div class="img-ph" style="width:80px;height:80px">🧥</div></div>
-        <div class="cr-detail">
-          <div class="cr-cat">어패럴 오버핏</div>
-          <div class="cr-name">비캔버스 오버핏 쭈리 맨투맨 <span class="cr-edit-icon">✎</span></div>
-          <div class="cr-meta">인쇄 위치: 앞면(가슴)<br>색상: 멜란지</div>
-          <div class="cr-links"><span class="cr-link">옵션 변경</span><span class="cr-link">색상 추가</span></div>
-        </div>
-        <div class="cr-qty">
-          <div class="cr-qty-row"><span class="cr-qty-label">사이즈</span><div class="cr-size-sel">L ▾</div></div>
-          <div class="cr-qty-row" style="margin-top:6px">
-            <div class="cr-counter"><button>−</button><span>1</span><button>+</button></div>
-            <div style="text-align:right"><span style="font-size:12px;font-weight:700">28,500원</span></div>
-          </div>
-        </div>
-        <div class="cr-price"><div class="final" style="font-size:15px;font-weight:800;color:var(--orange)">28,500원</div></div>
-        <div class="cr-date">2026.03.30</div>
-        <div class="cr-actions">
-          <button class="cr-action-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-          <button class="cr-action-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-          <button class="cr-action-btn" onclick="toast('복사되었습니다')">복사하기</button>
-          <button class="cr-action-btn share" onclick="openShareModal(false)">공유하기</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- 모바일 -->
-  <div class="phone-wrap mob-view" id="mob1">
-    <div class="phone">
-      <div class="phone-notch"><div class="phone-pill"></div></div>
-      <div class="phone-top"><span class="phone-top-logo">OH PRINT.ME</span><div style="position:relative"><span style="font-size:18px">🛒</span><span class="cart-badge">3</span></div></div>
-      <div class="phone-body">
-        <div style="padding:14px 14px 8px;background:var(--white)">
-          <h2 style="font-size:18px;font-weight:900;margin-bottom:4px">장바구니</h2>
-          <p style="font-size:12px;color:var(--gray-400);margin-bottom:10px">담은 상품 3개</p>
-          <div class="cart-banner" style="font-size:11px;padding:8px 12px;border-radius:6px">오프린트미 <strong>오늘 주문하면, 내일 출고!</strong></div>
-        </div>
-        <div style="padding:8px 14px;background:var(--white);border-bottom:1px solid var(--gray-100);display:flex;gap:6px">
-          <button class="m-act-btn">전체 선택</button>
-          <button class="m-act-btn">선택 삭제</button>
-          <button class="m-act-btn" style="background:var(--gray-100);color:var(--gray-400)">주문하기</button>
-        </div>
-        <div style="background:var(--gray-100);padding:7px 14px;font-size:10px;font-weight:800;color:var(--gray-500);border-radius:0">MY PROJECTS</div>
-        <!-- 모바일 아이템 1 -->
-        <div class="m-cart-item">
-          <div class="m-cart-inner">
-            <div class="m-cart-img"><div class="img-ph" style="width:64px;height:64px">👕</div></div>
-            <div class="m-cart-detail">
-              <div class="m-cart-cat">글리머 드라이 폴로셔츠</div>
-              <div class="m-cart-name">2026 러닝크루 공식 티셔츠</div>
-              <div class="m-cart-meta">화이트 · XL · 1개</div>
-              <div class="m-cart-price">24,500원</div>
-            </div>
-          </div>
-          <div class="m-cart-links">
-            <span class="m-cart-link" onclick="toast('옵션 변경 페이지로 이동합니다')">옵션 변경</span>
-            <span class="m-cart-link" onclick="toast('색상 추가 페이지로 이동합니다')">색상 추가</span>
-          </div>
-          <div class="m-cart-actions">
-            <button class="m-act-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-            <button class="m-act-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-            <button class="m-act-btn share" onclick="openShareModal(false)">공유하기</button>
-          </div>
-        </div>
-        <!-- 모바일 아이템 2 -->
-        <div class="m-cart-item">
-          <div class="m-cart-inner">
-            <div class="m-cart-img"><div class="img-ph" style="width:64px;height:64px">👔</div></div>
-            <div class="m-cart-detail">
-              <div class="m-cart-cat">어패럴 베이직</div>
-              <div class="m-cart-name">팀블링 30수 티셔츠</div>
-              <div class="m-cart-meta">네이비 · XL · 1개</div>
-              <div class="m-cart-price" style="color:var(--orange)">6,750원 <span style="font-size:10px;color:var(--gray-400);text-decoration:line-through;font-weight:400">13,500원</span></div>
-            </div>
-          </div>
-          <div class="m-cart-links">
-            <span class="m-cart-link" onclick="toast('옵션 변경 페이지로 이동합니다')">옵션 변경</span>
-            <span class="m-cart-link" onclick="toast('색상 추가 페이지로 이동합니다')">색상 추가</span>
-          </div>
-          <div class="m-cart-actions">
-            <button class="m-act-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-            <button class="m-act-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-            <button class="m-act-btn share" onclick="openShareModal(false)">공유하기</button>
-          </div>
-        </div>
-        <!-- 모바일 아이템 3 -->
-        <div class="m-cart-item">
-          <div class="m-cart-inner">
-            <div class="m-cart-img"><div class="img-ph" style="width:64px;height:64px">🧥</div></div>
-            <div class="m-cart-detail">
-              <div class="m-cart-cat">어패럴 오버핏</div>
-              <div class="m-cart-name">비캔버스 오버핏 쭈리 맨투맨</div>
-              <div class="m-cart-meta">멜란지 · L · 1개</div>
-              <div class="m-cart-price">28,500원</div>
-            </div>
-          </div>
-          <div class="m-cart-links">
-            <span class="m-cart-link" onclick="toast('옵션 변경 페이지로 이동합니다')">옵션 변경</span>
-            <span class="m-cart-link" onclick="toast('색상 추가 페이지로 이동합니다')">색상 추가</span>
-          </div>
-          <div class="m-cart-actions">
-            <button class="m-act-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-            <button class="m-act-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-            <button class="m-act-btn share" onclick="openShareModal(false)">공유하기</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ S2: 장바구니 (공유 중) ══════════ -->
-<div class="screen" id="s2">
-  <div class="pc-view" id="pc2">
-    <div class="page-wrap">
-      <div class="cart-title-area"><h1>장바구니</h1><p>내가 저장한 상품을 관리하고 주문할 수 있어요.</p></div>
-      <p class="cart-count">담은 상품 3개</p>
-      <div class="cart-banner">[업.계.최.초] 오프린트미에선 <strong>오늘 주문하면, 내일 바로 출고!</strong></div>
-      <div class="cart-toolbar">
-        <div class="cart-toolbar-btns">
-          <button class="ct-btn">전체 선택</button><button class="ct-btn">선택 삭제</button><button class="ct-btn">선택 견적서 발급</button>
-        </div>
-        <button class="ct-btn" style="background:var(--gray-100);color:var(--gray-400);cursor:not-allowed">선택 주문하기</button>
-      </div>
-      <div class="cart-col-header">
-        <div class="cc-chk"></div><div class="cc-info">상품 정보</div>
-        <div class="cc-qty">수량</div><div class="cc-price">가격</div>
-        <div class="cc-date">최종 편집일</div><div class="cc-action">비고</div>
-      </div>
-
-      <!-- ACTIVE GROUP ORDER 섹션 -->
-      <div class="section-bar sharing" style="margin-top:16px">
-        <span>🔗 ACTIVE GROUP ORDER</span>
-        <span class="section-share-badge">공유 중</span>
-      </div>
-
-      <!-- 공유 중인 아이템 -->
-      <div class="cart-row shared">
-        <div class="cr-chk"><input type="checkbox" checked></div>
-        <div class="cr-img"><div class="img-ph" style="width:80px;height:80px">👕</div></div>
-        <div class="cr-detail">
-          <div class="cr-cat">글리머 드라이 폴로셔츠</div>
-          <div class="cr-name">2026 러닝크루 공식 티셔츠 <span class="cr-edit-icon">✎</span> <span class="tag tag-blue">공유 중</span></div>
-          <div class="cr-meta">인쇄 위치: 앞면(가슴), 뒷면(등판)<br>색상: 화이트</div>
-          <div class="cr-links"><span class="cr-link">옵션 변경</span><span class="cr-link">색상 추가</span></div>
-        </div>
-        <div class="cr-qty">
-          <div class="cr-qty-row"><span class="cr-qty-label">사이즈</span><div class="cr-size-sel">XL ▾</div></div>
-          <div class="cr-qty-row" style="margin-top:6px">
-            <div class="cr-counter"><button>−</button><span>1</span><button>+</button></div>
-            <div style="text-align:right"><span style="font-size:12px;font-weight:700">24,500원</span></div>
-          </div>
-        </div>
-        <div class="cr-price"><div class="final" style="font-size:15px;font-weight:800;color:var(--orange)">24,500원</div></div>
-        <div class="cr-date">2026.03.30</div>
-        <div class="cr-actions">
-          <button class="cr-action-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-          <button class="cr-action-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-          <button class="cr-action-btn" onclick="toast('복사되었습니다')">복사하기</button>
-          <button class="cr-action-btn share active" onclick="openShareModal(true)">공유하기</button>
-        </div>
-      </div>
-
-      <!-- MY PROJECTS 섹션 -->
-      <div class="section-bar normal" style="margin-top:20px">MY PROJECTS</div>
-      <div class="cart-row">
-        <div class="cr-chk"><input type="checkbox" checked></div>
-        <div class="cr-img"><div class="img-ph" style="width:80px;height:80px">👔</div></div>
-        <div class="cr-detail">
-          <div class="cr-cat">어패럴 베이직</div>
-          <div class="cr-name">팀블링 30수 티셔츠 <span class="cr-edit-icon">✎</span></div>
-          <div class="cr-meta">인쇄 위치: 앞면<br>색상: 네이비</div>
-        </div>
-        <div class="cr-qty">
-          <div class="cr-qty-row"><span class="cr-qty-label">사이즈</span><div class="cr-size-sel">XL ▾</div></div>
-          <div class="cr-qty-row" style="margin-top:6px"><div class="cr-counter"><button>−</button><span>1</span><button>+</button></div><span style="font-size:12px;font-weight:800;color:var(--orange)">6,750원</span></div>
-        </div>
-        <div class="cr-price"><div class="final" style="font-size:15px;font-weight:800;color:var(--orange)">6,750원</div></div>
-        <div class="cr-date">2026.03.26</div>
-        <div class="cr-actions">
-          <button class="cr-action-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-          <button class="cr-action-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-          <button class="cr-action-btn" onclick="toast('복사되었습니다')">복사하기</button>
-          <button class="cr-action-btn share" onclick="toast('공유 링크가 생성됩니다')">공유하기</button>
-        </div>
-      </div>
-      <div class="cart-row" style="margin-bottom:40px">
-        <div class="cr-chk"><input type="checkbox"></div>
-        <div class="cr-img"><div class="img-ph" style="width:80px;height:80px">🧥</div></div>
-        <div class="cr-detail">
-          <div class="cr-cat">어패럴 오버핏</div>
-          <div class="cr-name">비캔버스 오버핏 쭈리 맨투맨 <span class="cr-edit-icon">✎</span></div>
-          <div class="cr-meta">색상: 멜란지</div>
-        </div>
-        <div class="cr-qty">
-          <div class="cr-qty-row"><span class="cr-qty-label">사이즈</span><div class="cr-size-sel">L ▾</div></div>
-          <div class="cr-qty-row" style="margin-top:6px"><div class="cr-counter"><button>−</button><span>1</span><button>+</button></div><span style="font-size:12px;font-weight:700">28,500원</span></div>
-        </div>
-        <div class="cr-price"><div class="final" style="font-size:15px;font-weight:800;color:var(--orange)">28,500원</div></div>
-        <div class="cr-date">2026.03.30</div>
-        <div class="cr-actions">
-          <button class="cr-action-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-          <button class="cr-action-btn" onclick="toast('편집기로 이동합니다')">편집하기</button>
-          <button class="cr-action-btn" onclick="toast('복사되었습니다')">복사하기</button>
-          <button class="cr-action-btn share" onclick="toast('공유 링크가 생성됩니다')">공유하기</button>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- 모바일 -->
-  <div class="phone-wrap mob-view" id="mob2">
-    <div class="phone">
-      <div class="phone-notch"><div class="phone-pill"></div></div>
-      <div class="phone-top"><span class="phone-top-logo">OH PRINT.ME</span><div style="position:relative"><span style="font-size:18px">🛒</span><span class="cart-badge">3</span></div></div>
-      <div class="phone-body">
-        <div style="padding:14px 14px 8px;background:var(--white)">
-          <h2 style="font-size:18px;font-weight:900;margin-bottom:4px">장바구니</h2>
-          <p style="font-size:12px;color:var(--gray-400)">담은 상품 3개</p>
-        </div>
-        <!-- 공유 중 섹션 헤더 -->
-        <div style="background:#EFF6FF;padding:7px 14px;font-size:10px;font-weight:800;color:var(--blue);display:flex;align-items:center;gap:6px;border-top:1px solid #DBEAFE;border-bottom:1px solid #DBEAFE">
-          🔗 ACTIVE GROUP ORDER <span style="background:var(--blue);color:#fff;font-size:8px;font-weight:800;padding:1px 6px;border-radius:10px">공유 중</span>
-        </div>
-        <!-- 공유 중인 아이템 -->
-        <div class="m-cart-item shared">
-          <div class="m-cart-inner">
-            <div class="m-cart-img"><div class="img-ph" style="width:64px;height:64px">👕</div></div>
-            <div class="m-cart-detail">
-              <div class="m-cart-cat">글리머 드라이 폴로셔츠</div>
-              <div class="m-cart-name">2026 러닝크루 공식 티셔츠 <span class="tag tag-blue" style="font-size:9px;padding:1px 5px">공유 중</span></div>
-              <div class="m-cart-meta">화이트 · XL · 1개</div>
-              <div class="m-cart-price">24,500원</div>
-            </div>
-          </div>
-          <div class="m-cart-links">
-            <span class="m-cart-link" onclick="toast('옵션 변경 페이지로 이동합니다')">옵션 변경</span>
-            <span class="m-cart-link" onclick="toast('색상 추가 페이지로 이동합니다')">색상 추가</span>
-          </div>
-          <div class="m-cart-actions">
-            <button class="m-act-btn order" onclick="toast('주문 페이지로 이동합니다')">주문하기</button>
-            <button class="m-act-btn">편집하기</button>
-            <button class="m-act-btn share active" onclick="openShareModal(true)">공유하기</button>
-          </div>
-        </div>
-        <!-- MY PROJECTS -->
-        <div style="background:var(--gray-100);padding:7px 14px;font-size:10px;font-weight:800;color:var(--gray-500);margin-top:12px">MY PROJECTS</div>
-        <div class="m-cart-item">
-          <div class="m-cart-inner">
-            <div class="m-cart-img"><div class="img-ph" style="width:64px;height:64px">👔</div></div>
-            <div class="m-cart-detail">
-              <div class="m-cart-cat">어패럴 베이직</div>
-              <div class="m-cart-name">팀블링 30수 티셔츠</div>
-              <div class="m-cart-meta">네이비 · XL</div>
-              <div class="m-cart-price" style="color:var(--orange)">6,750원</div>
-            </div>
-          </div>
-          <div class="m-cart-links">
-            <span class="m-cart-link" onclick="toast('옵션 변경 페이지로 이동합니다')">옵션 변경</span>
-            <span class="m-cart-link" onclick="toast('색상 추가 페이지로 이동합니다')">색상 추가</span>
-          </div>
-          <div class="m-cart-actions">
-            <button class="m-act-btn order">주문하기</button>
-            <button class="m-act-btn">편집하기</button>
-            <button class="m-act-btn share" onclick="openShareModal(false)">공유하기</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ S3: 참여자 랜딩 (비로그인) ══════════ -->
-<div class="screen" id="s3">
-  <!-- PC GNB (심플) -->
-  <div id="gnb-member">
-    <div class="gnb-top"><span class="gnb-top-logo">OH PRINT.ME</span></div>
-    <div class="gnb-main"><span class="gnb-logo">OH PRINT.ME</span><div class="gnb-right"><span>로그인</span><span>회원가입</span></div></div>
-  </div>
-  <div class="pc-view" id="pc3">
-    <div class="landing-wrap">
-      <div class="landing-inner">
-        <div class="landing-top">
-          <span class="org-badge">GROUP ORDER INVITE</span>
-          <span class="tag tag-orange">🔗 공유 링크로 접속</span>
-        </div>
-        <div class="landing-main">
-          <div>
-            <div class="landing-preview">
-              <div class="preview-img" id="previewImg">👕</div>
-              <div class="preview-tabs">
-                <button class="preview-tab active" onclick="setPreview('front', this)">앞면</button>
-                <button class="preview-tab" onclick="setPreview('back', this)">뒷면</button>
-              </div>
-            </div>
-          </div>
-          <div class="landing-info">
-            <div class="cat">글리머 드라이 폴로셔츠</div>
-            <h2>2026 러닝크루<br>공식 티셔츠</h2>
-            <p class="desc">
-              모임장이 완성한 디자인으로 각자 개별 주문·결제·배송을 진행해요.<br>
-              사이즈를 선택하고 장바구니에 담으면 됩니다.
-            </p>
-            <!-- 비로그인 안내 -->
-            <div class="login-notice">
-              <span class="icon">🔒</span>
-              <p><strong>로그인이 필요한 서비스예요.</strong><br>미리보기는 누구나 가능하지만 장바구니에 담으려면 로그인이 필요합니다.</p>
-            </div>
-            <!-- 사이즈 선택 -->
-            <div class="size-select-wrap">
-              <div class="size-select-label">
-                사이즈 선택 <span style="color:var(--orange)">*</span>
-                <span class="size-guide-link" onclick="toast('사이즈 가이드를 불러옵니다')">📏 사이즈 가이드</span>
-              </div>
-              <div class="size-btn-grid">
-                <button class="size-opt" onclick="selectSize3(this)">S</button>
-                <button class="size-opt" onclick="selectSize3(this)">M</button>
-                <button class="size-opt" onclick="selectSize3(this)">L</button>
-                <button class="size-opt" onclick="selectSize3(this)">XL</button>
-                <button class="size-opt" onclick="selectSize3(this)">2XL</button>
-              </div>
-            </div>
-            <!-- CTA 버튼 -->
-            <div class="cta-area">
-              <button class="cta-btn-main black disabled" id="cartBtn3" onclick="handleCTA('cart')">🛒 장바구니에 담기</button>
-            </div>
-            <p class="cta-hint" id="ctaHint3">사이즈를 선택하면 담기 버튼이 활성화됩니다 · 로그인 후 이용 가능</p>
-            <!-- 만료 안내 -->
-            <div class="expire-notice" style="margin-top:16px">
-              ⏰ 이 링크는 <strong style="margin:0 4px">2026.04.29</strong>에 만료됩니다 (28일 남음)
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- 모바일 -->
-  <div class="phone-wrap mob-view" id="mob3">
-    <div class="phone">
-      <div class="phone-notch"><div class="phone-pill"></div></div>
-      <div class="phone-top"><span class="phone-top-logo">OH PRINT.ME</span><span style="font-size:12px;color:var(--gray-500)">로그인</span></div>
-      <div class="phone-body" style="background:var(--white)">
-        <div class="m-landing-hero">
-          <div class="org">GROUP ORDER INVITE</div>
-          <h2>2026 러닝크루<br>공식 티셔츠</h2>
-          <p>모임장이 완성한 디자인으로<br>각자 주문·결제·배송하세요.</p>
-        </div>
-        <div class="m-preview-tabs">
-          <button class="m-preview-tab active">앞면</button>
-          <button class="m-preview-tab">뒷면</button>
-        </div>
-        <div class="m-preview">
-          <div class="m-preview-img">👕</div>
-          <div class="m-preview-info"><h4>글리머 드라이 폴로셔츠</h4></div>
-        </div>
-        <div class="m-login-notice">
-          🔒 <strong>로그인 후 이용 가능해요.</strong><br>미리보기는 누구나 가능하지만 담기는 로그인이 필요합니다.
-        </div>
-        <!-- 모바일 사이즈 선택 -->
-        <div class="m-size-select-wrap" style="padding:0 14px 10px">
-          <div class="m-size-select-label">
-            사이즈 선택 <span style="color:var(--orange)">*</span>
-            <span class="m-size-guide-link" onclick="toast('사이즈 가이드')">📏 사이즈 가이드</span>
-          </div>
-          <div class="m-size-btn-grid">
-            <button class="m-size-opt" onclick="mSelectSize3(this)">S</button>
-            <button class="m-size-opt" onclick="mSelectSize3(this)">M</button>
-            <button class="m-size-opt" onclick="mSelectSize3(this)">L</button>
-            <button class="m-size-opt" onclick="mSelectSize3(this)">XL</button>
-            <button class="m-size-opt" onclick="mSelectSize3(this)">2XL</button>
-          </div>
-        </div>
-        <div class="m-cta-area">
-          <button class="m-cta-main black disabled" id="mCartBtn3" onclick="handleCTA('cart')">🛒 장바구니에 담기</button>
-          <p class="m-cta-hint">사이즈 선택 후 활성화 · 로그인 후 이용 가능</p>
-          <div style="background:var(--orange-light);border:1px solid var(--orange-mid);border-radius:4px;padding:9px 12px;font-size:11px;color:var(--orange);font-weight:600;text-align:center">
-            ⏰ 링크 만료: 2026.04.29 (28일 남음)
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ S4: 참여자 랜딩 (로그인 후) ══════════ -->
-<div class="screen" id="s4">
-  <div id="gnb-member2">
-    <div class="gnb-top"><span class="gnb-top-logo">OH PRINT.ME</span><div class="gnb-top-right"><span>박지호님</span><span>로그아웃</span></div></div>
-    <div class="gnb-main"><span class="gnb-logo">OH PRINT.ME</span><div class="gnb-right"><span>박지호</span><div class="cart-icon"><span style="font-size:20px">🛒</span><span class="cart-badge">1</span></div><span style="font-size:20px">👤</span></div></div>
-  </div>
-  <div class="pc-view" id="pc4">
-    <div class="landing-wrap">
-      <div class="landing-inner">
-        <div class="landing-top">
-          <span class="org-badge">GROUP ORDER INVITE</span>
-          <span class="tag tag-green">✅ 로그인됨 — 박지호</span>
-        </div>
-        <div class="landing-main">
-          <div>
-            <div class="landing-preview">
-              <div class="preview-img" id="previewImg2">👕</div>
-              <div class="preview-tabs">
-                <button class="preview-tab active" onclick="setPreview2('front', this)">앞면</button>
-                <button class="preview-tab" onclick="setPreview2('back', this)">뒷면</button>
-              </div>
-            </div>
-          </div>
-          <div class="landing-info">
-            <div class="cat">글리머 드라이 폴로셔츠</div>
-            <h2>2026 러닝크루<br>공식 티셔츠</h2>
-            <p class="desc">
-              모임장이 완성한 디자인으로 각자 개별 주문·결제·배송을 진행해요.<br>
-              사이즈를 선택하고 장바구니에 담으면 됩니다.
-            </p>
-            <!-- 담기 완료 알림 -->
-            <div class="added-notice" id="addedNotice" style="display:none">
-              ✅ 장바구니에 담겼습니다. 장바구니에서 주문을 완료해주세요.
-            </div>
-            <!-- 사이즈 선택 -->
-            <div class="size-select-wrap" id="sizeWrap4">
-              <div class="size-select-label">
-                사이즈 선택 <span style="color:var(--orange)">*</span>
-                <span class="size-guide-link" onclick="toast('사이즈 가이드를 불러옵니다')">📏 사이즈 가이드</span>
-              </div>
-              <div class="size-btn-grid">
-                <button class="size-opt" onclick="selectSize4(this)">S</button>
-                <button class="size-opt" onclick="selectSize4(this)">M</button>
-                <button class="size-opt" onclick="selectSize4(this)">L</button>
-                <button class="size-opt" onclick="selectSize4(this)">XL</button>
-                <button class="size-opt" onclick="selectSize4(this)">2XL</button>
-              </div>
-            </div>
-            <!-- CTA 버튼 -->
-            <div class="cta-area">
-              <button class="cta-btn-main black disabled" id="cartBtn" onclick="handleLoggedCTA('cart')">🛒 장바구니에 담기</button>
-            </div>
-            <p class="cta-hint" id="ctaHint4">사이즈를 선택하면 담기 버튼이 활성화됩니다 · 모임장 디자인이 복사됩니다</p>
-            <div class="expire-notice" style="margin-top:16px">
-              ⏰ 이 링크는 <strong style="margin:0 4px">2026.04.29</strong>에 만료됩니다 (28일 남음)
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-  <!-- 모바일 -->
-  <div class="phone-wrap mob-view" id="mob4">
-    <div class="phone">
-      <div class="phone-notch"><div class="phone-pill"></div></div>
-      <div class="phone-top"><span class="phone-top-logo">OH PRINT.ME</span><div style="display:flex;align-items:center;gap:8px"><span style="font-size:11px;color:var(--gray-500)">박지호</span><div style="position:relative"><span style="font-size:18px">🛒</span><span class="cart-badge">1</span></div></div></div>
-      <div class="phone-body" style="background:var(--white)">
-        <div class="m-landing-hero">
-          <div class="org">GROUP ORDER INVITE · ✅ 박지호님</div>
-          <h2>2026 러닝크루<br>공식 티셔츠</h2>
-          <p>모임장이 완성한 디자인을 베이스로<br>각자 주문·결제·배송하세요.</p>
-        </div>
-        <div class="m-preview-tabs">
-          <button class="m-preview-tab active">앞면</button>
-          <button class="m-preview-tab">뒷면</button>
-        </div>
-        <div class="m-preview">
-          <div class="m-preview-img">👕</div>
-          <div class="m-preview-info"><h4>글리머 드라이 폴로셔츠</h4></div>
-        </div>
-        <div id="mAddedNotice" class="m-added" style="display:none">✅ 장바구니에 담겼습니다! 장바구니에서 주문을 완료해주세요.</div>
-        <div class="m-login-notice" style="background:var(--success-light);border-color:#A7F3D0;color:var(--success)">
-          ✅ 로그인 상태입니다. 사이즈를 선택하고 담으세요.
-        </div>
-        <!-- 모바일 사이즈 선택 -->
-        <div id="mSizeWrap4" class="m-size-select-wrap" style="padding:0 14px 10px">
-          <div class="m-size-select-label">
-            사이즈 선택 <span style="color:var(--orange)">*</span>
-            <span class="m-size-guide-link" onclick="toast('사이즈 가이드')">📏 사이즈 가이드</span>
-          </div>
-          <div class="m-size-btn-grid">
-            <button class="m-size-opt" onclick="mSelectSize4(this)">S</button>
-            <button class="m-size-opt" onclick="mSelectSize4(this)">M</button>
-            <button class="m-size-opt" onclick="mSelectSize4(this)">L</button>
-            <button class="m-size-opt" onclick="mSelectSize4(this)">XL</button>
-            <button class="m-size-opt" onclick="mSelectSize4(this)">2XL</button>
-          </div>
-        </div>
-        <div class="m-cta-area">
-          <button class="m-cta-main black disabled" id="mCartBtn" onclick="handleMLoggedCTA('cart')">🛒 장바구니에 담기</button>
-          <p class="m-cta-hint" id="mCtaHint4">사이즈를 선택하면 담기 버튼이 활성화됩니다</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══════════ S5: 링크 만료 ══════════ -->
-<div class="screen" id="s5">
-  <div id="gnb-expired">
-    <div class="gnb-top"><span class="gnb-top-logo">OH PRINT.ME</span></div>
-    <div class="gnb-main"><span class="gnb-logo">OH PRINT.ME</span></div>
-  </div>
-  <div class="pc-view" id="pc5">
-    <div class="expired-wrap">
-      <div class="expired-icon">🔗</div>
-      <div class="tag tag-gray" style="margin-bottom:16px;display:inline-flex">링크 만료</div>
-      <h2>이 공유 링크가 만료되었어요</h2>
-      <p>공유 링크는 생성 후 30일이 지나면 자동으로 만료됩니다.<br>모임장에게 새 링크를 요청해보세요.<br><br>이미 장바구니에 담으셨다면 주문을 계속 진행할 수 있어요.</p>
-      <div style="display:flex;gap:10px;justify-content:center">
-        <button class="btn-black" onclick="toast('오프린트미 홈으로 이동합니다')">오프린트미 홈</button>
-        <button class="btn-outline" onclick="toast('장바구니로 이동합니다')">🛒 내 장바구니</button>
-      </div>
-    </div>
-  </div>
-  <div class="phone-wrap mob-view" id="mob5">
-    <div class="phone">
-      <div class="phone-notch"><div class="phone-pill"></div></div>
-      <div class="phone-top"><span class="phone-top-logo">OH PRINT.ME</span></div>
-      <div class="phone-body" style="background:var(--white)">
-        <div style="padding:60px 20px;text-align:center">
-          <div style="font-size:48px;margin-bottom:16px">🔗</div>
-          <span class="tag tag-gray" style="margin-bottom:14px;display:inline-flex">링크 만료</span>
-          <h2 style="font-size:20px;font-weight:900;margin-bottom:8px">이 공유 링크가<br>만료되었어요</h2>
-          <p style="font-size:13px;color:var(--gray-500);line-height:1.7;margin-bottom:24px">공유 링크는 생성 후 30일이 지나면<br>자동으로 만료됩니다.<br>모임장에게 새 링크를 요청해보세요.</p>
-          <div style="display:flex;flex-direction:column;gap:8px;padding:0 10px">
-            <button class="m-cta-main black" onclick="toast('오프린트미 홈으로 이동합니다')">오프린트미 홈</button>
-            <button class="m-cta-main outline" onclick="toast('장바구니로 이동합니다')">🛒 내 장바구니</button>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-</div><!-- viewport -->
-
-<!-- 로그인 모달 -->
-<div class="modal-overlay login-modal" id="loginModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>로그인이 필요해요</h3>
-      <button class="modal-close" onclick="closeModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="login-info">
-        <strong>장바구니에 담기 · 디자인 수정</strong>을 이용하려면<br>
-        오프린트미 계정으로 로그인해야 합니다.<br><br>
-        미리보기는 로그인 없이도 가능합니다.
-      </div>
-      <div style="display:flex;flex-direction:column;gap:8px">
-        <button class="btn-black full" onclick="doLogin()" style="font-size:15px;padding:13px">로그인하기</button>
-        <button class="btn-outline full" onclick="closeModal()">취소</button>
-      </div>
-      <p style="text-align:center;font-size:12px;color:var(--gray-400);margin-top:12px">계정이 없으신가요? <span style="color:var(--blue);cursor:pointer;font-weight:600" onclick="toast('회원가입 페이지로 이동합니다')">회원가입</span></p>
-    </div>
-  </div>
-</div>
-
-<!-- 공유 중지 확인 모달 -->
-<div class="modal-overlay" id="stopModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3>공유를 중지할까요?</h3>
-      <button class="modal-close" onclick="document.getElementById('stopModal').classList.remove('show')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div class="login-info" style="background:var(--orange-light);border-color:var(--orange-mid)">
-        공유를 중지하면 <strong style="color:var(--orange)">링크가 즉시 비활성화</strong>됩니다.<br>
-        이미 장바구니에 담은 참여자의 주문은 영향받지 않습니다.
-      </div>
-      <div style="display:flex;gap:8px">
-        <button class="btn-outline full" onclick="document.getElementById('stopModal').classList.remove('show')">취소</button>
-        <button class="btn-orange full" onclick="doStopShare()">공유 중지</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 로딩 오버레이 -->
-<div class="loading-overlay" id="loadingOverlay">
-  <div class="spinner"></div>
-  <p style="font-size:13px;font-weight:700;color:var(--gray-700)">처리 중입니다...</p>
-</div>
-
-<!-- 공유 모달 (공유 전 / 공유 중 두 상태) -->
-<div class="modal-overlay" id="shareModal">
-  <div class="modal-box">
-    <div class="modal-header">
-      <h3 id="shareModalTitle">공유 링크</h3>
-      <button class="modal-close" onclick="closeShareModal()">✕</button>
-    </div>
-    <div class="modal-body">
-      <!-- 공유 전 상태 -->
-      <div id="shareBeforeState">
-        <div class="share-before">
-          <div class="illust">🔗</div>
-          <h4>그룹 주문 링크를 생성해보세요</h4>
-          <p>링크를 공유하면 참여자들이<br>각자 로그인 후 이 디자인을 자신의<br>장바구니에 담아 주문할 수 있어요.</p>
-        </div>
-        <button class="btn-black full lg" onclick="doCreateLink()" style="margin-bottom:8px">공유 링크 생성하기</button>
-        <button class="btn-outline full" onclick="closeShareModal()">취소</button>
-      </div>
-      <!-- 공유 중 상태 -->
-      <div id="shareActiveState" style="display:none">
-        <div style="margin-bottom:16px">
-          <span class="share-active-badge">🔗 공유 중</span>
-          <p style="font-size:13px;color:var(--gray-600);line-height:1.6">아래 링크를 참여자에게 공유하세요.<br>링크로 접속한 참여자는 이 디자인을 자신의 장바구니에 담아 개별 주문할 수 있어요.</p>
-        </div>
-        <div class="share-link-box">
-          <span class="share-link-url">ohprint.me/g/RUN_CREW_2026</span>
-          <button class="share-copy-btn" onclick="toast('링크가 복사되었습니다')">복사</button>
-        </div>
-        <div class="share-action-row">
-          <button class="sa-btn kakao" onclick="toast('카카오톡으로 공유합니다')">💬 카카오톡 공유</button>
-          <button class="sa-btn stop" onclick="closeShareModal(); showStopConfirm()">공유 중지</button>
-        </div>
-        <div class="share-expire-row">⏰ 만료: 2026.04.29 (생성 후 30일간 유효)</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 토스트 -->
-<div class="toast" id="toast"></div>
 
 <script>
-let cur = 1;
-let mode = 'pc';
-let pendingCTA = null; // 로그인 후 실행할 액션
+    let currentSize = "L";
 
-function setMode(m) {
-  mode = m;
-  document.getElementById('modePC').classList.toggle('on', m === 'pc');
-  document.getElementById('modeMobile').classList.toggle('on', m === 'mobile');
-  updateView();
-}
+    function go(n) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById('scr-' + n).classList.add('active');
+        document.querySelectorAll('.proto-nav button').forEach(b => b.classList.remove('active'));
+        document.getElementById('nav-' + n).classList.add('active');
 
-function updateView() {
-  // PC 뷰 / 모바일 뷰 토글
-  document.querySelectorAll('.pc-view').forEach(el => el.style.display = mode === 'pc' ? 'block' : 'none');
-  document.querySelectorAll('.mob-view').forEach(el => el.style.display = mode === 'mobile' ? 'flex' : 'none');
-  // GNB 토글
-  ['gnb-pc','gnb-member','gnb-member2','gnb-expired'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.style.display = 'none';
-  });
-  if (mode === 'pc') {
-    const gnbMap = {1:'gnb-pc', 2:'gnb-pc', 3:'gnb-member', 4:'gnb-member2', 5:'gnb-expired'};
-    const gnb = document.getElementById(gnbMap[cur]);
-    if (gnb) gnb.style.display = 'block';
-  }
-}
+        // 참여자 장바구니 재진입 시 배너 상태 초기화 (시뮬레이션용)
+        if(n === 5) {
+            const banner = document.getElementById('copy-banner');
+            banner.style.background = '#EBF2FF';
+            banner.style.color = '#1A56DB';
+            banner.innerHTML = '<span class="spinner" style="width: 16px; height: 16px; border-width: 2px; margin-bottom: 0;"></span> 모임장의 디자인을 내 프로젝트로 복사 중입니다...';
+            
+            setTimeout(() => {
+                banner.style.background = '#E6F7F3';
+                banner.style.color = '#00A67E';
+                banner.innerHTML = '✅ 프로젝트 복사가 완료되었습니다.';
+            }, 3000);
+        }
+    }
 
-function go(n) {
-  document.getElementById('s'+cur).classList.remove('on');
-  document.getElementById('pn'+cur).classList.remove('on');
-  cur = n;
-  document.getElementById('s'+n).classList.add('on');
-  document.getElementById('pn'+n).classList.add('on');
-  updateView();
-  window.scrollTo(0, 0);
-}
+    function generateLinkFlow() {
+        go(2);
+        setTimeout(() => { go(3); }, 1500);
+    }
 
-// 참여자 랜딩 — 비로그인 상태에서 버튼 클릭
-function handleCTA(type) {
-  // 비활성 상태면 무시
-  const btn = document.getElementById('cartBtn3') || document.getElementById('mCartBtn3');
-  pendingCTA = type;
-  document.getElementById('loginModal').classList.add('show');
-}
+    function copyAndNext() {
+        const toast = document.getElementById('toast');
+        toast.style.display = 'block';
+        setTimeout(() => {
+            toast.style.display = 'none';
+            go(4);
+        }, 1000);
+    }
 
-// 로그인 완료
-function doLogin() {
-  closeModal();
-  showLoading();
-  setTimeout(() => {
-    hideLoading();
-    go(4); // 로그인 후 S4로 이동 (사이즈 선택 상태 유지)
-    toast('로그인되었습니다. 사이즈를 선택하고 담으세요!');
-  }, 1200);
-}
+    function selectSize(el) {
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+        currentSize = el.innerText;
+        document.getElementById('add-btn').disabled = false;
+    }
 
-// 참여자 랜딩 — 로그인 상태에서 담기 클릭
-function handleLoggedCTA(type) {
-  if (type === 'cart') {
-    showLoading();
-    setTimeout(() => {
-      hideLoading();
-      // 사이즈 선택 영역 숨기기
-      const sw = document.getElementById('sizeWrap4');
-      if (sw) sw.style.display = 'none';
-      document.getElementById('addedNotice').style.display = 'flex';
-      const btn = document.getElementById('cartBtn');
-      btn.textContent = '✅ 장바구니에 담았어요';
-      btn.classList.remove('disabled');
-      btn.style.background = 'var(--success)';
-      btn.onclick = () => toast('장바구니로 이동합니다');
-      document.getElementById('ctaHint4').textContent = '에디터에서 추가 수정도 가능해요';
-      toast('장바구니에 담겼습니다! 장바구니에서 주문을 완료해주세요.');
-    }, 900);
-  }
-}
-
-function handleMLoggedCTA(type) {
-  if (type === 'cart') {
-    showLoading();
-    setTimeout(() => {
-      hideLoading();
-      const sw = document.getElementById('mSizeWrap4');
-      if (sw) sw.style.display = 'none';
-      document.getElementById('mAddedNotice').style.display = 'flex';
-      const btn = document.getElementById('mCartBtn');
-      btn.textContent = '✅ 장바구니에 담았어요';
-      btn.classList.remove('disabled');
-      btn.style.background = 'var(--success)';
-      btn.onclick = () => toast('장바구니로 이동합니다');
-      document.getElementById('mCtaHint4').textContent = '장바구니에서 주문을 완료해주세요';
-      toast('장바구니에 담겼습니다!');
-    }, 900);
-  }
-}
-
-// S3 사이즈 선택 (비로그인)
-function selectSize3(el) {
-  document.querySelectorAll('#s3 .size-opt').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  // 담기 버튼 활성화 — 클릭하면 로그인 유도
-  const btn = document.getElementById('cartBtn3');
-  btn.classList.remove('disabled');
-  btn.onclick = () => { document.getElementById('loginModal').classList.add('show'); };
-  document.getElementById('ctaHint3').textContent = '로그인 후 장바구니에 담을 수 있어요';
-}
-function mSelectSize3(el) {
-  document.querySelectorAll('#mob3 .m-size-opt').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  const btn = document.getElementById('mCartBtn3');
-  btn.classList.remove('disabled');
-  btn.onclick = () => { document.getElementById('loginModal').classList.add('show'); };
-}
-
-// S4 사이즈 선택 (로그인)
-function selectSize4(el) {
-  document.querySelectorAll('#s4 .size-opt').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  const btn = document.getElementById('cartBtn');
-  btn.classList.remove('disabled');
-  btn.onclick = () => handleLoggedCTA('cart');
-  document.getElementById('ctaHint4').textContent = '모임장 디자인이 내 장바구니에 복사됩니다';
-}
-function mSelectSize4(el) {
-  document.querySelectorAll('#mob4 .m-size-opt').forEach(b => b.classList.remove('selected'));
-  el.classList.add('selected');
-  const btn = document.getElementById('mCartBtn');
-  btn.classList.remove('disabled');
-  btn.onclick = () => handleMLoggedCTA('cart');
-  document.getElementById('mCtaHint4').textContent = '모임장 디자인이 내 장바구니에 복사됩니다';
-}
-
-function closeModal() {
-  document.getElementById('loginModal').classList.remove('show');
-}
-
-// 공유 모달 열기 (isSharing: 이미 공유 중 여부)
-function openShareModal(isSharing) {
-  document.getElementById('shareBeforeState').style.display = isSharing ? 'none' : 'block';
-  document.getElementById('shareActiveState').style.display = isSharing ? 'block' : 'none';
-  document.getElementById('shareModalTitle').textContent = isSharing ? '공유 링크 관리' : '공유 링크 생성';
-  document.getElementById('shareModal').classList.add('show');
-}
-
-function closeShareModal() {
-  document.getElementById('shareModal').classList.remove('show');
-}
-
-// 링크 생성 (공유 전 → 공유 중으로 전환)
-function doCreateLink() {
-  closeShareModal();
-  showLoading();
-  setTimeout(() => {
-    hideLoading();
-    go(2); // 공유 중 화면으로 이동
-    toast('공유 링크가 생성되었습니다!');
-  }, 1000);
-}
-
-function showStopConfirm() {
-  document.getElementById('stopModal').classList.add('show');
-}
-
-function doStopShare() {
-  document.getElementById('stopModal').classList.remove('show');
-  showLoading();
-  setTimeout(() => {
-    hideLoading();
-    go(1);
-    toast('공유가 중지되었습니다. 링크가 비활성화되었습니다.');
-  }, 1200);
-}
-
-function setPreview(side, el) {
-  document.querySelectorAll('#pc3 .preview-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('previewImg').textContent = side === 'front' ? '👕' : '🎽';
-}
-function setPreview2(side, el) {
-  document.querySelectorAll('#pc4 .preview-tab').forEach(t => t.classList.remove('active'));
-  el.classList.add('active');
-  document.getElementById('previewImg2').textContent = side === 'front' ? '👕' : '🎽';
-}
-
-function showLoading() { document.getElementById('loadingOverlay').classList.add('show'); }
-function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
-
-function toast(msg) {
-  const el = document.getElementById('toast');
-  el.textContent = msg; el.classList.add('show');
-  setTimeout(() => el.classList.remove('show'), 2500);
-}
-
-// 초기화
-setMode('pc');
-document.getElementById('pn1').classList.add('on');
-document.getElementById('s1').classList.add('on');
-document.getElementById('gnb-pc').style.display = 'block';
+    function copyToMemberCart() {
+        document.getElementById('sel-size').innerText = currentSize;
+        go(5);
+    }
 </script>
+
 </body>
 </html>
