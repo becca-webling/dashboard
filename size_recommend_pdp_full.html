@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>오프린트미 PDP — 사이즈 추천 v2</title>
+<title>사이즈 탭 — 사이즈 추천 컴포넌트</title>
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
 body {
@@ -17,103 +17,43 @@ body {
 .phone {
   width: 390px; background: #fff;
   border-radius: 48px; border: 8px solid #1C1C1C;
-  box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 28px 72px rgba(0,0,0,0.24);
+  box-shadow: 0 0 0 1px rgba(255,255,255,0.06) inset, 0 28px 72px rgba(0,0,0,0.22);
   overflow: hidden;
 }
 .notch-bar { background: #1C1C1C; height: 30px; display:flex; align-items:center; justify-content:center; }
 .notch-pill { width: 96px; height: 10px; background: #111; border-radius: 8px; border: 1px solid #2a2a2a; }
 .phone-screen { background: #fff; overflow-y: auto; max-height: 760px; }
 
-.statusbar { padding: 10px 20px 6px; display: flex; justify-content: space-between; align-items: center; font-size: 13px; font-weight: 700; color: #111; background: #fff; position: sticky; top: 0; z-index: 100; }
-.sb-icons { display: flex; gap: 5px; align-items: center; }
+/* 상태바 */
+.statusbar { padding: 10px 20px 6px; display:flex; justify-content:space-between; align-items:center; font-size:13px; font-weight:700; color:#111; }
+.sb-icons { display:flex; gap:5px; align-items:center; }
 
-.navbar { display: flex; align-items: center; justify-content: space-between; padding: 6px 14px 10px; background: #fff; position: sticky; top: 36px; z-index: 100; }
+/* 네비 */
+.navbar { display:flex; align-items:center; justify-content:space-between; padding:6px 14px 10px; border-bottom: 1px solid #F0EDEA; }
 .nav-back { width:36px; height:36px; display:flex; align-items:center; justify-content:center; cursor:pointer; }
 .nav-right { display:flex; gap:14px; align-items:center; }
 
-.product-hero { width:100%; aspect-ratio:1; background:#F0EDE8; display:flex; align-items:center; justify-content:center; }
-.hero-img-mock { width:100%; height:100%; background:linear-gradient(160deg,#E8E4DE 0%,#D5CFC6 100%); display:flex; align-items:center; justify-content:center; }
-.sweatshirt-wrap { width:62%; aspect-ratio:1; background:#F5F2EE; border-radius:12px; border:1px solid rgba(0,0,0,0.06); display:flex; align-items:center; justify-content:center; }
-.design-lbl { font-size:11px; font-weight:800; color:#2B4CB0; text-align:center; line-height:1.3; }
-.design-sub { font-size:8px; color:#7A8BC4; }
-
-.thumb-strip { display:flex; gap:8px; padding:10px 14px; overflow-x:auto; scrollbar-width:none; border-bottom:1px solid #F0EDEA; }
-.thumb-strip::-webkit-scrollbar { display:none; }
-.thumb { flex-shrink:0; width:62px; height:62px; border-radius:8px; background:#EAE6E0; border:1.5px solid transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; }
-.thumb.active { border-color:#1C1C1C; }
-.thumb-in { width:72%; height:72%; background:#F5F2EE; border-radius:4px; display:flex; align-items:center; justify-content:center; }
-.thumb-lbl { font-size:6px; font-weight:800; color:#2B4CB0; }
-
-.product-info { padding:16px 16px 0; }
-.rating-row { display:flex; align-items:center; gap:6px; margin-bottom:8px; }
-.stars { display:flex; gap:2px; }
-.star { font-size:14px; color:#F5A623; }
-.star.half { opacity:0.45; }
-.rating-text { font-size:13px; color:#666; }
-.review-link { font-size:13px; color:#666; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
-.product-name { font-size:18px; font-weight:800; color:#111; line-height:1.35; margin-bottom:14px; letter-spacing:-0.02em; }
-
-.info-rows { display:flex; flex-direction:column; gap:8px; margin-bottom:16px; }
-.info-row { display:flex; align-items:center; gap:10px; }
-.info-icon { width:28px; height:28px; background:#F5F3F0; border-radius:6px; display:flex; align-items:center; justify-content:center; flex-shrink:0; }
-.info-text { font-size:13px; color:#444; }
-.info-link { font-size:13px; color:#111; font-weight:500; text-decoration:underline; text-underline-offset:2px; cursor:pointer; }
-
-.section-label { font-size:13px; font-weight:700; color:#111; margin-bottom:10px; }
-.section-label span { font-size:12px; font-weight:400; color:#888; margin-left:4px; }
-.color-row { display:flex; gap:8px; margin-bottom:6px; }
-.color-chip { width:32px; height:32px; border-radius:50%; border:2px solid transparent; cursor:pointer; transition:all 0.12s; position:relative; }
-.color-chip.active { border-color:#111; }
-.color-chip::after { content:''; position:absolute; inset:2px; border-radius:50%; border:1.5px solid rgba(0,0,0,0.1); }
-
-.size-info-row { background:#F8F7F5; border-radius:10px; padding:11px 14px; margin:12px 0; }
-.size-info-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:2px; }
-.size-info-name { font-size:13px; font-weight:700; color:#111; }
-.size-info-guide { font-size:12px; color:#888; text-decoration:underline; text-underline-offset:2px; cursor:pointer; display:flex; align-items:center; gap:3px; }
-.size-chips-row { display:flex; gap:5px; flex-wrap:wrap; margin-top:8px; }
-.size-chip-sm { font-size:12px; font-weight:600; color:#555; background:#fff; border:1px solid #E0DDDA; border-radius:6px; padding:4px 10px; cursor:pointer; }
-
-.notice-box { background:#F8F7F5; border-radius:10px; padding:12px 14px; margin:0 0 16px; }
-.notice-title { font-size:13px; font-weight:700; color:#111; margin-bottom:6px; }
-.notice-item { font-size:12px; color:#666; line-height:1.6; padding-left:10px; position:relative; }
-.notice-item::before { content:'·'; position:absolute; left:0; }
-
-.price-section { padding:14px 0 12px; border-top:1px solid #F0EDEA; }
-.price-label { font-size:12px; color:#888; margin-bottom:4px; }
-.price-main { font-size:24px; font-weight:800; color:#111; letter-spacing:-0.03em; line-height:1.1; }
-.price-main span { font-size:16px; font-weight:600; }
-.price-origin-row { display:flex; align-items:center; gap:8px; margin-top:3px; }
-.price-origin { font-size:13px; color:#BBB; text-decoration:line-through; }
-.price-sale { font-size:13px; font-weight:700; color:#E55024; }
-.price-option { font-size:12px; color:#888; margin-top:6px; }
-
-.cta-wrap { padding:12px 0 16px; }
-.cta-btn { width:100%; height:52px; background:#111; color:#fff; border:none; border-radius:12px; font-size:16px; font-weight:800; cursor:pointer; font-family:inherit; letter-spacing:-0.01em; transition:background 0.1s; }
-.cta-btn:active { background:#333; }
-
-.tab-bar { display:flex; overflow-x:auto; -webkit-overflow-scrolling:touch; border-bottom:1px solid #EEECEB; background:#fff; scrollbar-width:none; position:sticky; top:72px; z-index:90; }
+/* 탭 바 */
+.tab-bar { display:flex; overflow-x:auto; -webkit-overflow-scrolling:touch; border-bottom:1px solid #EEECEB; scrollbar-width:none; }
 .tab-bar::-webkit-scrollbar { display:none; }
 .tab-item { flex-shrink:0; padding:11px 14px; font-size:13px; font-weight:500; color:#AAAAAA; cursor:pointer; white-space:nowrap; position:relative; }
 .tab-item.active { color:#111; font-weight:700; }
 .tab-item.active::after { content:''; position:absolute; bottom:0; left:0; right:0; height:2px; background:#111; border-radius:2px 2px 0 0; }
 
-.tab-contents > div { display:none; }
-.tab-contents > div.active { display:block; }
+/* 사이즈 탭 본문 */
+.size-body { padding: 14px 16px 40px; }
 
-/* ── 사이즈 탭 ── */
-.size-tab-body { padding:14px 16px 32px; }
-
-/* ★ 추천 컴포넌트 — 심플 */
+/* ── 추천 컴포넌트 ── */
 .rec-box {
   background: #F8F7F5;
   border-radius: 12px;
   border: 1px solid #E5E3DF;
-  padding: 12px 14px;
-  margin-bottom: 20px;
+  padding: 13px 14px;
+  margin-bottom: 22px;
 }
-.rec-box-desc {
-  font-size: 12px; color: #888; line-height: 1.5;
-  margin-bottom: 10px;
+.rec-desc {
+  font-size: 13px; color: #555; line-height: 1.55;
+  margin-bottom: 11px;
 }
 .rec-inp-row { display:flex; gap:8px; align-items:center; }
 .rec-inp {
@@ -126,7 +66,8 @@ body {
 }
 .rec-inp::placeholder { color:#C0BEBB; font-weight:400; }
 .rec-inp:focus { border-color:#111; box-shadow:0 0 0 3px rgba(0,0,0,0.06); }
-.rec-inp.err { border-color:#E55024; }
+.rec-inp.err { border-color:#E55024; animation: shake 0.25s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 33%{transform:translateX(-4px)} 66%{transform:translateX(4px)} }
 .rec-go {
   flex-shrink:0; height:40px; padding:0 16px;
   background:#111; color:#fff; border:none; border-radius:9px;
@@ -138,60 +79,50 @@ body {
 
 /* 결과 */
 .rec-res {
-  margin-top:12px; padding-top:12px;
-  border-top:1px solid #E5E3DF;
-  display:none;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid #E5E3DF;
+  display: none;
 }
-.rec-res.show { display:block; animation:fadeup 0.2s cubic-bezier(.22,.61,.36,1); }
+.rec-res.show { display:block; animation: fadeup 0.2s cubic-bezier(.22,.61,.36,1); }
 @keyframes fadeup { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
 
-.res-row { display:flex; align-items:center; justify-content:space-between; margin-bottom:8px; }
-.res-sz { display:flex; align-items:baseline; gap:7px; }
-.res-sz-val { font-size:32px; font-weight:800; color:#111; line-height:1; letter-spacing:-0.03em; }
+.res-sz-row { display:flex; align-items:baseline; gap:7px; margin-bottom:10px; }
+.res-sz-val { font-size:30px; font-weight:800; color:#111; line-height:1; letter-spacing:-0.03em; }
 .res-sz-lbl { font-size:11px; color:#AAA; }
 
-
-.res-bar-wrap { margin-bottom:8px; }
-.res-bar-label { display:flex; justify-content:space-between; margin-bottom:4px; }
-.res-bar-sz { font-size:11px; font-weight:700; color:#111; }
-.res-bar-pct { font-size:11px; color:#888; }
+.res-bar-wrap { margin-bottom:9px; }
+.res-bar-top { display:flex; justify-content:space-between; margin-bottom:5px; }
+.res-bar-sz { font-size:12px; font-weight:700; color:#111; }
+.res-bar-pct { font-size:12px; color:#888; }
 .res-bar-track { height:5px; background:#E8E5E1; border-radius:3px; overflow:hidden; }
-.res-bar-fill { height:100%; background:#111; border-radius:3px; transition:width 0.4s cubic-bezier(.22,.61,.36,1); }
+.res-bar-fill { height:100%; background:#111; border-radius:3px; transition:width 0.45s cubic-bezier(.22,.61,.36,1); width:0; }
 
 .res-reason { font-size:12px; color:#888; line-height:1.65; margin-bottom:6px; }
 .res-disc { font-size:10px; color:#C8C5C1; line-height:1.6; }
 
-/* 사이즈 안내 */
-.guide-title { font-size:15px; font-weight:700; color:#111; margin-bottom:14px; }
-.model-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:20px; }
+/* ── 사이즈 안내 ── */
+.section-title { font-size:15px; font-weight:700; color:#111; margin-bottom:14px; }
+.model-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:22px; }
 .model-card { border-radius:10px; overflow:hidden; background:#F5F3F0; }
-.model-photo { width:100%; aspect-ratio:3/4; background:#EAE6DF; position:relative; display:flex; align-items:flex-end; }
+.model-photo { width:100%; aspect-ratio:3/4; background:#EAE6DF; position:relative; }
 .model-sil { width:56%; height:80%; background:#D8D3CA; border-radius:3px 3px 0 0; position:absolute; bottom:0; left:50%; transform:translateX(-50%); }
 .model-tag { position:absolute; top:8px; left:8px; font-size:11px; font-weight:800; color:#fff; background:rgba(0,0,0,0.5); padding:2px 7px; border-radius:5px; }
 .model-info { padding:8px 10px 10px; }
 .model-nm { font-size:13px; font-weight:700; color:#111; margin-bottom:3px; }
 .model-dt { font-size:11px; color:#999; line-height:1.5; }
 
-.spec-wrap { margin-bottom:20px; }
+/* 스펙 테이블 */
 .spec-t { font-size:13px; font-weight:700; color:#111; margin-bottom:10px; }
 .spec-table { width:100%; border-collapse:collapse; font-size:12px; }
 .spec-table th { background:#F5F3F0; color:#666; font-weight:600; padding:8px 6px; text-align:center; border-bottom:1px solid #ECEAE7; font-size:11px; }
 .spec-table td { padding:8px 6px; text-align:center; color:#333; border-bottom:1px solid #F0EDEA; }
-.spec-table tr.hl td { background:#F5F3F0; color:#111; font-weight:700; }
+.spec-table tr.hl td { background:#F0EDEA; color:#111; font-weight:700; }
 .spec-table tr:last-child td { border-bottom:none; }
-
-/* 하단 탭 */
-.bottom-nav { display:flex; background:#fff; border-top:1px solid #EEECEB; padding:8px 0 12px; position:sticky; bottom:0; z-index:100; }
-.bn-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:4px; cursor:pointer; padding:4px 0; }
-.bn-icon { width:24px; height:24px; display:flex; align-items:center; justify-content:center; position:relative; }
-.bn-badge { position:absolute; top:-3px; right:-5px; width:16px; height:16px; background:#E55024; color:#fff; font-size:9px; font-weight:800; border-radius:50%; display:flex; align-items:center; justify-content:center; border:1.5px solid #fff; }
-.bn-label { font-size:10px; font-weight:500; color:#AAA; }
-.bn-item.active .bn-label { color:#111; font-weight:700; }
 </style>
 </head>
 <body>
 
-<div class="proto-tag">오프린트미 PDP — 사이즈 추천 v2 (심플)</div>
+<div class="proto-tag">오프린트미 · 사이즈 탭 추천 컴포넌트</div>
 
 <div class="phone">
   <div class="notch-bar"><div class="notch-pill"></div></div>
@@ -218,232 +149,107 @@ body {
       </div>
     </div>
 
-    <div class="product-hero">
-      <div class="hero-img-mock">
-        <div class="sweatshirt-wrap">
-          <div class="design-lbl">DESIGN<br><span class="design-sub">here · Your design here.</span></div>
-        </div>
-      </div>
-    </div>
-
-    <div class="thumb-strip">
-      <div class="thumb active"><div class="thumb-in"><span class="thumb-lbl">DESIGN</span></div></div>
-      <div class="thumb"><div class="thumb-in"><span class="thumb-lbl">DESIGN</span></div></div>
-      <div class="thumb"><div class="thumb-in" style="background:#E8E4DE;"></div></div>
-      <div class="thumb"><div class="thumb-in" style="background:#DDD9D3;"></div></div>
-      <div class="thumb"><div class="thumb-in" style="background:#D0CBC4;"></div></div>
-    </div>
-
-    <div class="product-info">
-      <div class="rating-row">
-        <div class="stars"><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star">★</span><span class="star half">★</span></div>
-        <span class="rating-text">4.8</span>
-        <span class="review-link">(리뷰 93)</span>
-      </div>
-      <div class="product-name">팀블링 루즈핏 쭈리 맨투맨</div>
-      <div class="info-rows">
-        <div class="info-row">
-          <div class="info-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="1" y="3" width="12" height="10" rx="2" stroke="#888" stroke-width="1.2"/><path d="M1 6h12" stroke="#888" stroke-width="1.2"/><path d="M4 1v4M10 1v4" stroke="#888" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-          <span class="info-text">5만원 이상 주문 시 배송비 무료</span>
-        </div>
-        <div class="info-row">
-          <div class="info-icon"><svg width="14" height="14" viewBox="0 0 14 14" fill="none"><circle cx="7" cy="7" r="6" stroke="#888" stroke-width="1.2"/><path d="M7 4v3.5l2 2" stroke="#888" stroke-width="1.2" stroke-linecap="round"/></svg></div>
-          <span class="info-link">지금 주문 시 04/01(수) 출고 예정</span>
-        </div>
-      </div>
-
-      <div style="margin-bottom:14px;">
-        <div class="section-label">색상 <span id="colorLabel">아이보리</span></div>
-        <div class="color-row">
-          <div class="color-chip active" style="background:#F2EFE7;" data-name="아이보리" onclick="selColor(this)"></div>
-          <div class="color-chip" style="background:#C0BDBA;" data-name="라이트그레이" onclick="selColor(this)"></div>
-          <div class="color-chip" style="background:#2A2A2A;" data-name="블랙" onclick="selColor(this)"></div>
-          <div class="color-chip" style="background:#B8B5B0;" data-name="멜란지그레이" onclick="selColor(this)"></div>
-          <div class="color-chip" style="background:#1E3A5F;" data-name="네이비" onclick="selColor(this)"></div>
-        </div>
-      </div>
-
-      <div class="size-info-row">
-        <div class="size-info-top">
-          <div class="size-info-name" id="colorForSize">아이보리</div>
-          <div class="size-info-guide" onclick="gotoSizeTab()">전체 색상/사이즈 보기 <svg width="5" height="9" viewBox="0 0 5 9" fill="none"><path d="M1 1l3 3.5-3 3.5" stroke="#888" stroke-width="1.3" stroke-linecap="round"/></svg></div>
-        </div>
-        <div class="size-chips-row">
-          <div class="size-chip-sm">XS</div><div class="size-chip-sm">S</div><div class="size-chip-sm">M</div><div class="size-chip-sm">L</div><div class="size-chip-sm">XL</div><div class="size-chip-sm">2XL</div>
-        </div>
-      </div>
-
-      <div class="notice-box">
-        <div class="notice-title">안내</div>
-        <div class="notice-item">사이즈 선택은 편집 단계에서 진행됩니다.</div>
-      </div>
-
-      <div class="price-section">
-        <div class="price-label">총 금액</div>
-        <div class="price-main">18,250<span>원</span></div>
-        <div class="price-origin-row"><span class="price-origin">36,500원</span><span class="price-sale">50% SALE</span></div>
-        <div class="price-option">· 옵션 : 아이보리</div>
-      </div>
-      <div class="cta-wrap"><button class="cta-btn">직접 만들기</button></div>
-    </div>
-
     <!-- 탭 바 -->
     <div class="tab-bar">
-      <div class="tab-item" onclick="switchTab(0)">상품 소개</div>
-      <div class="tab-item active" onclick="switchTab(1)">사이즈</div>
-      <div class="tab-item" onclick="switchTab(2)">옵션</div>
-      <div class="tab-item" onclick="switchTab(3)">가격</div>
-      <div class="tab-item" onclick="switchTab(4)">작업가이드</div>
-      <div class="tab-item" onclick="switchTab(5)">유의사항</div>
+      <div class="tab-item">상품 소개</div>
+      <div class="tab-item active">사이즈</div>
+      <div class="tab-item">옵션</div>
+      <div class="tab-item">가격</div>
+      <div class="tab-item">작업가이드</div>
+      <div class="tab-item">유의사항</div>
     </div>
 
-    <div class="tab-contents">
-      <div><div style="padding:32px 16px;text-align:center;color:#CCC;font-size:13px;">상품 소개 영역</div></div>
+    <!-- 사이즈 탭 본문 -->
+    <div class="size-body">
 
-      <!-- ★ 사이즈 탭 -->
-      <div class="active" id="sizeTab">
-        <div class="size-tab-body">
-
-          <!-- ★ 추천 컴포넌트 — 심플 버전 -->
-          <div class="rec-box">
-            <div class="rec-box-desc">회원님의 체형정보를 입력하고<br>비슷한 체형이 많이 구매한 사이즈를 찾아보세요</div>
-            <div class="rec-inp-row">
-              <input class="rec-inp" id="hInp" type="number" inputmode="decimal" placeholder="키  cm" min="140" max="210">
-              <input class="rec-inp" id="wInp" type="number" inputmode="decimal" placeholder="몸무게  kg" min="30" max="150">
-              <button class="rec-go" id="recBtn" onclick="doRec()">추천</button>
+      <!-- ★ 추천 컴포넌트 -->
+      <div class="rec-box">
+        <div class="rec-desc">회원님의 체형정보를 입력하고<br>비슷한 체형이 많이 구매한 사이즈를 찾아보세요</div>
+        <div class="rec-inp-row">
+          <input class="rec-inp" id="hInp" type="number" inputmode="decimal" placeholder="키  cm" min="140" max="210">
+          <input class="rec-inp" id="wInp" type="number" inputmode="decimal" placeholder="몸무게  kg" min="30" max="150">
+          <button class="rec-go" id="recBtn" onclick="doRec()">추천</button>
+        </div>
+        <div class="rec-res" id="recRes">
+          <div class="res-sz-row">
+            <span class="res-sz-val" id="rSzVal">M</span>
+            <span class="res-sz-lbl">추천 사이즈</span>
+          </div>
+          <div class="res-bar-wrap">
+            <div class="res-bar-top">
+              <span class="res-bar-sz" id="rBarSz">M</span>
+              <span class="res-bar-pct" id="rBarPct">48% (129명 구매)</span>
             </div>
-            <div class="rec-res" id="recRes">
-              <div class="res-row">
-                <div class="res-sz">
-                  <span class="res-sz-val" id="rSzVal">M</span>
-                  <span class="res-sz-lbl">추천 사이즈</span>
-                </div>
-              </div>
-              <div class="res-bar-wrap">
-                <div class="res-bar-label">
-                  <span class="res-bar-sz" id="rBarSz">M</span>
-                  <span class="res-bar-pct" id="rBarPct">48% (129명 구매)</span>
-                </div>
-                <div class="res-bar-track"><div class="res-bar-fill" id="rBarFill" style="width:48%"></div></div>
-              </div>
-              <div class="res-reason" id="rReason"></div>
-              <div class="res-disc">해당 정보는 평균 체형의 구매 데이터를 기반으로 합니다. 체형 정보를 입력하시면 맞춤 사이즈를 제안해드립니다.</div>
-            </div>
+            <div class="res-bar-track"><div class="res-bar-fill" id="rBarFill"></div></div>
           </div>
-          <!-- ★ 끝 -->
+          <div class="res-reason" id="rReason"></div>
+          <div class="res-disc">해당 정보는 평균 체형의 구매 데이터를 기반으로 합니다. 체형 정보를 입력하시면 맞춤 사이즈를 제안해드립니다.</div>
+        </div>
+      </div>
+      <!-- ★ 끝 -->
 
-          <div class="guide-title">사이즈 안내</div>
-          <div class="model-grid">
-            <div class="model-card"><div class="model-photo"><div class="model-sil"></div><div class="model-tag">S</div></div><div class="model-info"><div class="model-nm">S사이즈</div><div class="model-dt">· 모델 정보 : 여성 / 163cm / 48kg</div></div></div>
-            <div class="model-card"><div class="model-photo"><div class="model-sil" style="background:#C8C3BB;"></div><div class="model-tag">L</div></div><div class="model-info"><div class="model-nm">L사이즈</div><div class="model-dt">· 모델 정보 : 남성 / 170cm / 60kg</div></div></div>
-            <div class="model-card"><div class="model-photo"><div class="model-sil" style="background:#CCC8C0;"></div><div class="model-tag">XL</div></div><div class="model-info"><div class="model-nm">XL사이즈</div><div class="model-dt">· 모델 정보 : 남성 / 175cm / 70kg</div></div></div>
-            <div class="model-card"><div class="model-photo"><div class="model-sil" style="background:#D0CBBF;"></div><div class="model-tag">2XL</div></div><div class="model-info"><div class="model-nm">2XL사이즈</div><div class="model-dt">· 모델 정보 : 남성 / 178cm / 82kg</div></div></div>
-          </div>
-
-          <div class="spec-wrap">
-            <div class="spec-t">사이즈 스펙 (cm)</div>
-            <table class="spec-table" id="specTbl">
-              <thead><tr><th>사이즈</th><th>총장</th><th>가슴단면</th><th>어깨너비</th><th>소매길이</th></tr></thead>
-              <tbody>
-                <tr><td>XS</td><td>63</td><td>46</td><td>40</td><td>19</td></tr>
-                <tr><td>S</td><td>66</td><td>48</td><td>42</td><td>20</td></tr>
-                <tr><td>M</td><td>69</td><td>51</td><td>45</td><td>21</td></tr>
-                <tr><td>L</td><td>72</td><td>54</td><td>48</td><td>22</td></tr>
-                <tr><td>XL</td><td>75</td><td>57</td><td>51</td><td>23</td></tr>
-                <tr><td>2XL</td><td>78</td><td>60</td><td>54</td><td>24</td></tr>
-              </tbody>
-            </table>
-          </div>
+      <!-- 사이즈 안내 -->
+      <div class="section-title">사이즈 안내</div>
+      <div class="model-grid">
+        <div class="model-card">
+          <div class="model-photo"><div class="model-sil"></div><div class="model-tag">S</div></div>
+          <div class="model-info"><div class="model-nm">S사이즈</div><div class="model-dt">· 모델 정보 : 여성 / 163cm / 48kg</div></div>
+        </div>
+        <div class="model-card">
+          <div class="model-photo"><div class="model-sil" style="background:#C8C3BB;"></div><div class="model-tag">L</div></div>
+          <div class="model-info"><div class="model-nm">L사이즈</div><div class="model-dt">· 모델 정보 : 남성 / 170cm / 60kg</div></div>
+        </div>
+        <div class="model-card">
+          <div class="model-photo"><div class="model-sil" style="background:#CCC8C0;"></div><div class="model-tag">XL</div></div>
+          <div class="model-info"><div class="model-nm">XL사이즈</div><div class="model-dt">· 모델 정보 : 남성 / 175cm / 70kg</div></div>
+        </div>
+        <div class="model-card">
+          <div class="model-photo"><div class="model-sil" style="background:#D0CBBF;"></div><div class="model-tag">2XL</div></div>
+          <div class="model-info"><div class="model-nm">2XL사이즈</div><div class="model-dt">· 모델 정보 : 남성 / 178cm / 82kg</div></div>
         </div>
       </div>
 
-      <div><div style="padding:32px 16px;text-align:center;color:#CCC;font-size:13px;">옵션 영역</div></div>
-      <div><div style="padding:32px 16px;text-align:center;color:#CCC;font-size:13px;">가격 영역</div></div>
-      <div><div style="padding:32px 16px;text-align:center;color:#CCC;font-size:13px;">작업가이드 영역</div></div>
-      <div><div style="padding:32px 16px;text-align:center;color:#CCC;font-size:13px;">유의사항 영역</div></div>
-    </div>
+      <!-- 스펙 테이블 -->
+      <div class="spec-t">사이즈 스펙 (cm)</div>
+      <table class="spec-table" id="specTbl">
+        <thead><tr><th>사이즈</th><th>총장</th><th>가슴단면</th><th>어깨너비</th><th>소매길이</th></tr></thead>
+        <tbody>
+          <tr><td>XS</td><td>63</td><td>46</td><td>40</td><td>19</td></tr>
+          <tr><td>S</td><td>66</td><td>48</td><td>42</td><td>20</td></tr>
+          <tr><td>M</td><td>69</td><td>51</td><td>45</td><td>21</td></tr>
+          <tr><td>L</td><td>72</td><td>54</td><td>48</td><td>22</td></tr>
+          <tr><td>XL</td><td>75</td><td>57</td><td>51</td><td>23</td></tr>
+          <tr><td>2XL</td><td>78</td><td>60</td><td>54</td><td>24</td></tr>
+        </tbody>
+      </table>
 
-    <div class="bottom-nav">
-      <div class="bn-item active">
-        <div class="bn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M3 9.5L11 3L19 9.5V19H14v-5H8v5H3V9.5Z" stroke="#111" stroke-width="1.5" stroke-linejoin="round"/></svg></div>
-        <div class="bn-label">홈</div>
-      </div>
-      <div class="bn-item">
-        <div class="bn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="9" r="6" stroke="#AAA" stroke-width="1.5"/><path d="M4 20c0-3.3 3.1-6 7-6s7 2.7 7 6" stroke="#AAA" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        <div class="bn-label">카테고리</div>
-      </div>
-      <div class="bn-item">
-        <div class="bn-icon">
-          <svg width="22" height="22" viewBox="0 0 22 22" fill="none"><path d="M4 4h14l-1.5 10H5.5L4 4Z" stroke="#AAA" stroke-width="1.5" stroke-linejoin="round"/><circle cx="8" cy="18" r="1.5" fill="#AAA"/><circle cx="14" cy="18" r="1.5" fill="#AAA"/></svg>
-          <div class="bn-badge">84</div>
-        </div>
-        <div class="bn-label">장바구니</div>
-      </div>
-      <div class="bn-item">
-        <div class="bn-icon"><svg width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="11" cy="8" r="3.5" stroke="#AAA" stroke-width="1.5"/><path d="M4 19c0-3 3.1-5 7-5s7 2 7 5" stroke="#AAA" stroke-width="1.5" stroke-linecap="round"/></svg></div>
-        <div class="bn-label">마이페이지</div>
-      </div>
     </div>
-
   </div>
 </div>
 
 <div style="width:390px;margin-top:20px;font-size:11px;color:#AAA;text-align:center;line-height:1.7;">
-  키·몸무게 입력 → 추천 버튼 → 결과 확인<br>
-  결과 후 "－ 작게 / ＋ 크게" 버튼으로 직접 조절 가능
+  키·몸무게 입력 후 '추천' 버튼으로 인터랙션 확인
 </div>
 
 <script>
 var SIZES = ['XS','S','M','L','XL','2XL'];
-var BUYER_DATA = [
-  {pct:12, count:32}, {pct:28, count:74}, {pct:48, count:129},
-  {pct:62, count:165}, {pct:41, count:108}, {pct:23, count:61}
+var BUYER = [
+  {pct:12,count:32},{pct:28,count:74},{pct:48,count:129},
+  {pct:62,count:165},{pct:41,count:108},{pct:23,count:61}
 ];
-var curIdx = 2;
-var baseH = 0, baseW = 0;
 
-function switchTab(idx) {
-  document.querySelectorAll('.tab-item').forEach(function(t,i){ t.classList.toggle('active', i===idx); });
-  document.querySelectorAll('.tab-contents > div').forEach(function(c,i){ c.classList.toggle('active', i===idx); });
-}
-function selColor(el) {
-  document.querySelectorAll('.color-chip').forEach(function(c){ c.classList.remove('active'); });
-  el.classList.add('active');
-  var n = el.dataset.name;
-  document.getElementById('colorLabel').textContent = n;
-  document.getElementById('colorForSize').textContent = n;
-}
-function gotoSizeTab() {
-  switchTab(1);
-  document.getElementById('sizeTab').scrollIntoView({ behavior:'smooth', block:'start' });
-}
 function getSizeIdx(h, w) {
-  var bmi = w/((h/100)*(h/100));
-  if (h<158) return 0;
-  if (h<163 && bmi<21) return 0;
-  if (h<167 && bmi<23) return 1;
-  if (h<172 && bmi<25) return 2;
-  if (h<177 && bmi<27) return 3;
-  if (h<183) return 3;
-  if (h<188) return 4;
+  var bmi = w / ((h/100)*(h/100));
+  if (h < 158) return 0;
+  if (h < 163 && bmi < 21) return 0;
+  if (h < 167 && bmi < 23) return 1;
+  if (h < 172 && bmi < 25) return 2;
+  if (h < 177 && bmi < 27) return 3;
+  if (h < 183) return 3;
+  if (h < 188) return 4;
   return 5;
 }
-function render(idx) {
-  var sz = SIZES[idx];
-  var d = BUYER_DATA[idx];
-  document.getElementById('rSzVal').textContent = sz;
-  document.getElementById('rBarSz').textContent = sz;
-  document.getElementById('rBarPct').textContent = d.pct + '% (' + d.count + '명 구매)';
-  document.getElementById('rBarFill').style.width = d.pct + '%';
-  var reason = baseH && baseW
-    ? baseH + 'cm · ' + baseW + 'kg 기준 ' + sz + '를 추천드려요. 비슷한 체형 구매자들이 가장 많이 선택한 사이즈예요.'
-    : sz + '가 가장 많이 구매된 사이즈예요.';
-  document.getElementById('rReason').textContent = reason;
 
-  document.querySelectorAll('#specTbl tbody tr').forEach(function(tr){
-    tr.classList.toggle('hl', tr.cells[0].textContent.trim() === sz);
-  });
-}
 function doRec() {
   var h = parseFloat(document.getElementById('hInp').value);
   var w = parseFloat(document.getElementById('wInp').value);
@@ -451,21 +257,35 @@ function doRec() {
     var el = document.getElementById('hInp');
     el.classList.add('err');
     el.focus();
-    setTimeout(function(){ el.classList.remove('err'); }, 1500);
+    setTimeout(function(){ el.classList.remove('err'); }, 600);
     return;
   }
-  baseH = h; baseW = w;
   var btn = document.getElementById('recBtn');
   btn.classList.add('busy'); btn.textContent = '…';
+
   setTimeout(function(){
-    curIdx = getSizeIdx(h, w);
-    render(curIdx);
+    var idx = getSizeIdx(h, w);
+    var sz  = SIZES[idx];
+    var d   = BUYER[idx];
+
+    document.getElementById('rSzVal').textContent  = sz;
+    document.getElementById('rBarSz').textContent  = sz;
+    document.getElementById('rBarPct').textContent = d.pct + '% (' + d.count + '명 구매)';
+    document.getElementById('rBarFill').style.width = '0%';
+    setTimeout(function(){ document.getElementById('rBarFill').style.width = d.pct + '%'; }, 30);
+    document.getElementById('rReason').textContent =
+      h + 'cm · ' + w + 'kg 기준, ' + sz + '를 추천드려요. 비슷한 체형 구매자들이 가장 많이 선택한 사이즈예요.';
+
+    document.querySelectorAll('#specTbl tbody tr').forEach(function(tr){
+      tr.classList.toggle('hl', tr.cells[0].textContent.trim() === sz);
+    });
+
     btn.classList.remove('busy'); btn.textContent = '재추천';
+
     var res = document.getElementById('recRes');
     res.classList.remove('show'); void res.offsetWidth; res.classList.add('show');
   }, 380);
 }
-
 </script>
 </body>
 </html>
