@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스냅스 구독 서비스 — PRD 변경 현황</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #F7F6F3;
+    --white: #FFFFFF;
+    --navy: #16213E;
+    --navy-mid: #2A3558;
+    --orange: #E85D1A;
+    --orange-soft: #FFF0E8;
+    --green: #1A8A5C;
+    --green-soft: #E8F5EE;
+    --amber: #B45309;
+    --amber-soft: #FEF3C7;
+    --red: #C0392B;
+    --red-soft: #FDECEA;
+    --blue: #1D5FAD;
+    --blue-soft: #EBF3FC;
+    --purple: #5B21B6;
+    --purple-soft: #F5F3FF;
+    --gray: #6B7280;
+    --gray-soft: #F3F4F6;
+    --border: #E5E3DE;
+    --text: #1C1C1E;
+    --text-sub: #6B7280;
+    --text-hint: #9CA3AF;
+  }
+
+  body {
+    font-family: 'Noto Sans KR', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── Header ── */
+  .header {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .header-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 60px;
+  }
+  .logo {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--orange);
+    letter-spacing: -0.3px;
+  }
+  .header-meta {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+  }
+
+  /* ── Tab bar ── */
+  .tabbar {
+    background: var(--white);
+    border-bottom: 1px solid var(--border);
+    position: sticky;
+    top: 60px;
+    z-index: 99;
+  }
+  .tabbar-inner {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 0 40px;
+    display: flex;
+    gap: 0;
+  }
+  .tab-btn {
+    padding: 0 20px;
+    height: 48px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text-sub);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.15s;
+    white-space: nowrap;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+  }
+  .tab-btn:hover { color: var(--text); }
+  .tab-btn.active { color: var(--navy); border-bottom-color: var(--orange); }
+  .tab-count {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 1px 7px;
+    border-radius: 10px;
+    background: var(--gray-soft);
+    color: var(--gray);
+  }
+  .tab-btn.active .tab-count { background: var(--orange-soft); color: var(--orange); }
+
+  /* ── Main ── */
+  .main {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 36px 40px 80px;
+  }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ── Section ── */
+  .section { margin-bottom: 36px; }
+  .section-title {
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--text-hint);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  /* ── Grid ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+    gap: 8px;
+  }
+
+  /* ── Card ── */
+  .card {
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+    transition: box-shadow 0.15s;
+  }
+  .card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+
+  .card-left {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    align-items: flex-start;
+    flex-shrink: 0;
+    min-width: 76px;
+  }
+
+  .card-body { flex: 1; min-width: 0; }
+  .card-title {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 4px;
+    line-height: 1.4;
+  }
+  .card-desc {
+    font-size: 12px;
+    color: var(--text-sub);
+    line-height: 1.6;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    white-space: nowrap;
+    line-height: 1.6;
+  }
+  .badge-prd { background: var(--gray-soft); color: var(--gray); }
+  .badge-done { background: var(--green-soft); color: var(--green); }
+  .badge-warn { background: var(--amber-soft); color: var(--amber); }
+  .badge-danger { background: var(--red-soft); color: var(--red); }
+  .badge-info { background: var(--blue-soft); color: var(--blue); }
+  .badge-new { background: var(--purple-soft); color: var(--purple); }
+  .badge-mismatch { background: #FFF7ED; color: #C2410C; }
+
+  .owner {
+    font-size: 10px;
+    color: var(--text-hint);
+    font-weight: 400;
+  }
+
+  /* ── Notice bar ── */
+  .notice {
+    font-size: 12px;
+    padding: 10px 14px;
+    border-radius: 8px;
+    margin-bottom: 16px;
+    border-left: 3px solid;
+  }
+  .notice-warn { background: var(--amber-soft); border-color: #F59E0B; color: #92400E; }
+  .notice-info { background: var(--blue-soft); border-color: #3B82F6; color: #1E40AF; }
+  .notice-danger { background: var(--red-soft); border-color: #EF4444; color: #991B1B; }
+
+  /* ── Single column list (for tab 3) ── */
+  .list { display: flex; flex-direction: column; gap: 8px; }
+  .list .card { border-left: 3px solid var(--border); }
+  .list .card.mismatch { border-left-color: #F59E0B; }
+  .list .card.missing-prd { border-left-color: #3B82F6; }
+
+  /* ── Highlight card ── */
+  .card.new-item { border-color: var(--purple); background: var(--purple-soft); }
+  .card.new-item .card-title { color: var(--purple); }
+
+  /* ── Summary row at top ── */
+  .summary {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 28px;
+    flex-wrap: wrap;
+  }
+  .summary-chip {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 16px;
+    flex: 1;
+    min-width: 140px;
+  }
+  .summary-num {
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    line-height: 1;
+  }
+  .summary-label { font-size: 12px; color: var(--text-sub); }
+
+  @media (max-width: 720px) {
+    .header-inner, .tabbar-inner, .main { padding-left: 20px; padding-right: 20px; }
+    .grid { grid-template-columns: 1fr; }
+    .tab-btn { padding: 0 12px; font-size: 12px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <div class="logo">SNAPS 구독 서비스</div>
+    <div class="header-meta">PRD 변경 현황 · 2026.04.29</div>
+  </div>
+</div>
+
+<div class="tabbar">
+  <div class="tabbar-inner">
+    <button class="tab-btn active" onclick="switchTab('done', this)">
+      PRD + 프로토 반영 완료 <span class="tab-count">14</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('prd', this)">
+      PRD 정리됨, 협의 미완 <span class="tab-count">6</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('notion', this)">
+      노션 DB 미결 <span class="tab-count">8</span>
+    </button>
+    <button class="tab-btn" onclick="switchTab('missing', this)">
+      추가 정리 필요 <span class="tab-count">5</span>
+    </button>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- ══════ TAB 1: 완료 ══════ -->
+  <div class="tab-panel active" id="panel-done">
+    <div class="summary">
+      <div class="summary-chip"><div class="summary-num" style="color:var(--green)">14</div><div class="summary-label">PRD + 프로토타입<br>반영 완료</div></div>
+      <div class="summary-chip"><div class="summary-num" style="color:var(--navy)">v4</div><div class="summary-label">프로토타입<br>최신 버전</div></div>
+      <div class="summary-chip"><div class="summary-num" style="color:var(--orange)">6</div><div class="summary-label">PRD 문서<br>PRD-0 ~ PRD-5</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">1. 구독 가입</div>
+      <div class="grid">
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-0,1</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">"라이트" → "베이직" 명칭 변경</div><div class="card-desc">전체 PRD 및 프로토타입 v4 일괄 반영</div></div></div>
+
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-0,1</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">통합 랜딩 (서비스소개 + 마케팅랜딩)</div><div class="card-desc">단일 화면으로 통합. CTA 버튼으로 경로 분기. 프로토타입 Flow A/B 반영</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-1</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">구독 탭 진입 5가지 분기 확정</div><div class="card-desc">비로그인·이력없음 → 랜딩B / 체험이력있음 → 랜딩A / 구독중·해지 → 홈</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-1</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">모바일 웹 접근 정책</div><div class="card-desc">홈/라이브러리/관리 웹 접근 가능. 앱 설치 유도 팝업 트리거 2개 확정</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-0</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">요금제 변경 → 다음 결제일 적용</div><div class="card-desc">업/다운그레이드 모두 다음 결제일부터 적용. 즉시 적용 없음</div></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">2. 포토북 자동 생성</div>
+      <div class="grid">
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-2,5</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">포토북 제목 매월 직접 입력</div><div class="card-desc">온보딩 1회 설정 방식 폐기. 매월 STEP 5에서 직접 입력. 지난달 제목 기본값 제공</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-5</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">발행일 변경 → 다음 결제일부터 적용</div><div class="card-desc">기존 "다음 생성일부터" 수정. 발행일 &lt; 결제일 역전 케이스 방지</div></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">3. 실물 배송</div>
+      <div class="grid">
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-0,3</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">시즌 첫 실물 발송: 가입 당월 기준 3개월</div><div class="card-desc">3월 가입 → 6월 발송. 노션 DB 확인 완료 항목과 일치</div></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">4. 공유 & 수신자</div>
+      <div class="grid">
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-0,4</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">수신자 실물 주문: 스냅스 회원만, 장바구니</div><div class="card-desc">비회원 주문 불가. 로그인 후 장바구니 담기 → 배송지 입력 → 결제</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-1,4</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">Flow B 최종 순서 확정</div><div class="card-desc">랜딩 → 커버타입 → 커버편집 → 테마 → 체험사진권한 → AI분석 → 체험미리보기 → 원본업로드 → 완성 → 구독전환 → 결제 → 구독+발행완료</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-4</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">공유 링크: 완성 시 자동 생성, 30일 만료</div><div class="card-desc">포토북 published 이벤트 시 자동 생성. 생성 후 30일 후 만료</div></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">5. 구독 관리</div>
+      <div class="grid">
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-5</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">시즌 요금제 일시정지 미제공</div><div class="card-desc">체리피킹 리스크. 시즌 해지 리텐션 오퍼는 디지털 다운그레이드 제안으로 대체</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-5</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">일시정지 중 생성 시도 시 재개 팝업</div><div class="card-desc">라이브러리/홈 CTA 진입 인터셉트 → "지금 일시정지를 해제하고 포토북을 만들까요?" 팝업</div></div></div>
+        <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-5</span><span class="badge badge-done">완료</span></div><div class="card-body"><div class="card-title">해지 후 포토북 접근 정책</div><div class="card-desc">구독중: 열람+공유+생성 / 일시정지: 열람+공유 / 해지 후 12개월: 열람만 / 초과: 차단</div></div></div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ TAB 2: PRD 정리됨, 협의 미완 ══════ -->
+  <div class="tab-panel" id="panel-prd">
+    <div class="notice notice-warn">PRD에는 정책이 작성되어 있으나 팀 공식 협의가 완료되지 않은 항목들입니다. 미팅에서 확인·결정이 필요합니다.</div>
+    <div class="grid">
+      <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-1,5</span><span class="badge badge-warn">협의 필요</span><span class="owner">PM</span></div><div class="card-body"><div class="card-title">발행완료 후 배송지 입력 방식</div><div class="card-desc">하드 블로킹(다음 진행 차단) vs 소프트 유도(건너뛰기 허용) 결정 필요. 현재 옵션만 정리된 상태</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-5</span><span class="badge badge-warn">협의 필요</span><span class="owner">PM · 마케팅</span></div><div class="card-body"><div class="card-title">해지 리텐션 오퍼 수치</div><div class="card-desc">사유별 오퍼 구조는 정리됨. 할인율 · 무료 연장 기간 · 일시정지 허용 기간 수치 미결</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-5</span><span class="badge badge-warn">협의 필요</span><span class="owner">PM · 법무</span></div><div class="card-body"><div class="card-title">해지 후 12개월 초과 원본 사진 삭제 시점</div><div class="card-desc">PRD에 [협의 필요] 태그 부착. 전자상거래법 기준 법무팀 검토 필요</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-0</span><span class="badge badge-warn">협의 필요</span><span class="owner">PM</span></div><div class="card-body"><div class="card-title">시즌 재가입 제한 기간</div><div class="card-desc">마지막 실물 발송일 기준 N개월 잠금으로 방향 정해짐. 구체 기간(1개월/2개월) 미결</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-4</span><span class="badge badge-warn">협의 필요</span><span class="owner">PM</span></div><div class="card-body"><div class="card-title">체험 포토북 아카이브 노출 위치</div><div class="card-desc">통합 랜딩 배너 / 구독+발행완료 인터셉트 / 구독홈 라이브러리 섹션 — 셋 중 결정 필요</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-prd">PRD-2</span><span class="badge badge-warn">협의 필요</span><span class="owner">PM · AI팀</span></div><div class="card-body"><div class="card-title">관심사(테마) 데이터 AI 전달 방식</div><div class="card-desc">PRD에 "큐레이션 전 AI에 전달"로 정의됨. 실제 파라미터 형태 등 개발·AI팀 협의 필요</div></div></div>
+    </div>
+  </div>
+
+  <!-- ══════ TAB 3: 노션 DB 미결 ══════ -->
+  <div class="tab-panel" id="panel-notion">
+    <div class="notice notice-info">노션 협의 필요 DB의 상태와 PRD 실제 반영 여부를 비교한 항목입니다.</div>
+
+    <div class="section">
+      <div class="section-title">노션 상태 불일치 — PRD는 확정됐으나 노션 DB 미업데이트 (3건)</div>
+      <div class="list">
+        <div class="card mismatch"><div class="card-left"><span class="badge badge-mismatch">노션: 협의필요</span><span class="badge badge-done">PRD: 완료</span></div><div class="card-body"><div class="card-title">관심사(테마) 데이터 입력</div><div class="card-desc">노션 상태 "협의 필요" → PRD에 아기/반려동물/자동으로 확정됨. 노션 상태를 "확인 완료"로 업데이트 필요</div></div></div>
+        <div class="card mismatch"><div class="card-left"><span class="badge badge-mismatch">노션: 협의필요</span><span class="badge badge-done">PRD: 완료</span></div><div class="card-body"><div class="card-title">커버 타이틀 입력 방식</div><div class="card-desc">노션 "개발 협의 필요(4/22)" 표기 → PRD에 매월 직접 입력으로 확정. 노션 업데이트 필요</div></div></div>
+        <div class="card mismatch"><div class="card-left"><span class="badge badge-mismatch">노션: 신규추가</span><span class="badge badge-done">PRD: 완료</span></div><div class="card-body"><div class="card-title">해지 시 디지털 포토북 열람 가능 여부</div><div class="card-desc">노션 "신규 추가" 상태 → PRD에 12개월 아카이브 열람으로 확정. 노션 "확인 완료"로 업데이트 필요</div></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">노션 미결 — PRD에 아직 미반영 (5건)</div>
+      <div class="list">
+        <div class="card missing-prd"><div class="card-left"><span class="badge badge-info">노션: 협의필요</span><span class="badge badge-warn">PRD: 미반영</span><span class="owner">PM · 디자인</span></div><div class="card-body"><div class="card-title">커버 색상 팔레트 확정</div><div class="card-desc">5~6색 팔레트 구성. 브랜드 컨셉 일치 여부 확인 필요. 디자인팀 확정 후 PRD-2 반영</div></div></div>
+        <div class="card missing-prd"><div class="card-left"><span class="badge badge-info">노션: 협의필요</span><span class="badge badge-warn">PRD: 미반영</span><span class="owner">PM · 디자인</span></div><div class="card-body"><div class="card-title">커버 디자인 타입별 시안 제작</div><div class="card-desc">A/B/C 타입별 세부 컨셉(A-1/A-2/A-3 등) 디자인 스펙. 디자인팀 산출물 필요</div></div></div>
+        <div class="card missing-prd"><div class="card-left"><span class="badge badge-info">노션: 협의필요</span><span class="badge badge-warn">PRD: 미반영</span><span class="owner">PM · 디자인 · 개발</span></div><div class="card-body"><div class="card-title">구독 탭 진입점 위치 (앱 내 IA)</div><div class="card-desc">하단 탭바 추가? 홈 배너? 마이페이지 내? 피그마 키비 참고 필요. PRD-0 IA에 반영 필요</div></div></div>
+        <div class="card missing-prd"><div class="card-left"><span class="badge badge-info">노션: 협의필요</span><span class="badge badge-warn">PRD: 미반영</span><span class="owner">개발</span></div><div class="card-body"><div class="card-title">상품코드 신규 생성 vs 기존 유지</div><div class="card-desc">구독 전용 신규 SKU vs 기존 코드 활용. 통계·트래킹 용이성 고려. 개발팀 확인 후 PRD-0에 추가</div></div></div>
+        <div class="card missing-prd"><div class="card-left"><span class="badge badge-info">노션: 상태없음</span><span class="badge badge-warn">PRD: 미반영</span><span class="owner">PM</span></div><div class="card-body"><div class="card-title">구독 후 미생성 케이스</div><div class="card-desc">구독됐는데 발행일이 지나도 포토북이 생성되지 않은 경우. 만료 처리 vs 소급 생성. PRD-2 엣지케이스에 추가 필요</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════ TAB 4: 추가 정리 필요 ══════ -->
+  <div class="tab-panel" id="panel-missing">
+    <div class="notice notice-danger">PRD에도 노션 DB에도 아직 없는 항목들입니다. 개발 착수 전 반드시 정리가 필요합니다.</div>
+    <div class="grid">
+      <div class="card"><div class="card-left"><span class="badge badge-danger">누락</span><span class="owner">법무</span></div><div class="card-body"><div class="card-title">알림톡 3자 전화번호 수집 법적 근거</div><div class="card-desc">공유 대상자 전화번호 수집 시 개인정보보호법 근거 확인 필요. 법무팀 검토 후 PRD-4에 반영</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-danger">누락</span><span class="owner">PM</span></div><div class="card-body"><div class="card-title">iOS IAP 적용 여부</div><div class="card-desc">앱스토어 인앱결제 규정상 구독 서비스 IAP 적용 필요 여부. PRD-1 결제 정책에 추가 필요</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-danger">누락</span><span class="owner">PM · 법무</span></div><div class="card-body"><div class="card-title">환불 정책</div><div class="card-desc">전자상거래법상 환불 조건 및 실물 발주 후 환불 불가 기준 정의 필요. 전체 PRD에 없음</div></div></div>
+      <div class="card"><div class="card-left"><span class="badge badge-danger">누락</span><span class="owner">PM</span></div><div class="card-body"><div class="card-title">공유 수신자 수 상한</div><div class="card-desc">1 구독당 공유 대상자 최대 몇 명까지 허용할지. PRD-4에 없음</div></div></div>
+      <div class="card new-item"><div class="card-left"><span class="badge badge-new">신규 추가</span><span class="owner">PM · 개발</span></div><div class="card-body"><div class="card-title">배송지 입력 순서 변경</div><div class="card-desc">현재 플로우에서 배송지 입력 시점·방식 재검토 필요. 발행완료 후 필수 입력 방식 확정 전 선행 논의 필요</div></div></div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function switchTab(id, btn) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('panel-' + id).classList.add('active');
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
