@@ -37,6 +37,14 @@ body { background: #E8E6E3; font-family: -apple-system, 'Apple SD Gothic Neo', '
 .rec-saved-val { font-size:13px; color:#555; }
 .rec-modify-btn { font-size:12px; color:#888; background:none; border:none; cursor:pointer; font-family:inherit; padding:0; text-decoration:underline; text-underline-offset:2px; }
 .rec-desc { font-size:13px; color:#555; line-height:1.55; margin-bottom:11px; }
+
+/* 성별 선택 */
+.sex-row { display:flex; gap:6px; margin-bottom:8px; }
+.sex-chip { flex:1; height:36px; border:1px solid #DDDBD8; border-radius:9px; font-size:13px; font-weight:600; color:#888; background:#fff; cursor:pointer; font-family:inherit; transition:all 0.12s; }
+.sex-chip.on { border-color:#111; background:#111; color:#fff; }
+/* 저장값 성별 표시 */
+.saved-sex { display:inline-block; font-size:11px; font-weight:700; background:#F0EDEA; color:#555; border-radius:5px; padding:2px 7px; margin-right:4px; vertical-align:middle; }
+
 .rec-inp-row { display:flex; gap:8px; align-items:center; }
 .rec-inp { flex:1; height:40px; min-width:0; background:#fff; border:1px solid #DDDBD8; border-radius:9px; font-size:13px; font-weight:500; color:#111; padding:0 12px; outline:none; font-family:inherit; -webkit-appearance:none; transition:border-color 0.15s, box-shadow 0.15s; }
 .rec-inp::placeholder { color:#C0BEBB; font-weight:400; }
@@ -174,7 +182,11 @@ body { background: #E8E6E3; font-family: -apple-system, 'Apple SD Gothic Neo', '
       <div class="size-body">
         <div class="size-info-title">사이즈 정보</div>
         <div class="rec-box">
-          <div class="rec-desc">회원님과 비슷한 체형이 구매한 사이즈<br>키와 몸무게를 입력해 주세요</div>
+          <div class="rec-desc">회원님과 비슷한 체형이 구매한 사이즈<br>성별·키·몸무게를 입력해 주세요</div>
+          <div class="sex-row">
+            <button class="sex-chip" id="sexG-M" data-sex="M" onclick="selSex('G','M')">남성</button>
+            <button class="sex-chip" id="sexG-F" data-sex="F" onclick="selSex('G','F')">여성</button>
+          </div>
           <div class="rec-inp-row">
             <input class="rec-inp" id="hG" type="number" inputmode="decimal" placeholder="키  cm">
             <input class="rec-inp" id="wG" type="number" inputmode="decimal" placeholder="몸무게  kg">
@@ -182,11 +194,7 @@ body { background: #E8E6E3; font-family: -apple-system, 'Apple SD Gothic Neo', '
           </div>
           <div class="rec-res" id="resG">
             <div class="res-sz-row"><span class="res-sz-val" id="szG">M</span><span class="res-sz-lbl">추천 사이즈</span></div>
-            <div class="res-bar-wrap">
-              <div class="res-bar-top"><span class="res-bar-sz" id="bszG">M</span><span class="res-bar-pct" id="bpctG"></span></div>
-              <div class="res-bar-track"><div class="res-bar-fill" id="bfillG"></div></div>
-            </div>
-            <div class="res-reason" id="reasonG"></div>
+
             <button class="hist-entry-card" onclick="openPopup()">
               <div class="hec-icon"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="11" rx="2.5" stroke="#fff" stroke-width="1.3"/><path d="M4 6.5h5M6.5 4v5" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg></div>
               <div class="hec-texts"><div class="hec-title">구매한 옷이랑 사이즈 비교하기</div><div class="hec-sub">과거 구매 상품으로 더 정확하게 확인해 보세요</div></div>
@@ -221,10 +229,14 @@ body { background: #E8E6E3; font-family: -apple-system, 'Apple SD Gothic Neo', '
         <div class="rec-box">
           <div class="rec-box-title">회원님과 비슷한 체형이 구매한 사이즈</div>
           <div class="rec-saved-row">
-            <span class="rec-saved-val" id="savedVal">168cm · 62kg</span>
+            <span><span class="saved-sex" id="savedSex">남성</span><span class="rec-saved-val" id="savedVal">168cm · 62kg</span></span>
             <button class="rec-modify-btn" onclick="toggleEdit()">수정하기</button>
           </div>
           <div id="editRow" style="display:none;margin-bottom:10px;">
+            <div class="sex-row">
+              <button class="sex-chip on" id="sexL-M" data-sex="M" onclick="selSex('L','M')">남성</button>
+              <button class="sex-chip" id="sexL-F" data-sex="F" onclick="selSex('L','F')">여성</button>
+            </div>
             <div class="rec-inp-row">
               <input class="rec-inp" id="hL" type="number" inputmode="decimal" placeholder="키  cm" value="168">
               <input class="rec-inp" id="wL" type="number" inputmode="decimal" placeholder="몸무게  kg" value="62">
@@ -233,11 +245,7 @@ body { background: #E8E6E3; font-family: -apple-system, 'Apple SD Gothic Neo', '
           </div>
           <div class="rec-res instant" id="resL">
             <div class="res-sz-row"><span class="res-sz-val" id="szL">L</span><span class="res-sz-lbl">추천 사이즈</span></div>
-            <div class="res-bar-wrap">
-              <div class="res-bar-top"><span class="res-bar-sz" id="bszL">L</span><span class="res-bar-pct" id="bpctL">62%</span></div>
-              <div class="res-bar-track"><div class="res-bar-fill" id="bfillL" style="width:62%"></div></div>
-            </div>
-            <div class="res-reason" id="reasonL">168cm · 62kg 기준, L을 추천드려요. 비슷한 체형 구매자들이 가장 많이 선택한 사이즈예요.</div>
+
             <button class="hist-entry-card" onclick="openPopup()">
               <div class="hec-icon"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1" y="1" width="11" height="11" rx="2.5" stroke="#fff" stroke-width="1.3"/><path d="M4 6.5h5M6.5 4v5" stroke="#fff" stroke-width="1.3" stroke-linecap="round"/></svg></div>
               <div class="hec-texts"><div class="hec-title">구매한 옷이랑 사이즈 비교하기</div><div class="hec-sub">과거 구매 상품으로 더 정확하게 확인해 보세요</div></div>
@@ -334,12 +342,22 @@ body { background: #E8E6E3; font-family: -apple-system, 'Apple SD Gothic Neo', '
 
 <script>
 var SIZES=['XS','S','M','L','XL','2XL'];
-var BUYER=[{pct:12,count:32},{pct:28,count:74},{pct:48,count:129},{pct:62,count:165},{pct:41,count:108},{pct:23,count:61}];
+// BUYER 데이터는 실데이터 확보 후 적용 예정
 var SPEC=[
   {sz:'XS',t:63,s:40,c:46,sl:19},{sz:'S',t:66,s:42,c:48,sl:20},
   {sz:'M',t:69,s:45,c:51,sl:21},{sz:'L',t:72,s:48,c:54,sl:22},
   {sz:'XL',t:75,s:51,c:57,sl:23},{sz:'2XL',t:78,s:54,c:60,sl:24}
 ];
+var curSex = {G:'M', L:'M'};
+
+function selSex(panel, sex) {
+  curSex[panel] = sex;
+  ['M','F'].forEach(function(s){
+    var el = document.getElementById('sex'+panel+'-'+s);
+    if(el) el.classList.toggle('on', s===sex);
+  });
+}
+
 var HIST=[
   {name:'헤비웨이트 베이직 티셔츠', sizes:['M'], specs:{'M':{t:69,s:45,c:51,sl:21}}},
   {name:'팀블링 루즈핏 쭈리 맨투맨', sizes:['S','M','L'], specs:{'S':{t:66,s:42,c:48,sl:20},'M':{t:69,s:45,c:51,sl:21},'L':{t:72,s:48,c:54,sl:22}}, sel:'M'},
@@ -355,19 +373,32 @@ function switchUser(idx){
   document.querySelector('.phone-screen').scrollTop=0;
   curP=idx===0?'G':'L';
 }
-function getSzIdx(h,w){ var bmi=w/((h/100)*(h/100)); if(h<158)return 0; if(h<163&&bmi<21)return 0; if(h<167&&bmi<23)return 1; if(h<172&&bmi<25)return 2; if(h<177&&bmi<27)return 3; if(h<183)return 3; if(h<188)return 4; return 5; }
+// 상품 스펙 (현재 상품 기준 — 가슴단면 cm)
+var PRODUCT_SPEC=[
+  {sz:'XS',chest:46},{sz:'S',chest:49},{sz:'M',chest:52},
+  {sz:'L',chest:55},{sz:'XL',chest:58},{sz:'2XL',chest:61}
+];
+// Size Korea 8차 인체치수조사(5,092명) 기반 가슴단면 추정
+// 남성: y = 0.1733*h + 0.0460*w + 16.74
+// 여성: y = -0.0957*h + 0.2385*w + 46.20 (+4cm 루즈핏 여유 보정)
+function estimateChest(sex, h, w) {
+  if (sex==='M') return 0.1733*h + 0.0460*w + 16.74;
+  else           return -0.0957*h + 0.2385*w + 46.20 + 4.0;
+}
+function getSzIdx(sex, h, w) {
+  var chest = estimateChest(sex, h, w);
+  var minD=999, best=2;
+  PRODUCT_SPEC.forEach(function(s,i){ var d=Math.abs(s.chest-chest); if(d<minD){minD=d;best=i;} });
+  return best;
+}
 function doRec(p){
   var h=parseFloat(document.getElementById('h'+p).value), w=parseFloat(document.getElementById('w'+p).value);
   if(!h||!w){ var el=document.getElementById('h'+p); el.classList.add('err'); el.focus(); setTimeout(function(){ el.classList.remove('err'); },600); return; }
   var btn=document.getElementById('btn'+p); btn.classList.add('busy'); btn.textContent='…';
   setTimeout(function(){
-    var idx=getSzIdx(h,w), sz=SIZES[idx], d=BUYER[idx];
+    var sex=curSex[p]||'M', idx=getSzIdx(sex,h,w), sz=SIZES[idx];
     document.getElementById('sz'+p).textContent=sz;
-    document.getElementById('bsz'+p).textContent=sz;
-    document.getElementById('bfill'+p).style.width='0%';
-    setTimeout(function(){ document.getElementById('bfill'+p).style.width=d.pct+'%'; },30);
-    document.getElementById('reason'+p).textContent=h+'cm · '+w+'kg 기준, '+sz+'를 추천드려요. 비슷한 체형 구매자들이 가장 많이 선택한 사이즈예요.';
-    if(p==='L'){ document.getElementById('savedVal').textContent=h+'cm · '+w+'kg'; document.getElementById('editRow').style.display='none'; editOpen=false; document.querySelectorAll('#tblL tbody tr').forEach(function(tr){ if(tr.classList.contains('my-sz'))return; tr.classList.toggle('hl',tr.cells[0].textContent.trim()===sz); }); }
+    if(p==='L'){ document.getElementById('savedSex').textContent=sex==='M'?'남성':'여성'; document.getElementById('savedVal').textContent=h+'cm · '+w+'kg'; document.getElementById('editRow').style.display='none'; editOpen=false; document.querySelectorAll('#tblL tbody tr').forEach(function(tr){ if(tr.classList.contains('my-sz'))return; tr.classList.toggle('hl',tr.cells[0].textContent.trim()===sz); }); }
     btn.classList.remove('busy'); btn.textContent='적용';
     var res=document.getElementById('res'+p); if(!res.classList.contains('instant')){ res.classList.remove('show'); void res.offsetWidth; res.classList.add('show'); }
   },380);
@@ -405,6 +436,14 @@ function confirmSel(){
   tbl.querySelectorAll('tbody tr')[simI+1].classList.add('similar');
   document.getElementById('legend'+p).classList.add('show');
   if(p==='L'){ document.getElementById('selBadgeName').textContent=label; document.getElementById('selBadge').classList.add('show'); }
+
+  // 스펙 테이블 앵커 스크롤
+  setTimeout(function(){
+    var tblEl = document.getElementById('tbl'+p);
+    var screen = document.querySelector('.phone-screen');
+    var offset = tblEl.getBoundingClientRect().top - screen.getBoundingClientRect().top + screen.scrollTop - 16;
+    screen.scrollTo({ top: offset, behavior: 'smooth' });
+  }, 120);
 }
 </script>
 </body>
