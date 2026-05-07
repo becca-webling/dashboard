@@ -364,7 +364,6 @@ function doRec(p){
     var idx=getSzIdx(h,w), sz=SIZES[idx], d=BUYER[idx];
     document.getElementById('sz'+p).textContent=sz;
     document.getElementById('bsz'+p).textContent=sz;
-    document.getElementById('bpct'+p).textContent=d.pct+'% ('+d.count+'명 구매)';
     document.getElementById('bfill'+p).style.width='0%';
     setTimeout(function(){ document.getElementById('bfill'+p).style.width=d.pct+'%'; },30);
     document.getElementById('reason'+p).textContent=h+'cm · '+w+'kg 기준, '+sz+'를 추천드려요. 비슷한 체형 구매자들이 가장 많이 선택한 사이즈예요.';
