@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스냅스 구독 서비스 — 정책 변경 미팅 자료</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #E8651A;
+    --orange-light: #FFF3EC;
+    --orange-mid: #F5C09A;
+    --navy: #1A1E2E;
+    --navy-mid: #2C3147;
+    --slate: #5C627A;
+    --slate-light: #8C93A8;
+    --bg: #F7F7F9;
+    --white: #FFFFFF;
+    --border: #E4E6ED;
+    --green: #16A05B;
+    --green-bg: #EAF7F1;
+    --amber: #D97706;
+    --amber-bg: #FEF3C7;
+    --red: #DC2626;
+    --red-bg: #FEF2F2;
+    --blue: #1D6FE8;
+    --blue-bg: #EFF6FF;
+    --purple: #7C3AED;
+    --purple-bg: #F5F3FF;
+    --r: 10px;
+    --r-sm: 6px;
+  }
+
+  body {
+    font-family: 'Pretendard', -apple-system, sans-serif;
+    background: var(--bg);
+    color: var(--navy);
+    min-height: 100vh;
+    font-size: 14px;
+    line-height: 1.6;
+  }
+
+  /* ── HEADER ── */
+  .doc-header {
+    background: var(--navy);
+    padding: 28px 40px 24px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 20px;
+  }
+  .doc-header-left { display: flex; flex-direction: column; gap: 6px; }
+  .doc-badge {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 500; letter-spacing: 0.06em;
+    color: var(--orange); background: rgba(232,101,26,0.12);
+    border: 1px solid rgba(232,101,26,0.25);
+    padding: 3px 10px; border-radius: 20px; width: fit-content;
+  }
+  .doc-title { font-size: 22px; font-weight: 600; color: #fff; letter-spacing: -0.02em; }
+  .doc-meta { font-size: 12px; color: var(--slate-light); margin-top: 2px; }
+  .doc-pills { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+  .doc-pill {
+    font-size: 11px; padding: 4px 12px; border-radius: 20px;
+    background: rgba(255,255,255,0.07); color: rgba(255,255,255,0.6);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  /* ── TABS ── */
+  .tab-nav {
+    background: var(--navy-mid);
+    padding: 0 40px;
+    display: flex; gap: 0;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .tab-btn {
+    padding: 14px 20px;
+    font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,0.45);
+    background: none; border: none; cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: all 0.18s;
+    display: flex; align-items: center; gap: 7px;
+    white-space: nowrap;
+  }
+  .tab-btn:hover { color: rgba(255,255,255,0.75); }
+  .tab-btn.active { color: #fff; border-bottom-color: var(--orange); }
+  .tab-icon { font-size: 14px; }
+
+  /* ── CONTENT ── */
+  .tab-content { display: none; padding: 32px 40px 48px; max-width: 860px; }
+  .tab-content.active { display: block; }
+
+  /* ── SECTION ── */
+  .section { margin-bottom: 32px; }
+  .section-title {
+    font-size: 11px; font-weight: 600; letter-spacing: 0.08em;
+    text-transform: uppercase; color: var(--slate-light);
+    margin-bottom: 12px;
+    display: flex; align-items: center; gap: 8px;
+  }
+  .section-title::after {
+    content: ''; flex: 1; height: 1px; background: var(--border);
+  }
+
+  /* ── PLAN CARDS ── */
+  .plan-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 12px; }
+  .plan-card {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 16px;
+    position: relative; overflow: hidden;
+  }
+  .plan-card.highlight { border: 2px solid var(--orange); }
+  .plan-card-accent {
+    position: absolute; top: 0; left: 0; right: 0; height: 3px;
+  }
+  .plan-name { font-size: 12px; font-weight: 500; color: var(--slate); margin-bottom: 4px; }
+  .plan-price { font-size: 20px; font-weight: 700; color: var(--navy); letter-spacing: -0.03em; }
+  .plan-period { font-size: 11px; font-weight: 400; color: var(--slate-light); }
+  .plan-prev { font-size: 11px; color: var(--slate-light); text-decoration: line-through; margin-top: 2px; }
+  .plan-tags { display: flex; flex-wrap: wrap; gap: 4px; margin: 10px 0 8px; }
+  .tag {
+    font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 4px;
+    letter-spacing: 0.03em;
+  }
+  .tag-new { background: var(--green-bg); color: var(--green); }
+  .tag-changed { background: var(--blue-bg); color: var(--blue); }
+  .tag-free { background: var(--green-bg); color: var(--green); }
+  .plan-desc { font-size: 11px; color: var(--slate); line-height: 1.7; border-top: 1px solid var(--border); padding-top: 8px; margin-top: 4px; }
+
+  /* ── CHANGE ITEMS ── */
+  .change-list { display: flex; flex-direction: column; gap: 8px; }
+  .change-item {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 14px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .change-item.warn { border-left: 3px solid var(--amber); border-radius: 0 var(--r) var(--r) 0; }
+  .change-item.info { border-left: 3px solid var(--blue); border-radius: 0 var(--r) var(--r) 0; }
+  .change-num {
+    width: 22px; height: 22px; border-radius: 50%;
+    background: var(--navy); color: #fff;
+    font-size: 10px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0; margin-top: 1px;
+  }
+  .change-body { flex: 1; }
+  .change-title { font-size: 13px; font-weight: 600; color: var(--navy); margin-bottom: 3px; }
+  .change-desc { font-size: 12px; color: var(--slate); line-height: 1.65; }
+  .change-example {
+    font-size: 11px; color: var(--slate-light);
+    background: var(--bg); border-radius: var(--r-sm);
+    padding: 6px 10px; margin-top: 7px; line-height: 1.65;
+  }
+  .change-example strong { color: var(--slate); }
+
+  /* ── FLOW BOXES ── */
+  .flow-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .flow-box {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 14px 16px;
+  }
+  .flow-box-title {
+    font-size: 12px; font-weight: 600; color: var(--navy);
+    margin-bottom: 10px; display: flex; align-items: center; gap: 6px;
+    padding-bottom: 8px; border-bottom: 1px solid var(--border);
+  }
+  .flow-step {
+    font-size: 11px; color: var(--slate);
+    padding: 3px 0; line-height: 1.5;
+    display: flex; align-items: flex-start; gap: 6px;
+  }
+  .flow-step::before { content: '·'; color: var(--slate-light); flex-shrink: 0; margin-top: 1px; }
+  .flow-step.changed { color: var(--orange); font-weight: 500; }
+  .flow-step.changed::before { color: var(--orange); }
+
+  /* ── NOTE BOX ── */
+  .note-box {
+    background: var(--amber-bg); border: 1px solid #FCD34D;
+    border-radius: var(--r-sm); padding: 10px 14px;
+    font-size: 12px; color: #92400E; line-height: 1.6; margin-top: 10px;
+  }
+
+  /* ── REVIEW TABLE (TAB 2) ── */
+  .review-section { margin-bottom: 28px; }
+  .review-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 12px;
+  }
+  .review-badge {
+    font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 20px;
+    display: flex; align-items: center; gap: 5px;
+  }
+  .badge-before { background: var(--navy); color: #fff; }
+  .badge-after { background: var(--bg); color: var(--slate); border: 1px solid var(--border); }
+  .review-count { font-size: 11px; color: var(--slate-light); }
+
+  .review-items { display: flex; flex-direction: column; gap: 6px; }
+  .review-item {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r); padding: 12px 16px;
+    display: flex; gap: 12px; align-items: flex-start;
+  }
+  .review-item-num {
+    font-size: 10px; font-weight: 700; color: var(--slate-light);
+    min-width: 20px; padding-top: 1px;
+  }
+  .review-item-body { flex: 1; }
+  .review-item-title { font-size: 13px; font-weight: 500; color: var(--navy); margin-bottom: 2px; }
+  .review-item-desc { font-size: 11px; color: var(--slate); line-height: 1.6; }
+  .review-tags { display: flex; gap: 4px; margin-top: 5px; flex-wrap: wrap; }
+  .rtag {
+    font-size: 10px; padding: 1px 7px; border-radius: 3px; font-weight: 500;
+  }
+  .rtag-policy { background: var(--purple-bg); color: var(--purple); }
+  .rtag-dev { background: var(--blue-bg); color: var(--blue); }
+  .rtag-ux { background: var(--green-bg); color: var(--green); }
+  .rtag-biz { background: var(--amber-bg); color: var(--amber); }
+
+  /* ── PRD TABLE (TAB 3) ── */
+  .prd-section { margin-bottom: 28px; }
+  .prd-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 11px; font-weight: 600; padding: 4px 12px;
+    border-radius: 20px; margin-bottom: 10px;
+  }
+  .prd-0 { background: #EEEDFE; color: #3C3489; }
+  .prd-1 { background: var(--blue-bg); color: var(--blue); }
+  .prd-3 { background: var(--green-bg); color: var(--green); }
+  .prd-5 { background: var(--amber-bg); color: var(--amber); }
+
+  .prd-items { display: flex; flex-direction: column; gap: 5px; }
+  .prd-item {
+    background: var(--white); border: 1px solid var(--border);
+    border-radius: var(--r-sm); padding: 10px 14px;
+    display: flex; gap: 12px; align-items: center;
+  }
+  .prd-item-num { font-size: 10px; font-weight: 700; color: var(--slate-light); min-width: 20px; }
+  .prd-item-title { flex: 1; font-size: 12px; color: var(--navy); font-weight: 400; }
+  .prd-item-title strong { font-weight: 500; }
+  .status-badge {
+    font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 4px;
+    white-space: nowrap; flex-shrink: 0;
+  }
+  .status-done { background: var(--green-bg); color: var(--green); }
+  .status-pending { background: var(--amber-bg); color: var(--amber); }
+
+  .prd-summary {
+    display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 24px;
+  }
+  .summary-chip {
+    font-size: 12px; padding: 6px 14px; border-radius: 20px;
+    background: var(--white); border: 1px solid var(--border);
+    color: var(--slate); display: flex; align-items: center; gap: 6px;
+  }
+  .summary-chip strong { color: var(--navy); font-weight: 600; }
+  .chip-dot { width: 7px; height: 7px; border-radius: 50%; }
+
+  /* ── DIVIDER ── */
+  hr.div { border: none; border-top: 1px solid var(--border); margin: 24px 0; }
+
+  /* ── RESPONSIVE ── */
+  @media (max-width: 640px) {
+    .doc-header { padding: 20px; flex-direction: column; align-items: flex-start; }
+    .tab-nav { padding: 0 16px; overflow-x: auto; }
+    .tab-content { padding: 20px 16px 40px; }
+    .plan-grid { grid-template-columns: 1fr; }
+    .flow-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<div class="doc-header">
+  <div class="doc-header-left">
+    <div class="doc-badge">2026.05.15 · 내부 미팅 자료</div>
+    <div class="doc-title">스냅스 포토북 구독 서비스 — 정책 변경사항</div>
+    <div class="doc-meta">요금제 개편 · 해지 방어 · 일시정지 · 가입 플로우 점검</div>
+  </div>
+  <div class="doc-pills">
+    <div class="doc-pill">PRD-0~5 연동</div>
+    <div class="doc-pill">개발 착수 전</div>
+    <div class="doc-pill">v1.0</div>
+  </div>
+</div>
+
+<!-- TABS -->
+<div class="tab-nav">
+  <button class="tab-btn active" onclick="switchTab('tab1', this)">
+    <span class="tab-icon">📋</span> 변경사항 요약
+  </button>
+  <button class="tab-btn" onclick="switchTab('tab2', this)">
+    <span class="tab-icon">🔍</span> 검토 예정 항목
+  </button>
+  <button class="tab-btn" onclick="switchTab('tab3', this)">
+    <span class="tab-icon">📄</span> PRD 반영 현황
+  </button>
+</div>
+
+<!-- ════════════════ TAB 1 : 변경사항 요약 ════════════════ -->
+<div id="tab1" class="tab-content active">
+
+  <!-- 요금제 개편 -->
+  <div class="section">
+    <div class="section-title">요금제 개편</div>
+    <div class="plan-grid">
+
+      <div class="plan-card">
+        <div class="plan-card-accent" style="background: var(--slate-light);"></div>
+        <div class="plan-name">디지털</div>
+        <div class="plan-price">무료</div>
+        <div class="plan-prev">기존 1,900원/월</div>
+        <div class="plan-tags">
+          <span class="tag tag-changed">정책 변경</span>
+        </div>
+        <div class="plan-desc">
+          결제 수단 등록 없이 바로 이용<br>
+          디지털 포토북만 제공<br>
+          가입 프로세스에서 결제 단계 생략
+        </div>
+      </div>
+
+      <div class="plan-card highlight">
+        <div class="plan-card-accent" style="background: var(--orange);"></div>
+        <div class="plan-name">베이직 ★ 추천</div>
+        <div class="plan-price">5,900<span class="plan-period">원/월</span></div>
+        <div class="plan-prev">요금 동일, 혜택 추가</div>
+        <div class="plan-tags">
+          <span class="tag tag-new">첫 달 무료 신규</span>
+        </div>
+        <div class="plan-desc">
+          1회차: 0원 / 2회차~: 5,900원<br>
+          디지털 + 매월 실물 배송
+        </div>
+      </div>
+
+      <div class="plan-card">
+        <div class="plan-card-accent" style="background: var(--blue);"></div>
+        <div class="plan-name">시즌</div>
+        <div class="plan-price">7,900<span class="plan-period">원/3개월</span></div>
+        <div class="plan-prev">기존 3,900원/월</div>
+        <div class="plan-tags">
+          <span class="tag tag-changed">결제 방식 변경</span>
+        </div>
+        <div class="plan-desc">
+          3개월 단위 일시결제<br>
+          결제월: 디지털 + 실물<br>
+          나머지 2개월: 디지털만 무료
+        </div>
+      </div>
+
+    </div>
+    <div class="change-example" style="margin-top: 10px; background: #fff; border: 1px solid var(--border); border-radius: var(--r-sm); padding: 10px 14px;">
+      <strong>시즌 예시:</strong> 1월 결제(7,900원) → 실물 배송 &nbsp;/&nbsp; 2·3월 디지털만 &nbsp;/&nbsp; 4월 재결제(7,900원) → 실물 배송
+    </div>
+  </div>
+
+  <!-- 신규 기능 & 정책 변경 -->
+  <div class="section">
+    <div class="section-title">신규 기능 &amp; 정책 변경</div>
+    <div class="change-list">
+
+      <div class="change-item">
+        <div class="change-num">1</div>
+        <div class="change-body">
+          <div class="change-title">해지 방어 — 베이직 전용 할인 오퍼</div>
+          <div class="change-desc">해지 신청 시 다음 달 한시적 할인(3,900원) 제공 후 원래 요금 복귀. 베이직 전용.</div>
+          <div class="change-example">
+            <strong>예시:</strong> 5월 해지 신청 → 6월 3,900원 → 7월부터 5,900원 정상 청구<br>
+            <strong>노출 문구:</strong> "가족 N명이 이 책을 함께 받고 있어요"
+          </div>
+        </div>
+      </div>
+
+      <div class="change-item">
+        <div class="change-num">2</div>
+        <div class="change-body">
+          <div class="change-title">일시정지 중 디지털 포토북 계속 발급</div>
+          <div class="change-desc">일시정지 중에도 디지털 포토북은 자동 생성 유지. 실물 발주만 중단.</div>
+          <div class="change-example">
+            조부모 등 실물 수령 불가 상황에서도 디지털 경험 유지 → 해지 방지 효과
+          </div>
+        </div>
+      </div>
+
+      <div class="change-item warn">
+        <div class="change-num">3</div>
+        <div class="change-body">
+          <div class="change-title">디지털 → 베이직/시즌 업그레이드: 즉시 적용 검토</div>
+          <div class="change-desc">기존 "다음 달 적용" 정책에서, 무료 플랜이므로 즉시 적용이 UX상 자연스러움. 결제 수단 미등록 상태에서 즉시 업그레이드 시 결제 수단 등록 단계 삽입 필요.</div>
+          <div class="change-example">⚠️ 개발 구현 방식에 직접 영향 — 오픈 전 정책 확정 필요</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- 가입 플로우 점검 -->
+  <div class="section">
+    <div class="section-title">가입 플로우 케이스별 점검</div>
+    <div class="flow-grid">
+
+      <div class="flow-box">
+        <div class="flow-box-title">🆓 디지털 (무료) 가입</div>
+        <div class="flow-step">요금제 선택 → 디지털</div>
+        <div class="flow-step changed">결제 수단 등록 단계 생략</div>
+        <div class="flow-step changed">S1 완료 → 바로 S3 가입 완료로 이동</div>
+        <div class="flow-step">온보딩 (테마·공유 대상자 등) 진행</div>
+        <div class="flow-step changed">가입 안내 알림톡 — 결제 정보 없는 별도 템플릿 필요</div>
+      </div>
+
+      <div class="flow-box">
+        <div class="flow-box-title">⭐ 베이직 (첫 달 무료) 가입</div>
+        <div class="flow-step">요금제 선택 → 베이직</div>
+        <div class="flow-step changed">결제 수단 등록 (첫 달 무료 안내 표시)</div>
+        <div class="flow-step changed">결제 요약: 오늘 0원 / 2회차부터 5,900원</div>
+        <div class="flow-step">온보딩 진행</div>
+        <div class="flow-step changed">알림톡: "첫 달 무료" 문구 포함 별도 템플릿</div>
+      </div>
+
+      <div class="flow-box">
+        <div class="flow-box-title">📅 시즌 가입</div>
+        <div class="flow-step">요금제 선택 → 시즌</div>
+        <div class="flow-step changed">결제 주기 안내 필수 (3개월 단위)</div>
+        <div class="flow-step changed">결제 요약: 오늘 7,900원 / 다음 결제일 +3개월</div>
+        <div class="flow-step">온보딩 진행</div>
+        <div class="flow-step changed">알림톡: 분기 결제 구조 + 실물 배송 기준 안내</div>
+      </div>
+
+      <div class="flow-box">
+        <div class="flow-box-title">🔄 디지털 → 베이직/시즌 변경</div>
+        <div class="flow-step changed">즉시 vs 다음 달 — 정책 확정 필요</div>
+        <div class="flow-step changed">결제 수단 등록 단계 신규 삽입</div>
+        <div class="flow-step changed">D-1 컷오프 기준 — 현재 발행 사이클 편입 여부</div>
+        <div class="flow-step">업그레이드 완료 알림톡 발송</div>
+      </div>
+
+    </div>
+
+    <div class="note-box">
+      ⚠️ <strong>공통 점검:</strong> 디지털 포토북이 가입 프로세스를 타면서 발송되는 알림톡 전수 검토 필요. 요금제별 결제 정보·무료 여부·배송 안내가 모두 다름.
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════ TAB 2 : 검토 예정 항목 ════════════════ -->
+<div id="tab2" class="tab-content">
+
+  <!-- 오픈 전 -->
+  <div class="review-section">
+    <div class="review-header">
+      <div class="review-badge badge-before">🔒 오픈 전 확정 필요</div>
+      <div class="review-count">7건 — 개발 착수 전 결정 필요</div>
+    </div>
+    <div class="review-items">
+
+      <div class="review-item">
+        <div class="review-item-num">01</div>
+        <div class="review-item-body">
+          <div class="review-item-title">디지털 → 유료 업그레이드 적용 시점</div>
+          <div class="review-item-desc">무료 플랜이므로 즉시 적용이 자연스럽지만, 기존 "다음 결제일 적용" 원칙과의 충돌 정리 필요. 개발 구현 방식에 직접 영향.</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span><span class="rtag rtag-dev">개발</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">02</div>
+        <div class="review-item-body">
+          <div class="review-item-title">베이직 첫 달 무료 vs 기존 무료 체험 정책 관계</div>
+          <div class="review-item-desc">기존 "계정당 1회 무료 체험" 정책이 "베이직 첫 달 무료"로 대체되는지, 병존하는지 확정 필요. 무료 체험 D-3 알림·자동 해지 정책 적용 범위도 재정의 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">03</div>
+        <div class="review-item-body">
+          <div class="review-item-title">알림톡 템플릿 요금제별 분기 내용 확정</div>
+          <div class="review-item-desc">디지털 무료화로 가입 완료·결제·배송 관련 알림톡 전수 수정 필요. 요금제별(디지털/베이직/시즌) 분기 템플릿 내용 확정 후 카카오 사전 심사 일정 고려.</div>
+          <div class="review-tags"><span class="rtag rtag-dev">개발</span><span class="rtag rtag-policy">정책</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">04</div>
+        <div class="review-item-body">
+          <div class="review-item-title">일시정지 중 디지털 발급 — POD 제외 로직 개발 범위</div>
+          <div class="review-item-desc">일시정지 상태에서 디지털은 계속 생성되고 실물 발주만 제외. B-02/B-03 배치의 일시정지 상태 체크 로직 분리 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-dev">개발</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">05</div>
+        <div class="review-item-body">
+          <div class="review-item-title">해지 후 디지털 포토북 열람 기간</div>
+          <div class="review-item-desc">현재 PRD에서 미확정 상태 (6개월 vs 12개월 vs 무기한). 스토리지 비용 및 재가입 유도 정책과 직결. 개발 전 확정 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span><span class="rtag rtag-biz">비즈</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">06</div>
+        <div class="review-item-body">
+          <div class="review-item-title">시즌 비결제월 앱 내 안내 방식</div>
+          <div class="review-item-desc">비결제월(2개월) 사용자에게 "이번 달은 디지털만 이용 가능" 안내 노출 방식. 히어로 카드 배지 or 별도 배너 or 인앱 알림. UX 방향 결정 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-ux">UX</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">07</div>
+        <div class="review-item-body">
+          <div class="review-item-title">디지털 요금제 가입자 실물 추가 주문 허용 여부</div>
+          <div class="review-item-desc">디지털 가입자가 라이브러리에서 개별 실물 주문 가능한지 여부. 허용 시 가격 기준(구독 할인가 vs 일반가) 및 결제 수단 등록 플로우도 함께 정의 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span><span class="rtag rtag-biz">비즈</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <hr class="div">
+
+  <!-- 오픈 후 -->
+  <div class="review-section">
+    <div class="review-header">
+      <div class="review-badge badge-after">📌 오픈 이후 검토 (V2)</div>
+      <div class="review-count">5건</div>
+    </div>
+    <div class="review-items">
+
+      <div class="review-item">
+        <div class="review-item-num">01</div>
+        <div class="review-item-body">
+          <div class="review-item-title">해지 방어 오퍼 조건 상세 기준</div>
+          <div class="review-item-desc">베이직 해지 방어 3,900원 오퍼를 몇 회 이상 구독자에게만 제공할지 등 발동 기준. 임시 할인 구독 상태 DB 처리 방식 정의 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span><span class="rtag rtag-biz">비즈</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">02</div>
+        <div class="review-item-body">
+          <div class="review-item-title">시즌 요금제 해지 방어</div>
+          <div class="review-item-desc">시즌 구독자 해지 시 방어 오퍼 설계. 분기 결제 구조상 베이직과 다른 접근 필요 (디지털 다운그레이드 제안 또는 결제 유예 등).</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span><span class="rtag rtag-biz">비즈</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">03</div>
+        <div class="review-item-body">
+          <div class="review-item-title">시즌 체리피킹 방어 방안</div>
+          <div class="review-item-desc">결제 구조 변경(월 → 분기 일시결제)에 따라 체리피킹 패턴 재분석 필요. 재가입 주기 제한, 결제 후 해지 시 실물 미발송 처리 등 방안 검토.</div>
+          <div class="review-tags"><span class="rtag rtag-policy">정책</span><span class="rtag rtag-biz">비즈</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">04</div>
+        <div class="review-item-body">
+          <div class="review-item-title">구독 쿠폰 시스템</div>
+          <div class="review-item-desc">재가입 할인 쿠폰 자동 적용 / 이벤트 무료 쿠폰 (기간/금액) 발급 및 적용 시스템. 예: 2개월 무료 쿠폰, 500원 할인 쿠폰 등. 쿠폰 적용 순서 및 중복 정책 포함.</div>
+          <div class="review-tags"><span class="rtag rtag-dev">개발</span><span class="rtag rtag-biz">비즈</span></div>
+        </div>
+      </div>
+
+      <div class="review-item">
+        <div class="review-item-num">05</div>
+        <div class="review-item-body">
+          <div class="review-item-title">실물 포토북 구매 할인 방식</div>
+          <div class="review-item-desc">① 공유 링크 → 장바구니 담기 → 구매 시 할인 적용 &nbsp;② 디지털 포토북 라이브러리 → 실물 구매 시 구독자 할인 적용. 할인율·방식·적용 범위 정의 필요.</div>
+          <div class="review-tags"><span class="rtag rtag-biz">비즈</span><span class="rtag rtag-ux">UX</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+
+<!-- ════════════════ TAB 3 : PRD 반영 현황 ════════════════ -->
+<div id="tab3" class="tab-content">
+
+  <div class="prd-summary">
+    <div class="summary-chip">
+      <div class="chip-dot" style="background: var(--green);"></div>
+      반영 완료 <strong>15건</strong>
+    </div>
+    <div class="summary-chip">
+      <div class="chip-dot" style="background: var(--amber);"></div>
+      정책 확정 후 반영 <strong>6건</strong>
+    </div>
+    <div class="summary-chip" style="color: var(--slate-light); font-size: 11px;">
+      마지막 업데이트 2026.05.15
+    </div>
+  </div>
+
+  <!-- PRD-0 -->
+  <div class="prd-section">
+    <div class="prd-label prd-0">PRD-0 · 오버뷰 &amp; 공통 정책</div>
+    <div class="prd-items">
+      <div class="prd-item">
+        <div class="prd-item-num">01</div>
+        <div class="prd-item-title">요금제 테이블 전면 개정 — 디지털 무료 / 베이직 첫 달 무료 / 시즌 7,900원/3개월 분기결제</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">02</div>
+        <div class="prd-item-title">요금제 정책 원칙 — 디지털(무료)→유료 즉시 적용 분기 추가</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">03</div>
+        <div class="prd-item-title">B-03 시즌 배치 트리거 — "분기 결제 완료 이벤트 확인 후 발주"로 재정의</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">04</div>
+        <div class="prd-item-title">일시정지 공통 정책 — 포토북 생성 "기간 중 없음" → 디지털 계속 발급, 실물 발주만 중단</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">05</div>
+        <div class="prd-item-title">서비스 IA 코드블럭 — 결제 등록 단계 디지털(무료) 생략 분기 명시</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRD-1 -->
+  <div class="prd-section">
+    <div class="prd-label prd-1">PRD-1 · 구독 가입 플로우</div>
+    <div class="prd-items">
+      <div class="prd-item">
+        <div class="prd-item-num">06</div>
+        <div class="prd-item-title">디지털 가입 시 S2(결제 등록) 생략 — 경로 A 플로우 코드블럭 분기 반영</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">07</div>
+        <div class="prd-item-title">S1 요금제 선택 화면 — 베이직 "첫 달 무료" 배지 / 시즌 7,900원/3개월 / 디지털 "무료" 표기</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">08</div>
+        <div class="prd-item-title">S2 결제 요약 — 베이직 오늘 0원/2회차 5,900원 / 시즌 오늘 7,900원/+3개월 / 디지털 미노출</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">09</div>
+        <div class="prd-item-title">무료 체험 정책 재정리 — 기존 체험 vs 베이직 첫 달 무료 관계 (대체 or 병존)</div>
+        <div class="status-badge status-pending">⏳ 정책 확정 후</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">10</div>
+        <div class="prd-item-title">가입 완료 알림톡 요금제별 분기 — 릴리즈 체크리스트에 반영</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">11</div>
+        <div class="prd-item-title">Flow B 구독전환 화면 요금제 카드 — 가격/혜택 정보 전면 업데이트</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRD-3 -->
+  <div class="prd-section">
+    <div class="prd-label prd-3">PRD-3 · 실물 배송</div>
+    <div class="prd-items">
+      <div class="prd-item">
+        <div class="prd-item-num">12</div>
+        <div class="prd-item-title">시즌 실물 발주 트리거 — 분기 결제 완료 이벤트 확인 후 해당 월 published 포토북 대상 발주</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">13</div>
+        <div class="prd-item-title">일시정지 중 실물 발주 제외 — B-02/B-03 배치 일시정지 상태 체크 후 스킵 명시</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PRD-5 -->
+  <div class="prd-section">
+    <div class="prd-label prd-5">PRD-5 · 구독 관리</div>
+    <div class="prd-items">
+      <div class="prd-item">
+        <div class="prd-item-num">14</div>
+        <div class="prd-item-title">히어로 카드 — 디지털 "무료 (결제 수단 불필요)" 표기 변경</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">15</div>
+        <div class="prd-item-title">히어로 카드 — 시즌 "7,900원/3개월 · 결제월 실물 유무 표시" 변경</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">16</div>
+        <div class="prd-item-title">디지털→유료 즉시 업그레이드 플로우 — 결제 수단 등록 삽입·즉시 전환·D-1 컷오프 처리</div>
+        <div class="status-badge status-pending">⏳ 정책 확정 후</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">17</div>
+        <div class="prd-item-title">일시정지 정책 테이블 — 포토북 생성 "디지털 계속 자동 생성, 실물 발주만 중단"으로 수정</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">17-2</div>
+        <div class="prd-item-title">상태별 기능 차이 표 — 일시정지 중 신규 생성 "✅ (디지털만, 실물 발주 없음)"으로 수정</div>
+        <div class="status-badge status-done">✅ 반영</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">18</div>
+        <div class="prd-item-title">해지 방어 — 베이직 전용 3,900원 할인 오퍼 플로우 신규 정의</div>
+        <div class="status-badge status-pending">⏳ 정책 확정 후</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">19</div>
+        <div class="prd-item-title">해지 방어 수락 후 임시 할인 구독 상태 처리 정책 및 배치 정의</div>
+        <div class="status-badge status-pending">⏳ 정책 확정 후</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">20</div>
+        <div class="prd-item-title">D1 무료 체험 종료 여정 재검토 — 디지털 상시 무료화에 따른 여정 재정의 또는 폐지</div>
+        <div class="status-badge status-pending">⏳ 정책 확정 후</div>
+      </div>
+      <div class="prd-item">
+        <div class="prd-item-num">21</div>
+        <div class="prd-item-title">알림 이벤트 테이블 — 시즌 전용 이벤트 (분기 결제 D-3 / 완료 / 비결제월 안내) 추가</div>
+        <div class="status-badge status-pending">⏳ 정책 확정 후</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  function switchTab(id, btn) {
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+  }
+</script>
+</body>
+</html>
