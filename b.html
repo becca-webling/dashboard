@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스냅스 구독 쿠폰 — 옵션 B (코드 전용) 프로토타입</title>
+<style>
+  :root {
+    --bg: #f0efed;
+    --phone-w: 390px;
+    --phone-h: 844px;
+    --snap-orange: #ff5c35;
+    --snap-deep: #e84420;
+    --snap-light: #fff5f2;
+    --text: #1a1a1a;
+    --sub: #888;
+    --sub2: #aaa;
+    --border: #e8e8e8;
+    --green: #2e7d32;
+    --green-bg: #e8f5e9;
+    --red: #d32f2f;
+    --red-bg: #ffebee;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Noto Sans KR', 'Malgun Gothic', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    padding: 32px 16px 60px;
+    min-height: 100vh;
+  }
+
+  /* Top header */
+  .doc-header { max-width: 900px; margin: 0 auto 24px; text-align: center; }
+  .doc-header h1 { font-size: 20px; font-weight: 800; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .doc-header p { font-size: 13px; color: var(--sub); line-height: 1.5; }
+
+  .option-summary { max-width: 720px; margin: 24px auto 28px; padding: 14px 18px; background: #fff; border-radius: 12px; font-size: 12px; color: #555; line-height: 1.6; border: 1px solid #eee; }
+  .option-summary strong { color: var(--text); }
+
+  /* Phones row */
+  .phones-row { display: flex; flex-wrap: wrap; gap: 32px; justify-content: center; align-items: flex-start; }
+  .phone-col { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .phone-label { font-size: 12px; font-weight: 700; color: var(--text); background: #fff; padding: 6px 14px; border-radius: 20px; border: 1px solid #eee; }
+  .phone-label .step { color: var(--snap-orange); margin-right: 6px; }
+
+  .phone-frame { width: var(--phone-w); height: var(--phone-h); background: #fff; border-radius: 44px; box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,0,0,0.06); overflow: hidden; position: relative; }
+  .phone-notch { position: absolute; top: 0; left: 50%; transform: translateX(-50%); width: 126px; height: 34px; background: #000; border-radius: 0 0 20px 20px; z-index: 100; }
+  .phone-home-bar { position: absolute; bottom: 8px; left: 50%; transform: translateX(-50%); width: 134px; height: 5px; background: #1a1a1a; border-radius: 3px; z-index: 100; }
+  .phone-content { width: 100%; height: 100%; overflow: hidden; position: relative; background: #fff; }
+
+  /* Screens */
+  .screen { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: #fff; display: flex; flex-direction: column; overflow: hidden; }
+
+  .status-bar { height: 54px; flex-shrink: 0; }
+  .nav-bar { display: flex; align-items: center; padding: 0 16px; height: 48px; flex-shrink: 0; border-bottom: 1px solid var(--border); position: relative; }
+  .nav-back { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; cursor: pointer; border: none; background: none; font-size: 20px; color: var(--text); border-radius: 8px; }
+  .nav-title { position: absolute; left: 50%; transform: translateX(-50%); font-size: 15px; font-weight: 600; }
+  .nav-step { margin-left: auto; font-size: 12px; color: var(--sub2); font-weight: 500; }
+
+  .screen-body { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 120px; }
+  .screen-body h2 { font-size: 22px; font-weight: 800; line-height: 1.35; margin-bottom: 6px; letter-spacing: -0.3px; }
+  .screen-body .desc { font-size: 13px; color: var(--sub); margin-bottom: 22px; line-height: 1.5; }
+
+  .bottom-cta { position: absolute; bottom: 0; left: 0; right: 0; padding: 12px 20px 36px; background: linear-gradient(transparent, #fff 25%); z-index: 20; }
+  .btn-primary { width: 100%; height: 52px; border: none; border-radius: 14px; background: var(--snap-orange); color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+  .btn-primary:hover { background: var(--snap-deep); }
+
+  /* Section */
+  .section { margin-bottom: 22px; }
+  .section-title { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; justify-content: space-between; }
+  .section-title .helper { font-size: 11px; color: var(--sub); font-weight: 500; }
+
+  /* Payment method input */
+  .pay-card { border: 1.5px solid var(--border); border-radius: 14px; padding: 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+  .pay-icon-sm { width: 36px; height: 36px; border-radius: 9px; background: linear-gradient(135deg, #ffd16a, #ff8c42); display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; font-weight: 700; flex-shrink: 0; }
+  .pay-card .pay-name { font-size: 14px; font-weight: 600; }
+  .pay-card .pay-sub { font-size: 11px; color: var(--sub); margin-top: 2px; }
+  .pay-card .edit { margin-left: auto; font-size: 12px; color: var(--snap-orange); font-weight: 600; cursor: pointer; }
+
+  /* === OPTION B: 코드 입력 1줄 === */
+  .coupon-input-b { display: flex; gap: 8px; }
+  .coupon-input-b input { flex: 1; height: 48px; border: 1.5px solid var(--border); border-radius: 12px; padding: 0 14px; font-size: 14px; font-family: inherit; letter-spacing: 1px; text-transform: uppercase; outline: none; transition: border 0.15s; background: #fafafa; }
+  .coupon-input-b input:focus { border-color: var(--snap-orange); background: #fff; }
+  .coupon-input-b input::placeholder { letter-spacing: 0.3px; text-transform: none; color: var(--sub2); }
+  .coupon-input-b .btn-verify { height: 48px; padding: 0 18px; border: 1.5px solid var(--border); border-radius: 12px; background: #fff; font-size: 13px; font-weight: 700; color: var(--text); cursor: pointer; font-family: inherit; white-space: nowrap; }
+  .coupon-input-b .btn-verify:hover { border-color: var(--snap-orange); color: var(--snap-orange); }
+
+  .coupon-input-b-result { margin-top: 10px; padding: 12px 14px; border-radius: 10px; font-size: 12px; line-height: 1.5; display: none; }
+  .coupon-input-b-result.success { background: var(--green-bg); color: var(--green); border: 1px solid #c8e6c9; display: block; }
+  .coupon-input-b-result.success strong { font-weight: 700; }
+
+  /* Price preview */
+  .price-preview { margin-top: 16px; padding: 16px; background: #fafafa; border-radius: 12px; border: 1px solid #f0f0f0; }
+  .price-row { display: flex; justify-content: space-between; align-items: center; padding: 6px 0; font-size: 13px; }
+  .price-row.label { color: var(--sub); }
+  .price-row.discount { color: var(--snap-orange); font-weight: 600; }
+  .price-row.discount .amt { font-weight: 700; }
+  .price-row.total { padding-top: 12px; border-top: 1px solid #e8e8e8; margin-top: 6px; font-size: 15px; font-weight: 700; }
+  .price-row.total .amt { font-size: 18px; font-weight: 800; color: var(--snap-orange); }
+  .price-row .strike { text-decoration: line-through; color: var(--sub2); font-size: 12px; margin-right: 6px; }
+
+  /* Plan info */
+  .plan-info-card { background: var(--snap-light); border-radius: 12px; padding: 14px 16px; margin-bottom: 22px; display: flex; align-items: center; gap: 12px; }
+  .plan-info-card .pi-badge { background: var(--snap-orange); color: #fff; font-size: 10px; font-weight: 700; padding: 3px 8px; border-radius: 6px; flex-shrink: 0; }
+  .plan-info-card .pi-name { font-size: 13px; font-weight: 700; }
+  .plan-info-card .pi-price { font-size: 12px; color: var(--sub); margin-top: 1px; }
+
+  @media (max-width: 880px) {
+    .phones-row { flex-direction: column; align-items: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="doc-header">
+  <h1>스냅스 구독 쿠폰 시스템 — 프로토타입</h1>
+  <p>옵션 B (코드 전용) UX 흐름</p>
+  <div class="option-summary">
+    <strong>옵션 B 요약</strong> · 사용자는 코드를 입력하면 즉시 다음 결제에 적용 및 예약됩니다. 별도의 보유함 UI가 없으며, 시스템은 3상태(미사용→사용/만료)로 단순화됩니다. 마케팅 일괄 지급 시 1인 1코드 대량 생성 및 알림톡 발송 방식을 활용합니다.
+  </div>
+</div>
+
+<div id="opt-b">
+<div class="phones-row">
+
+  <!-- B-1: 결제수단 등록 (코드 입력 빈 상태) -->
+  <div class="phone-col">
+    <div class="phone-label"><span class="step">1</span>가입 - 결제수단 등록</div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-content">
+        <div class="screen active">
+          <div class="status-bar"></div>
+          <div class="nav-bar">
+            <button class="nav-back">←</button>
+            <div class="nav-title">결제 정보</div>
+            <div class="nav-step">3/3</div>
+          </div>
+          <div class="screen-body">
+            <h2>결제수단을<br/>등록할게요</h2>
+            <p class="desc">언제든지 해지·변경할 수 있어요</p>
+
+            <div class="plan-info-card">
+              <div class="pi-badge">베이직</div>
+              <div>
+                <div class="pi-name">디지털+실물 베이직 플랜</div>
+                <div class="pi-price">첫 달 무료 · 이후 월 5,900원</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">결제수단</div>
+              <div class="pay-card">
+                <div class="pay-icon-sm">N</div>
+                <div>
+                  <div class="pay-name">네이버페이</div>
+                  <div class="pay-sub">naver_user@****.com</div>
+                </div>
+                <div class="edit">변경</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">쿠폰 코드<span class="helper">선택사항</span></div>
+              <div class="coupon-input-b">
+                <input type="text" placeholder="쿠폰 코드 입력" maxlength="12" id="codeB1" oninput="this.value=this.value.toUpperCase()" />
+                <button class="btn-verify" onclick="verifyCodeB('codeB1', 'codeBResult')">확인</button>
+              </div>
+              <div class="coupon-input-b-result" id="codeBResult">
+                ✓ <strong>신년 특가 20% 할인</strong> 적용됨<br/>
+                <span style="opacity: 0.8;">첫 유효 결제에 자동으로 할인이 적용돼요</span>
+              </div>
+              <div style="font-size: 11px; color: var(--sub); margin-top: 8px; line-height: 1.5;">
+                코드를 받으셨나요? 알림톡·이메일에서 코드를 확인하세요
+              </div>
+            </div>
+          </div>
+          <div class="bottom-cta">
+            <button class="btn-primary">동의하고 시작하기</button>
+          </div>
+        </div>
+      </div>
+      <div class="phone-home-bar"></div>
+    </div>
+  </div>
+
+  <!-- B-2: 코드 적용 후 -->
+  <div class="phone-col">
+    <div class="phone-label"><span class="step">2</span>코드 적용 후</div>
+    <div class="phone-frame">
+      <div class="phone-notch"></div>
+      <div class="phone-content">
+        <div class="screen active">
+          <div class="status-bar"></div>
+          <div class="nav-bar">
+            <button class="nav-back">←</button>
+            <div class="nav-title">결제 정보</div>
+            <div class="nav-step">3/3</div>
+          </div>
+          <div class="screen-body">
+            <h2>결제수단을<br/>등록할게요</h2>
+            <p class="desc">언제든지 해지·변경할 수 있어요</p>
+
+            <div class="plan-info-card">
+              <div class="pi-badge">베이직</div>
+              <div>
+                <div class="pi-name">디지털+실물 베이직 플랜</div>
+                <div class="pi-price">첫 달 무료 · 이후 월 5,900원</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">결제수단</div>
+              <div class="pay-card">
+                <div class="pay-icon-sm">N</div>
+                <div>
+                  <div class="pay-name">네이버페이</div>
+                  <div class="pay-sub">naver_user@****.com</div>
+                </div>
+                <div class="edit">변경</div>
+              </div>
+            </div>
+
+            <div class="section">
+              <div class="section-title">쿠폰 코드</div>
+              <div class="coupon-input-b">
+                <input type="text" value="NEWYEAR20" readonly style="background: var(--snap-light); border-color: var(--snap-orange); color: var(--snap-orange); font-weight: 700;" />
+                <button class="btn-verify" style="border-color: var(--snap-orange); color: var(--snap-orange);">해제</button>
+              </div>
+              <div class="coupon-input-b-result success">
+                ✓ <strong>신년 특가 20% 할인</strong> 적용됨<br/>
+                <span style="opacity: 0.8;">첫 유효 결제에 자동으로 할인이 적용돼요</span>
+              </div>
+            </div>
+
+            <div class="price-preview">
+              <div class="price-row label">
+                <span>첫 결제 (베이직 첫달무료)</span>
+                <span style="color: var(--green); font-weight: 600;">0원</span>
+              </div>
+              <div class="price-row label" style="font-size: 11px; color: var(--sub2);">
+                <span>↳ 다음 결제(7/22) 자동 할인</span>
+                <span></span>
+              </div>
+              <div class="price-row discount">
+                <span>20% 할인</span>
+                <span class="amt">−1,180원</span>
+              </div>
+              <div class="price-row total">
+                <span>다음 결제 금액</span>
+                <span><span class="strike">5,900원</span><span class="amt">4,720원</span></span>
+              </div>
+            </div>
+          </div>
+          <div class="bottom-cta">
+            <button class="btn-primary">동의하고 시작하기</button>
+          </div>
+        </div>
+      </div>
+      <div class="phone-home-bar"></div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+  function verifyCodeB(inputId, resultId) {
+    const input = document.getElementById(inputId);
+    const result = document.getElementById(resultId);
+    
+    // 시연을 위해 4자 이상 입력 시 성공 화면으로 전환
+    if (input.value.trim().length >= 4) {
+      input.value = 'NEWYEAR20';
+      input.readOnly = true;
+      input.style.background = 'var(--snap-light)';
+      input.style.borderColor = 'var(--snap-orange)';
+      input.style.color = 'var(--snap-orange)';
+      input.style.fontWeight = '700';
+      result.classList.add('success');
+      result.style.display = 'block';
+    }
+  }
+</script>
+
+</body>
+</html>
