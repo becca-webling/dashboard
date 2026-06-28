@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>스냅스 결제 퍼널 데이터 인사이트 v1.0</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<style>
+  * { box-sizing: border-box; }
+  html, body { margin: 0; padding: 0; }
+  body { background: #f8fafc; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, sans-serif; }
+  #root { min-height: 100vh; }
+  #loading { padding: 40px; font-family: 'Pretendard', sans-serif; color: #64748b; font-size: 14px; }
+  .recharts-wrapper { font-family: 'Pretendard', sans-serif; }
+</style>
+<!-- 순서 중요: React -> ReactDOM -> prop-types -> Recharts(React,PropTypes 필요) -> Babel -->
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/prop-types@15.8.1/prop-types.min.js"></script>
+<script crossorigin src="https://cdn.jsdelivr.net/npm/recharts@2.15.4/umd/Recharts.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@babel/standalone@7.26.4/babel.min.js"></script>
+</head>
+<body>
+<div id="root"><div id="loading">대시보드를 불러오는 중입니다...</div></div>
+
+<script type="text/babel" data-presets="react">
+const { useState } = React;
+const {
+  BarChart, Bar, LineChart, Line, AreaChart, Area, PieChart, Pie, Cell,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, Legend, CartesianGrid
+} = Recharts;
+
+
+const SECTIONS = [
+  { id:"overview",    label:"📋 개요",                  group:"개요" },
+  { id:"funnel",      label:"1. 단계별 전환율",          group:"분석" },
+  { id:"abandon",     label:"2. 결제시도 이탈(146002)",   group:"분석" },
+  { id:"recovery",    label:"3. 이탈 유저 추적",          group:"분석" },
+  { id:"category",    label:"4. 카테고리별",              group:"분석" },
+  { id:"price",       label:"5. 객단가별",                group:"분석" },
+  { id:"purchase",    label:"6. 첫구매 vs 재구매",        group:"분석" },
+  { id:"payment",     label:"7. 결제수단",                group:"분석" },
+  { id:"coupon",      label:"8. 쿠폰·할인",               group:"분석" },
+  { id:"hourly",      label:"9. 결제 시간대",             group:"분석" },
+  { id:"channelmix",  label:"10. 프로젝트 채널 구성",     group:"분석" },
+  { id:"limits",      label:"⚠️ 한계 및 검증 필요",       group:"부록" },
+  { id:"mapping",     label:"🎯 데이터 → 정책 매핑",      group:"부록" },
+];
+
+function App() {
+  const [section, setSection] = useState("overview");
+  const groups = [...new Set(SECTIONS.map(s => s.group))];
+
+  return (
+    <div style={{ fontFamily:"'Pretendard',-apple-system,sans-serif", display:"flex", minHeight:"100vh", background:"#f8fafc", color:"#1e293b" }}>
+      {/* Sidebar */}
+      <aside style={{ width:240, background:"#fff", borderRight:"1px solid #e2e8f0", padding:20, position:"sticky", top:0, height:"100vh", overflowY:"auto" }}>
+        <div style={{ fontSize:13, fontWeight:800, marginBottom:4, color:"#1e293b" }}>스냅스 결제 퍼널</div>
+        <div style={{ fontSize:11, color:"#64748b", marginBottom:20 }}>데이터 인사이트 v1.0</div>
+        {groups.map(g => (
+          <div key={g} style={{ marginBottom:14 }}>
+            <div style={{ fontSize:10, fontWeight:700, color:"#94a3b8", marginBottom:6, textTransform:"uppercase", letterSpacing:0.5 }}>{g}</div>
+            {SECTIONS.filter(s => s.group === g).map(s => (
+              <button key={s.id} onClick={()=>setSection(s.id)} style={{
+                display:"block", width:"100%", textAlign:"left", padding:"7px 10px",
+                borderRadius:6, border:"none", marginBottom:2, cursor:"pointer",
+                fontSize:12, fontWeight: section===s.id ? 700 : 400,
+                background: section===s.id ? "#1e293b" : "transparent",
+                color: section===s.id ? "#fff" : "#475569",
+                transition:"all 0.1s"
+              }}>{s.label}</button>
+            ))}
+          </div>
+        ))}
+      </aside>
+
+      {/* Main */}
+      <main style={{ flex:1, padding:32, maxWidth:1100 }}>
+        {section === "overview"   && <Overview />}
+        {section === "funnel"     && <Funnel />}
+        {section === "abandon"    && <Abandon />}
+        {section === "recovery"   && <Recovery />}
+        {section === "category"   && <Category />}
+        {section === "price"      && <Price />}
+        {section === "purchase"   && <Purchase />}
+        {section === "payment"    && <Payment />}
+        {section === "coupon"     && <Coupon />}
+        {section === "hourly"     && <Hourly />}
+        {section === "channelmix" && <ChannelMix />}
+        {section === "limits"     && <Limits />}
+        {section === "mapping"    && <Mapping />}
+      </main>
+    </div>
+  );
+}
+
+// ─── 공통 컴포넌트 ───
+const Card = ({ title, children, color="#fff", border="#e2e8f0" }) => (
+  <div style={{ background:color, borderRadius:10, padding:16, border:`1px solid ${border}`, marginBottom:14 }}>
+    {title && <div style={{ fontSize:14, fontWeight:700, marginBottom:10 }}>{title}</div>}
+    {children}
+  </div>
+);
+
+const Insight = ({ children, color="#fef3c7", border="#fbbf24", text="#92400e" }) => (
+  <div style={{ background:color, borderRadius:10, padding:14, border:`1px solid ${border}`, marginBottom:14 }}>
+    <div style={{ fontSize:12, fontWeight:700, color:text, marginBottom:6 }}>💡 인사이트</div>
+    <div style={{ fontSize:12, color:text, lineHeight:1.8 }}>{children}</div>
+  </div>
+);
+
+const Policy = ({ children }) => (
+  <div style={{ background:"#f0fdf4", borderRadius:10, padding:14, border:"1px solid #86efac", marginBottom:14 }}>
+    <div style={{ fontSize:12, fontWeight:700, color:"#166534", marginBottom:6 }}>🎯 연결되는 정책</div>
+    <div style={{ fontSize:12, color:"#15803d", lineHeight:1.8 }}>{children}</div>
+  </div>
+);
+
+const Purpose = ({ children }) => (
+  <div style={{ background:"#eff6ff", borderRadius:10, padding:14, border:"1px solid #93c5fd", marginBottom:14 }}>
+    <div style={{ fontSize:12, fontWeight:700, color:"#1e40af", marginBottom:6 }}>🔍 분석 목적</div>
+    <div style={{ fontSize:12, color:"#1e3a5f", lineHeight:1.8 }}>{children}</div>
+  </div>
+);
+
+const H1 = ({ children, sub }) => (
+  <div style={{ marginBottom:24 }}>
+    <h1 style={{ fontSize:22, fontWeight:800, margin:0, marginBottom:4 }}>{children}</h1>
+    {sub && <div style={{ fontSize:13, color:"#64748b" }}>{sub}</div>}
+  </div>
+);
+
+const th = { padding:"10px 8px", textAlign:"center", fontWeight:600, fontSize:12, borderBottom:"1px solid #e2e8f0", whiteSpace:"nowrap", background:"#f8fafc" };
+const td = { padding:"8px", textAlign:"center", borderBottom:"1px solid #f1f5f9", fontSize:12, whiteSpace:"nowrap" };
+
+// ═══════════════════════════════════════════════
+// 1. 개요
+// ═══════════════════════════════════════════════
+const Overview = () => (
+  <>
+    <H1 sub="스냅스 KR · 2026년 4~5월 · BigQuery 기반">스냅스 결제 퍼널 데이터 인사이트</H1>
+
+    <Card title="분석 개요">
+      <table style={{ width:"100%", fontSize:13, borderCollapse:"collapse" }}>
+        <tbody>
+          <tr><td style={{...td,textAlign:"left",width:140,fontWeight:600}}>데이터 소스</td><td style={{...td,textAlign:"left"}}>BigQuery (snaps_carts, snaps_orders, snaps_product_groups, GA4)</td></tr>
+          <tr><td style={{...td,textAlign:"left",fontWeight:600}}>분석 기간</td><td style={{...td,textAlign:"left"}}>2026-04-01 ~ 2026-05-31 (스냅스 KR 한정)</td></tr>
+          <tr><td style={{...td,textAlign:"left",fontWeight:600}}>채널 구분</td><td style={{...td,textAlign:"left"}}>PC (KOR0000) / 모바일 (KOR0031)</td></tr>
+          <tr><td style={{...td,textAlign:"left",fontWeight:600}}>cart_status</td><td style={{...td,textAlign:"left"}}>146001 (장바구니) / 146002 (결제시도 이탈) / 146003 (주문완료)</td></tr>
+          <tr><td style={{...td,textAlign:"left",fontWeight:600}}>제외 처리</td><td style={{...td,textAlign:"left"}}>bot 계정 user_no=37751189 / cart_deleted_yn='Y' / project_deleted_yn='Y'</td></tr>
+        </tbody>
+      </table>
+    </Card>
+
+    <Card title="핵심 지표 요약 (한눈에)">
+      <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:12 }}>
+        {[
+          { k:"모바일 총 전환율", v:"58.5%", c:"#f97316" },
+          { k:"PC 총 전환율", v:"57.0%", c:"#3b82f6" },
+          { k:"모바일 결제시도 이탈", v:"20,674건", c:"#dc2626", sub:"11,503명, 2개월" },
+          { k:"모바일 간편결제 비중", v:"66.5%", c:"#10b981", sub:"네페+토스+카페" },
+          { k:"쿠폰 사용 주문 비율", v:"59%", c:"#8b5cf6" },
+          { k:"당일 결제 비중", v:"73%", c:"#0ea5e9", sub:"20-23시 35% 집중" },
+        ].map((kpi,i)=>(
+          <div key={i} style={{ background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, padding:14 }}>
+            <div style={{ fontSize:11, color:"#64748b", marginBottom:4 }}>{kpi.k}</div>
+            <div style={{ fontSize:24, fontWeight:800, color:kpi.c }}>{kpi.v}</div>
+            {kpi.sub && <div style={{ fontSize:10, color:"#94a3b8", marginTop:2 }}>{kpi.sub}</div>}
+          </div>
+        ))}
+      </div>
+    </Card>
+
+    <Card title="3대 핵심 문제 진단" color="#fff7ed" border="#fdba74">
+      <div style={{ fontSize:13, color:"#9a3412", lineHeight:1.8 }}>
+        <div style={{ marginBottom:8 }}><b>1. 모바일 주문서 결제 마찰</b> — 결제시도 이탈 20,674건. PG 오류가 아닌 UI 마찰</div>
+        <div style={{ marginBottom:8 }}><b>2. 할인 정보 가시성 약함</b> — 쿠폰 사용 59%인데 장바구니·주문서에서 잘 안 보임</div>
+        <div><b>3. 즉흥구매·모바일 재구매 마찰 집중</b> — 굿즈 18.2% / 폰케이스 21.9% 이탈, 모바일 재구매 카테고리 믹스 효과로 GAP 7.9%p</div>
+      </div>
+    </Card>
+  </>
+);
+
+// ═══════════════════════════════════════════════
+// 1. 단계별 전환율
+// ═══════════════════════════════════════════════
+const Funnel = () => {
+  const data = [
+    { stage:"장바구니→주문서", "모바일":75.6, "PC":70.5 },
+    { stage:"주문서→구매완료", "모바일":76.4, "PC":80.9 },
+    { stage:"총 전환율", "모바일":58.5, "PC":57.0 },
+  ];
+
+  return (
+    <>
+      <H1 sub="장바구니→주문서→구매완료 3단계 전환율을 디바이스·월별로 측정">1. 단계별 전환율</H1>
+
+      <Purpose>장바구니→주문서→구매완료 각 단계의 전환율을 디바이스별로 분리해 누수가 발생하는 단계를 특정.</Purpose>
+
+      <Card title="디바이스별 전환율 (4~5월 합산, 장바구니 경유 기준)">
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="stage" tick={{ fontSize:12 }}/>
+            <YAxis tick={{ fontSize:11 }} domain={[0,100]} unit="%"/>
+            <Tooltip formatter={(v)=>`${v}%`} contentStyle={{ fontSize:12 }}/>
+            <Legend wrapperStyle={{ fontSize:12 }}/>
+            <Bar dataKey="PC" fill="#3b82f6" radius={[3,3,0,0]}/>
+            <Bar dataKey="모바일" fill="#f97316" radius={[3,3,0,0]}/>
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Card title="월별 추이 (모바일)">
+        <ResponsiveContainer width="100%" height={220}>
+          <LineChart data={[
+            { month:"4월", "장바구니→주문서":77.6, "주문서→구매완료":76.5 },
+            { month:"5월", "장바구니→주문서":73.1, "주문서→구매완료":78.6 },
+          ]}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="month" tick={{ fontSize:12 }}/>
+            <YAxis tick={{ fontSize:11 }} domain={[60,90]} unit="%"/>
+            <Tooltip formatter={(v)=>`${v}%`} contentStyle={{ fontSize:12 }}/>
+            <Legend wrapperStyle={{ fontSize:11 }}/>
+            <Line type="monotone" dataKey="장바구니→주문서" stroke="#f97316" strokeWidth={2.5} dot={{ r:5 }}/>
+            <Line type="monotone" dataKey="주문서→구매완료" stroke="#dc2626" strokeWidth={2.5} dot={{ r:5 }}/>
+          </LineChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Insight>
+        <b>모바일 장바구니→주문서가 4→5월 4.5%p 하락</b> (77.6%→73.1%). 모바일은 두 단계 모두에서 누수 발생, PC는 첫 단계 손실이 큼.<br/>
+        총 전환율은 비슷하지만, <b>모바일 트래픽이 PC의 2배</b>라 절대 손실 규모는 모바일이 훨씬 큼.
+      </Insight>
+
+      <Policy>기능 6 결제수단 순서 / 기능 7 약관 일괄 동의 / 기능 1 쿠폰 가시화 / 기능 8 배송지 가독성 — 결제 마찰 축소 정책 전반</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 2. 결제시도 이탈 (146002)
+// ═══════════════════════════════════════════════
+const Abandon = () => (
+  <>
+    <H1 sub="cart_status=146002 — 주문서 페이지 진입 후 결제 시도 전 이탈">2. 결제시도 이탈의 정체</H1>
+
+    <Purpose>주문서 페이지까지 진입했지만 결제를 완료하지 못한 프로젝트가 어떤 상태인지 파악. 결제 실패(PG 오류) vs 결제 시도 전 이탈을 구분.</Purpose>
+
+    <Card title="146002 프로젝트의 snaps_orders 매칭 결과 (모바일)">
+      <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
+        <div style={{ flex:1, minWidth:200, padding:14, background:"#fef2f2", borderRadius:8, border:"1px solid #fca5a5", textAlign:"center" }}>
+          <div style={{ fontSize:30, fontWeight:800, color:"#dc2626" }}>20,764건</div>
+          <div style={{ fontSize:12, color:"#991b1b" }}>결제시도 이탈 프로젝트</div>
+        </div>
+        <div style={{ flex:1, minWidth:200, padding:14, background:"#fff7ed", borderRadius:8, border:"1px solid #fdba74", textAlign:"center" }}>
+          <div style={{ fontSize:30, fontWeight:800, color:"#c2410c" }}>0건</div>
+          <div style={{ fontSize:12, color:"#9a3412" }}>snaps_orders 매칭 레코드</div>
+        </div>
+        <div style={{ flex:1, minWidth:200, padding:14, background:"#f0fdf4", borderRadius:8, border:"1px solid #86efac", textAlign:"center" }}>
+          <div style={{ fontSize:30, fontWeight:800, color:"#16a34a" }}>100%</div>
+          <div style={{ fontSize:12, color:"#166534" }}>주문 시도조차 안 함</div>
+        </div>
+      </div>
+    </Card>
+
+    <Insight>
+      <b>146002 = "결제 실패"가 아니라 "결제 버튼을 한 번도 누르지 않은 이탈"</b>이다.<br/>
+      orders 테이블에 단 한 건의 매칭 레코드도 없음 → 결제수단 선택·결제 버튼 클릭 전에 빠짐.<br/>
+      PG 오류·결제 거절이 아닌 <b>주문서 UI 자체의 마찰</b>이 이탈 원인이라는 결정적 증거.
+    </Insight>
+
+    <Card title="이탈 시나리오 추정" color="#fff" border="#cbd5e1">
+      <div style={{ fontSize:13, color:"#475569", lineHeight:1.9 }}>
+        1️⃣ 주문서 진입 → 배송지·주문자 정보·결제수단 등 입력 항목 나열 노출<br/>
+        2️⃣ 결제수단까지 스크롤 → 자주 쓰는 간편결제(네페·토스)는 최하단<br/>
+        3️⃣ 정보 확인·옵션 변경하다가 집중력 분산<br/>
+        4️⃣ <b>"너무 번거롭다" → 페이지 이탈</b>
+      </div>
+    </Card>
+
+    <Policy>
+      기능 6 결제수단 순서변경 / 기능 7 약관 일괄 동의 / 기능 8 배송지 가독성 개선<br/>
+      → 주문서 UI 마찰을 직접 해소하는 정책들이 모두 이 이탈을 타깃
+    </Policy>
+  </>
+);
+
+// ═══════════════════════════════════════════════
+// 3. 이탈 유저 추적
+// ═══════════════════════════════════════════════
+const Recovery = () => {
+  const dist = [
+    { label:"1개 이탈",    users:7616, pct:66.2 },
+    { label:"2개 이탈",    users:2108, pct:18.3 },
+    { label:"3~5개 이탈",  users:1360, pct:11.8 },
+    { label:"6개 이상",    users:419,  pct:3.6 },
+  ];
+  return (
+    <>
+      <H1 sub="결제시도 이탈을 경험한 유저의 분포와 이후 행동">3. 이탈 유저 추적</H1>
+
+      <Purpose>이탈한 프로젝트가 몇 명의 유저에 의해 발생했는지, 그 유저들이 이후 구매를 했는지 추적해 결제 마찰의 실질 영향 범위를 측정.</Purpose>
+
+      <Card title="이탈 프로젝트 ↔ 유저 매핑">
+        <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
+          {[
+            { v:"20,674건", k:"이탈 프로젝트", c:"#dc2626" },
+            { v:"11,503명", k:"이탈 유저", c:"#c2410c" },
+            { v:"1.8개", k:"유저당 평균 이탈", c:"#1d4ed8" },
+          ].map((x,i) => (
+            <div key={i} style={{ flex:1, minWidth:180, padding:14, background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, textAlign:"center" }}>
+              <div style={{ fontSize:24, fontWeight:800, color:x.c }}>{x.v}</div>
+              <div style={{ fontSize:12, color:"#64748b" }}>{x.k}</div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      <Card title="유저별 이탈 프로젝트 수 분포">
+        <ResponsiveContainer width="100%" height={220}>
+          <BarChart data={dist}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="label" tick={{ fontSize:12 }}/>
+            <YAxis tick={{ fontSize:11 }}/>
+            <Tooltip contentStyle={{ fontSize:12 }} formatter={(v,n)=>n==='users'?v.toLocaleString()+'명':v}/>
+            <Bar dataKey="users" radius={[3,3,0,0]}>
+              {dist.map((e,i)=><Cell key={i} fill={i===0?"#3b82f6":i===1?"#60a5fa":i===2?"#f97316":"#dc2626"}/>)}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Card title="이탈 후 행동 (이탈 유저 11,503명 추적)">
+        <table style={{ width:"100%", borderCollapse:"collapse" }}>
+          <thead><tr><th style={th}>이탈 후 행동</th><th style={th}>유저 수</th><th style={th}>비중</th></tr></thead>
+          <tbody>
+            <tr><td style={{...td,textAlign:"left",fontWeight:600}}>같은 프로젝트 재결제</td><td style={td}>0명 (시스템 특성상 측정 불가)</td><td style={td}>-</td></tr>
+            <tr style={{ background:"#fff7ed" }}><td style={{...td,textAlign:"left",fontWeight:600}}>다른 상품으로 구매</td><td style={td}>4,351명</td><td style={{...td,fontWeight:700,color:"#c2410c"}}>37.7%</td></tr>
+            <tr style={{ background:"#fef2f2" }}><td style={{...td,textAlign:"left",fontWeight:600}}>이후 한 건도 주문 없음</td><td style={td}>7,164명</td><td style={{...td,fontWeight:700,color:"#dc2626"}}>62.3%</td></tr>
+          </tbody>
+        </table>
+      </Card>
+
+      <Insight>
+        <b>같은 프로젝트의 재결제는 시스템 특성상 정확한 측정이 어렵다.</b> 한 번 주문서로 넘어간 프로젝트는 cart_status가 변경되지 않기 때문.<br/>
+        다만 명확한 것: <b>이탈 유저의 62.3%(7,164명)는 이후 어떤 주문도 하지 않음</b>. 결제 마찰이 단순 일회성이 아니라 고객 이탈로 이어질 가능성이 있음.<br/>
+        반면 37.7%(4,351명)는 다른 상품을 주문 → <b>구매 의지는 있었으나 그 프로젝트의 결제 과정에서 포기</b>한 케이스.
+      </Insight>
+
+      <Policy>P0 정책 전체의 실질 타깃이 바로 이 37.7% (다시 시도하려는 유저)</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 4. 카테고리별
+// ═══════════════════════════════════════════════
+const Category = () => {
+  const data = [
+    { cat:"사진인화", paid:51590, fail:7457, paid_pct:71.9, fail_pct:10.4 },
+    { cat:"굿즈",     paid:22646, fail:7255, paid_pct:56.7, fail_pct:18.2 },
+    { cat:"팬시",     paid:13415, fail:2551, paid_pct:63.6, fail_pct:12.1 },
+    { cat:"포토북",   paid:8715,  fail:1045, paid_pct:63.0, fail_pct:7.6 },
+    { cat:"폰케이스", paid:3488,  fail:1575, paid_pct:48.5, fail_pct:21.9 },
+    { cat:"액자",     paid:1944,  fail:290,  paid_pct:63.2, fail_pct:9.4 },
+  ];
+  return (
+    <>
+      <H1 sub="카테고리별 전환율·결제시도 이탈율">4. 카테고리별 패턴 (모바일)</H1>
+
+      <Purpose>어떤 상품 카테고리에서 결제 이탈이 많은지 파악해 개선의 1차 수혜 카테고리를 특정.</Purpose>
+
+      <Card title="카테고리별 전환·이탈율">
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="cat" tick={{ fontSize:12 }}/>
+            <YAxis tick={{ fontSize:11 }} unit="%"/>
+            <Tooltip formatter={(v)=>`${v}%`} contentStyle={{ fontSize:12 }}/>
+            <Legend wrapperStyle={{ fontSize:11 }}/>
+            <Bar dataKey="paid_pct" name="전환율" fill="#3b82f6" radius={[3,3,0,0]}/>
+            <Bar dataKey="fail_pct" name="결제시도 이탈율" fill="#f87171" radius={[3,3,0,0]}/>
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Insight>
+        <b>폰케이스 21.9% · 굿즈 18.2%</b>가 결제시도 이탈율 1, 2위 → 즉흥구매 카테고리에서 결제 마찰 치명적.<br/>
+        반면 사진인화·포토북은 이탈율이 평균 이하 → 정기/계획 구매라 결제 의지가 강함.<br/>
+        <b>전체 이탈 건수에서 굿즈가 35%</b>를 차지 (주문완료 중 21.6%인 것 대비 1.6배 과대 대표).
+      </Insight>
+
+      <Policy>기능 1 쿠폰 가시화 + 기능 7 약관 일괄 동의 → 굿즈·폰케이스 같은 즉흥구매 결제 마찰 직접 해소</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 5. 객단가별
+// ═══════════════════════════════════════════════
+const Price = () => {
+  const data = [
+    { bucket:"~1만원",  PC:75.9, "모바일":66.6, pc_attempt:7.8,  mo_attempt:13.1 },
+    { bucket:"1~3만원", PC:63.8, "모바일":52.7, pc_attempt:9.8,  mo_attempt:14.3 },
+    { bucket:"3~5만원", PC:39.5, "모바일":58.4, pc_attempt:9.4,  mo_attempt:10.5 },
+    { bucket:"5만원+",  PC:64.4, "모바일":63.4, pc_attempt:5.0,  mo_attempt:7.9 },
+  ];
+  return (
+    <>
+      <H1 sub="객단가 구간별 전환율·이탈율 — 가격 vs UX 마찰 구분">5. 객단가 구간별</H1>
+
+      <Purpose>고객 이탈이 가격 부담 때문인지(저단가는 괜찮고 고단가만 이탈) 아니면 UX 마찰 때문인지(모든 가격대에서 이탈) 구분.</Purpose>
+
+      <Card title="가격대별 전환율">
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="bucket" tick={{ fontSize:12 }}/>
+            <YAxis tick={{ fontSize:11 }} unit="%" domain={[0,100]}/>
+            <Tooltip formatter={(v)=>`${v}%`} contentStyle={{ fontSize:12 }}/>
+            <Legend wrapperStyle={{ fontSize:12 }}/>
+            <Bar dataKey="PC" fill="#3b82f6" radius={[3,3,0,0]}/>
+            <Bar dataKey="모바일" fill="#f97316" radius={[3,3,0,0]}/>
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Insight>
+        <b>가격 부담이 아닌 UX 마찰이 핵심.</b> 1만원 미만 저단가에서도 모바일 이탈율 13.1% (PC 7.8%의 1.7배).<br/>
+        오히려 5만원+ 고단가에서는 이탈율이 낮음(MO 7.9%) → 고단가는 이미 구매 의지가 강해 결제 허들 넘김.<br/>
+        모든 가격대에서 PC &gt; 모바일 전환율 → 디바이스 종속적인 결제 마찰 문제.
+      </Insight>
+
+      <Policy>이 결과는 P0 정책 전체 방향이 옳다는 검증 — "가격 정책"이 아닌 "결제 UX 개선"이 답</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 6. 첫구매 vs 재구매
+// ═══════════════════════════════════════════════
+const Purchase = () => {
+  const catData = [
+    { cat:"사진인화", PC:87.4, "모바일":74.9, gap:12.5, pc_share:35.5, mo_share:41.6 },
+    { cat:"포토북",   PC:67.1, "모바일":67.0, gap:0.1,  pc_share:27.5, mo_share:8.4 },
+    { cat:"굿즈",     PC:72.6, "모바일":60.3, gap:12.3, pc_share:16.5, mo_share:25.7 },
+    { cat:"팬시",     PC:71.6, "모바일":68.3, gap:3.3,  pc_share:10.9, mo_share:15.4 },
+    { cat:"폰케이스", PC:50.0, "모바일":49.3, gap:0.7,  pc_share:1.7,  mo_share:3.7 },
+  ];
+  return (
+    <>
+      <H1 sub="재구매 모바일 GAP의 진짜 원인은 무엇인가">6. 첫구매 vs 재구매 + 카테고리 믹스</H1>
+
+      <Purpose>재구매 모바일 전환율이 PC보다 7.9%p 낮은 원인 검증 — 디바이스 자체 마찰 vs 카테고리 분포 차이.</Purpose>
+
+      <Card title="첫구매·재구매 × 디바이스 전환율">
+        <table style={{ width:"100%", borderCollapse:"collapse" }}>
+          <thead><tr><th style={th}>구분</th><th style={th}>PC</th><th style={th}>모바일</th><th style={th}>GAP</th></tr></thead>
+          <tbody>
+            <tr><td style={{...td,fontWeight:600}}>첫구매</td><td style={td}>82.7%</td><td style={td}>81.3%</td><td style={{...td,color:"#16a34a"}}>1.4%p</td></tr>
+            <tr style={{ background:"#fef2f2" }}><td style={{...td,fontWeight:600}}>재구매</td><td style={td}>75.2%</td><td style={td}>67.3%</td><td style={{...td,color:"#dc2626",fontWeight:700}}>7.9%p</td></tr>
+          </tbody>
+        </table>
+      </Card>
+
+      <Card title="재구매 GAP을 카테고리별로 분해">
+        <table style={{ width:"100%", borderCollapse:"collapse" }}>
+          <thead><tr>
+            <th style={th}>카테고리</th><th style={th}>PC 전환율</th><th style={th}>MO 전환율</th>
+            <th style={th}>GAP</th><th style={th}>PC 구성비</th><th style={th}>MO 구성비</th>
+          </tr></thead>
+          <tbody>{catData.map(r => (
+            <tr key={r.cat} style={{ background: r.gap >= 10 ? "#fef2f2" : r.gap < 2 ? "#f0fdf4" : "#fff" }}>
+              <td style={{...td,fontWeight:700}}>{r.cat}</td>
+              <td style={td}>{r.PC}%</td>
+              <td style={td}>{r["모바일"]}%</td>
+              <td style={{...td,fontWeight:700,color: r.gap >= 10 ? "#dc2626" : r.gap < 2 ? "#16a34a" : "#f97316"}}>{r.gap}%p</td>
+              <td style={td}>{r.pc_share}%</td>
+              <td style={{...td,fontWeight: r.mo_share > r.pc_share * 1.3 ? 700 : 400}}>{r.mo_share}%</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </Card>
+
+      <Insight>
+        <b>"디바이스 자체 마찰" 가설은 데이터로 기각.</b> 포토북(GAP 0.1%p)·폰케이스(0.7%p)는 PC/모바일이 거의 동일.<br/>
+        <b>진짜 원인 = 카테고리 믹스 효과</b>: 모바일 재구매는 굿즈 비중 25.7%로 PC(16.5%)의 1.6배. 굿즈는 모바일에서 12.3%p 낮음. 두 효과 결합으로 전체 GAP 발생.<br/>
+        사진인화도 GAP 12.5%p로 큼 — 즉흥구매가 아닌데도 큼 → <b>화면 가독성·결제 직전 정보 확인 어려움</b> 가설 (추가 검증 필요)
+      </Insight>
+
+      <Policy>기능 8 배송지 가독성 개선 (사진인화 GAP 해소 가능성) + P0 정책 전반</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 7. 결제수단
+// ═══════════════════════════════════════════════
+const Payment = () => {
+  const data = [
+    { method:"NAVER Pay",   MO:34.7, PC:38.6 },
+    { method:"신용카드",     MO:24.6, PC:35.7 },
+    { method:"Toss",        MO:18.2, PC:4.3 },
+    { method:"Kakaopay",    MO:13.6, PC:7.7 },
+    { method:"무통장입금",   MO:4.5,  PC:10.0 },
+    { method:"휴대폰",       MO:2.1,  PC:1.8 },
+  ];
+  return (
+    <>
+      <H1 sub="실사용 비중과 UI 노출 순서의 불일치">7. 결제수단</H1>
+
+      <Purpose>유저가 실제로 자주 쓰는 결제수단과 현재 UI 노출 순서가 일치하는지 검증.</Purpose>
+
+      <Card title="결제수단 사용 비중 (4~5월)">
+        <ResponsiveContainer width="100%" height={280}>
+          <BarChart data={data}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="method" tick={{ fontSize:12 }}/>
+            <YAxis tick={{ fontSize:11 }} unit="%"/>
+            <Tooltip formatter={(v)=>`${v}%`} contentStyle={{ fontSize:12 }}/>
+            <Legend wrapperStyle={{ fontSize:12 }}/>
+            <Bar dataKey="PC" fill="#3b82f6" radius={[3,3,0,0]}/>
+            <Bar dataKey="MO" name="모바일" fill="#f97316" radius={[3,3,0,0]}/>
+          </BarChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Card title="현재 UI 순서 vs 제안 순서 (모바일)">
+        <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
+          <div style={{ flex:1, minWidth:240, padding:14, background:"#fef2f2", borderRadius:8, border:"1px solid #fca5a5" }}>
+            <div style={{ fontSize:12, fontWeight:700, color:"#991b1b", marginBottom:8 }}>현재 (APP)</div>
+            <div style={{ fontSize:11, color:"#7f1d1d", lineHeight:1.9 }}>
+              1. 신용카드<br/>
+              2. 제휴카드<br/>
+              3. 무통장입금<br/>
+              4. 편의점결제<br/>
+              5. 휴대폰<br/>
+              6. 스냅스머니<br/>
+              <b>7. NAVER Pay (1위인데 7번째!)</b><br/>
+              <b>8. Toss (3위인데 8번째!)</b><br/>
+              9. Kakaopay
+            </div>
+          </div>
+          <div style={{ flex:1, minWidth:240, padding:14, background:"#f0fdf4", borderRadius:8, border:"1px solid #86efac" }}>
+            <div style={{ fontSize:12, fontWeight:700, color:"#166534", marginBottom:8 }}>제안 (데이터 기반)</div>
+            <div style={{ fontSize:11, color:"#14532d", lineHeight:1.9 }}>
+              <b>1. NAVER Pay (34.7%)</b><br/>
+              <b>2. Toss (18.2%)</b><br/>
+              <b>3. 신용카드 (24.6%)</b><br/>
+              <b>4. Kakaopay (13.6%)</b><br/>
+              5. 휴대폰<br/>
+              6. 스냅스머니<br/>
+              7. 무통장입금<br/>
+              8. 편의점결제
+            </div>
+          </div>
+        </div>
+      </Card>
+
+      <Insight>
+        <b>모바일 간편결제(네페+토스+카페) 합 = 66.5%</b>인데 현재 UI에서 모두 하단 배치.<br/>
+        특히 <b>토스가 PC 4.3% → 모바일 18.2%로 4배 차이</b>나서 모바일 UI에서 위치를 올려야 함.<br/>
+        결제수단을 찾기 위한 스크롤 자체가 이탈 유발 가능.
+      </Insight>
+
+      <Policy>기능 6 결제수단 순서변경 (직접적인 데이터 근거)</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 8. 쿠폰/할인
+// ═══════════════════════════════════════════════
+const Coupon = () => {
+  const discount = [
+    { type:"쿠폰만",        orders:31288, pct:59.0, avg_pay:20832 },
+    { type:"할인없음",      orders:17051, pct:32.1, avg_pay:25210 },
+    { type:"쿠폰+포인트",   orders:3264,  pct:6.2,  avg_pay:18419 },
+    { type:"포인트만",      orders:1440,  pct:2.7,  avg_pay:31598 },
+  ];
+  const cat = [
+    { cat:"기프트",   no_pct:55.6, total:239 },
+    { cat:"패브릭",   no_pct:47.3, total:279 },
+    { cat:"캘린더",   no_pct:38.4, total:242 },
+    { cat:"사진인화", no_pct:37.2, total:27136 },
+    { cat:"액자",     no_pct:33.2, total:1166 },
+    { cat:"팬시",     no_pct:29.9, total:6091 },
+    { cat:"포토북",   no_pct:28.6, total:9706 },
+    { cat:"굿즈",     no_pct:16.0, total:12517 },
+    { cat:"폰케이스", no_pct:8.4,  total:3233 },
+  ];
+
+  return (
+    <>
+      <H1 sub="쿠폰 사용 분포와 카테고리별 할인 의존도">8. 쿠폰·할인 분포</H1>
+
+      <Purpose>쿠폰이 구매 결정에 미치는 영향과 카테고리별 할인 의존도 차이 파악.</Purpose>
+
+      <Card title="주문완료 건의 할인 유형 분포 (모바일)">
+        <table style={{ width:"100%", borderCollapse:"collapse" }}>
+          <thead><tr><th style={th}>할인 유형</th><th style={th}>주문 수</th><th style={th}>비중</th><th style={th}>평균 결제액</th></tr></thead>
+          <tbody>{discount.map(r => (
+            <tr key={r.type}>
+              <td style={{...td,fontWeight:600}}>{r.type}</td>
+              <td style={td}>{r.orders.toLocaleString()}</td>
+              <td style={{...td,fontWeight:700,color: r.type==="쿠폰만"?"#f97316":"#475569"}}>{r.pct}%</td>
+              <td style={td}>{r.avg_pay.toLocaleString()}원</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </Card>
+
+      <Card title="카테고리별 '할인없음 구매' 비율 (500건+)">
+        <ResponsiveContainer width="100%" height={260}>
+          <BarChart data={cat.filter(r=>r.total>=500)} layout="vertical" margin={{ left:60 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis type="number" tick={{ fontSize:11 }} domain={[0,50]} unit="%"/>
+            <YAxis type="category" dataKey="cat" tick={{ fontSize:12 }} width={60}/>
+            <Tooltip formatter={(v)=>`${v}%`} contentStyle={{ fontSize:12 }}/>
+            <Bar dataKey="no_pct" radius={[0,3,3,0]}>
+              {cat.filter(r=>r.total>=500).map((e,i)=>(
+                <Cell key={i} fill={e.no_pct >= 35 ? "#10b981" : e.no_pct >= 25 ? "#3b82f6" : e.no_pct >= 15 ? "#f97316" : "#ef4444"}/>
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
+        <p style={{ fontSize:11, color:"#64748b", marginTop:6 }}>전체 평균 32.1% — 평균 이상 = 가격 무관 구매, 이하 = 할인 의존</p>
+      </Card>
+
+      <Insight>
+        <b>주문의 59%가 쿠폰 사용</b> — 쿠폰은 구매 결정의 핵심 트리거.<br/>
+        <b>폰케이스(8.4%)·굿즈(16.0%)는 할인 의존 카테고리</b> — 쿠폰이 없으면 거의 결제 안 함.<br/>
+        주목: 폰케이스·굿즈는 <b>결제시도 이탈율 1·2위 + 할인 의존 1·2위</b>로 정확히 일치. "쿠폰 가시성 부족 → 이탈"의 강한 정황 증거.
+      </Insight>
+
+      <Policy>기능 1 주문서 쿠폰 가시화(절약액 표시) / 기능 3 쿠폰 만료 표시</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 9. 결제 시간대
+// ═══════════════════════════════════════════════
+const Hourly = () => {
+  const data = [
+    {h:0,v:1613},{h:1,v:1308},{h:2,v:764},{h:3,v:526},{h:4,v:301},{h:5,v:238},
+    {h:6,v:295},{h:7,v:482},{h:8,v:743},{h:9,v:1015},{h:10,v:1408},{h:11,v:1641},
+    {h:12,v:1838},{h:13,v:2068},{h:14,v:2241},{h:15,v:2280},{h:16,v:2284},{h:17,v:2344},
+    {h:18,v:2401},{h:19,v:2325},{h:20,v:2709},{h:21,v:3139},{h:22,v:3656},{h:23,v:3970},
+  ].map(d => ({ ...d, label: d.h+"시" }));
+  const night = data.slice(20).reduce((s,d)=>s+d.v,0);
+  const total = data.reduce((s,d)=>s+d.v,0);
+
+  return (
+    <>
+      <H1 sub="당일 결제 건의 결제 시각 분포 (모바일)">9. 결제 시간대</H1>
+
+      <Purpose>모바일 결제가 어느 시간대에 집중되는지 파악해 시나리오 정의 (한 손 모바일 vs 책상 앞 결제).</Purpose>
+
+      <Card title="시간대별 결제 건수">
+        <ResponsiveContainer width="100%" height={260}>
+          <AreaChart data={data}>
+            <defs>
+              <linearGradient id="g" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="5%" stopColor="#f97316" stopOpacity={0.3}/>
+                <stop offset="95%" stopColor="#f97316" stopOpacity={0}/>
+              </linearGradient>
+            </defs>
+            <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9"/>
+            <XAxis dataKey="label" tick={{ fontSize:10 }} interval={1}/>
+            <YAxis tick={{ fontSize:11 }}/>
+            <Tooltip formatter={(v)=>v.toLocaleString()+"건"} contentStyle={{ fontSize:12 }}/>
+            <Area type="monotone" dataKey="v" stroke="#f97316" strokeWidth={2} fillOpacity={1} fill="url(#g)"/>
+          </AreaChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Insight>
+        <b>20~23시 야간 시간대에 전체의 35%</b>가 집중 — "침대에서 한 손으로 모바일 쇼핑" 시나리오.<br/>
+        이 환경에서는 배송지 폼·결제수단 탐색·약관 동의 같은 마찰이 극도로 부담스러움.<br/>
+        결제 동선 단축 정책(P1-2 약관 일괄 동의, P1-1 결제수단 상단 배치)의 직접 효과 시간대.
+      </Insight>
+
+      <Policy>기능 6 결제수단 순서 / 기능 7 약관 일괄 동의 / 기능 10 푸시 알림 발송 시간(20~21시)</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 10. 프로젝트 채널 구성
+// ═══════════════════════════════════════════════
+const ChannelMix = () => {
+  const data = [
+    { mix:"PC 프로젝트만",     orders:26552, pct:34.54, aov:45338 },
+    { mix:"모바일 프로젝트만", orders:49341, pct:64.19, aov:20331 },
+    { mix:"PC+모바일 복합",    orders:977,   pct:1.27,  aov:40392 },
+  ];
+  const COLORS = ["#3b82f6","#f97316","#8b5cf6"];
+
+  return (
+    <>
+      <H1 sub="주문 1건 안에 PC/모바일 프로젝트가 어떻게 섞여 있는가">10. 프로젝트 채널 구성</H1>
+
+      <Purpose>현재 장바구니에서 PC/모바일 상품을 분리 표시하는 UI의 실효성 검증.</Purpose>
+
+      <Card title="주문 분포 (4~5월, 76,872건)">
+        <ResponsiveContainer width="100%" height={240}>
+          <PieChart>
+            <Pie data={data} dataKey="orders" nameKey="mix" cx="50%" cy="50%" outerRadius={85}
+              label={({mix,pct})=>`${mix} ${pct}%`} labelLine={{ strokeWidth:1 }}
+              style={{ fontSize:11 }}>
+              {data.map((e,i)=><Cell key={e.mix} fill={COLORS[i]}/>)}
+            </Pie>
+            <Tooltip formatter={(v)=>v.toLocaleString()+"건"} contentStyle={{ fontSize:12 }}/>
+          </PieChart>
+        </ResponsiveContainer>
+      </Card>
+
+      <Card title="상세">
+        <table style={{ width:"100%", borderCollapse:"collapse" }}>
+          <thead><tr><th style={th}>구성</th><th style={th}>주문 수</th><th style={th}>비중</th><th style={th}>평균 객단가</th></tr></thead>
+          <tbody>{data.map((r,i) => (
+            <tr key={r.mix} style={{ background: r.mix.includes("복합") ? "#faf5ff" : "#fff" }}>
+              <td style={{...td,fontWeight:700}}>
+                <span style={{ display:"inline-block",width:10,height:10,borderRadius:2,background:COLORS[i],marginRight:6 }}/>
+                {r.mix}
+              </td>
+              <td style={td}>{r.orders.toLocaleString()}</td>
+              <td style={{...td,fontWeight:600}}>{r.pct}%</td>
+              <td style={td}>{r.aov.toLocaleString()}원</td>
+            </tr>
+          ))}</tbody>
+        </table>
+      </Card>
+
+      <Insight>
+        <b>PC+모바일 복합 주문은 1.27%에 불과</b> → 분리 UI의 실제 효용이 매우 제한적.<br/>
+        다만 복합 주문 유저는 객단가 40,392원으로 헤비유저 — 통합 시 이 1.27% 헤비유저 UX 영향 검토 필요.<br/>
+        대부분 유저(98%+)는 한 디바이스에서만 편집·결제 → 통합 UI가 더 직관적일 가능성 큼.
+      </Insight>
+
+      <Policy>기능 5 PC/모바일 장바구니 영역 통합 — P1 (영향 작지만 UI 단순화 효과)</Policy>
+    </>
+  );
+};
+
+// ═══════════════════════════════════════════════
+// 한계 및 추가 검증
+// ═══════════════════════════════════════════════
+const Limits = () => (
+  <>
+    <H1 sub="현재 분석으로 답할 수 없는 영역">⚠️ 분석 한계 및 추가 검증 필요</H1>
+
+    <Card title="1. GA4 begin_checkout 이벤트 정의 이슈" color="#fef2f2" border="#fca5a5">
+      <div style={{ fontSize:12, color:"#7f1d1d", lineHeight:1.8 }}>
+        GA4의 begin_checkout 이벤트가 <b>주문서 페이지 진입이 아닌 다른 지점에서 발화</b>되는 것으로 확인 (홈에서 56.9% 발화, 주문서 페이지에서는 0.5%). <br/>
+        → 본 분석에서는 GA4 begin_checkout 데이터 대신 <b>DB의 cart_status 기준으로 분석</b> 진행<br/>
+        → GA4 이벤트 정의 수정이 별도 필요
+      </div>
+    </Card>
+
+    <Card title="2. 사진인화 모바일 GAP 12.5%p 원인 미확정" color="#fef3c7" border="#fbbf24">
+      <div style={{ fontSize:12, color:"#78350f", lineHeight:1.8 }}>
+        사진인화는 즉흥구매 카테고리가 아니고 정기 구매형인데도 모바일에서 PC 대비 12.5%p 낮은 전환율.<br/>
+        가설: 화면 가독성 / 결제 직전 정보 확인 어려움 / 사진 매수 많아 옵션 변경 빈번 → 그러나 데이터로 직접 검증되지 않음.<br/>
+        → <b>주문서 진입 후 결제까지 소요 시간 분포, 페이지 전환 패턴 등 GA4 추가 분석 필요</b>
+      </div>
+    </Card>
+
+    <Card title="3. 결제 미완료 후 재진입 추적의 한계" color="#fef3c7" border="#fbbf24">
+      <div style={{ fontSize:12, color:"#78350f", lineHeight:1.8 }}>
+        한 번 주문서로 넘어간 프로젝트는 cart_status가 변경되지 않음 → "재진입 후 결제 완료" 케이스의 정확한 측정 불가.<br/>
+        → 본 분석에서는 "같은 유저가 이후 다른 주문을 했는지" 기준으로만 추적 가능<br/>
+        → cart_status 외 별도의 재진입 추적 로직(이벤트 로그 등) 도입 검토 필요
+      </div>
+    </Card>
+
+    <Card title="4. 무료배송 임계 효과 미분석" color="#fef3c7" border="#fbbf24">
+      <div style={{ fontSize:12, color:"#78350f", lineHeight:1.8 }}>
+        무료배송까지 남은 금액 표기(P2-5)의 실제 객단가 향상 효과는 본 분석에 미포함.<br/>
+        → 5만원 임계 직전 구간(3~5만원) 주문의 객단가 분포·추가 구매 발생 빈도 별도 분석 필요
+      </div>
+    </Card>
+
+    <Card title="5. PG 단계 결제 실패율 데이터 부재" color="#fef3c7" border="#fbbf24">
+      <div style={{ fontSize:12, color:"#78350f", lineHeight:1.8 }}>
+        146002 분석으로 "결제 시도 전 이탈"은 확인했지만, 실제 PG 단계에서 결제 실패한 비율은 별도 데이터 필요.<br/>
+        → PG 로그·결제 실패 이력 데이터 확보 시 추가 분석 가능
+      </div>
+    </Card>
+  </>
+);
+
+// ═══════════════════════════════════════════════
+// 데이터 → 정책 매핑 (노션 v1.0 기준)
+// ═══════════════════════════════════════════════
+const Mapping = () => {
+  const map = [
+    // 장바구니 (5)
+    { n:1,  screen:"장바구니",   policy:"적용 가능 쿠폰 가시화 (절약액 결제 버튼 표시)",  owner:"FE+BE",   priority:"P0", insight:"8. 쿠폰·할인",                evidence:"주문 59% 쿠폰 사용 / 굿즈·폰케이스 할인 의존",                  strength:"강함" },
+    { n:2,  screen:"장바구니",   policy:"주문 전 결제액·할인·배송비 미리보기",            owner:"FE+BE",   priority:"P0", insight:"1. 단계별 전환율",            evidence:"모바일 장바구니→주문서 4.5%p 하락 추세",                          strength:"중간" },
+    { n:3,  screen:"장바구니",   policy:"쿠폰 만료 표시 (24h 카운트 / 3일 일 단위)",      owner:"FE+BE",   priority:"P0", insight:"(전환 타임라인)",             evidence:"담기 후 3일 내 결제 86~90%",                                       strength:"중간" },
+    { n:4,  screen:"장바구니",   policy:"무료배송까지 남은 금액 표기 (5만원 기준)",       owner:"FE+BE",   priority:"P1", insight:"(별도 분석 미진행)",          evidence:"객단가 향상 가설",                                                 strength:"약함" },
+    { n:5,  screen:"장바구니",   policy:"PC/모바일 장바구니 영역 통합",                   owner:"FE+BE",   priority:"P1", insight:"10. 프로젝트 채널 구성",      evidence:"복합 주문 1.27% — 영향 작지만 UI 단순화 효과",                     strength:"약함" },
+    // 주문/결제 (3)
+    { n:6,  screen:"주문/결제",  policy:"결제수단 순서변경 (간편결제 상단)",              owner:"FE",      priority:"P0", insight:"7. 결제수단",                 evidence:"간편결제 66.5% vs UI 하단 배치 / 토스 모바일 4배 사용",            strength:"강함" },
+    { n:7,  screen:"주문/결제",  policy:"결제 단계 약관 일괄 동의 (모바일 우선)",         owner:"FE+기획", priority:"P1", insight:"2. 이탈 정체 / 9. 시간대",    evidence:"146002 결제 시도 전 이탈 20,674건 + 야간 20~23시 35% 집중",        strength:"강함" },
+    { n:8,  screen:"주문/결제",  policy:"배송지 가독성 개선 (모바일 한정)",               owner:"FE",      priority:"P0", insight:"6. 첫구매 vs 재구매",         evidence:"사진인화 모바일 GAP 12.5%p — 화면 가독성 가설",                    strength:"중간" },
+    // 메인 (1)
+    { n:9,  screen:"메인",       policy:"메인영역 장바구니 노출 (MO 슬라이드 / PC 나열)", owner:"FE+BE",   priority:"P1", insight:"(전환 타임라인)",             evidence:"담기 후 3일 내 결제 86~90%",                                       strength:"중간" },
+    // 푸시 (1)
+    { n:10, screen:"푸시",       policy:"전날 편집 상품 푸시 알림 (마지막 편집 기준 1회)", owner:"BE",      priority:"P2", insight:"(전환 타임라인)",             evidence:"3일 내 결제 86~90% / 7일 넘으면 급감",                              strength:"중간" },
+  ];
+
+  const screenColors = {
+    "장바구니":   { bg:"#fff7ed", border:"#fed7aa", text:"#9a3412" },
+    "주문/결제":  { bg:"#eff6ff", border:"#bfdbfe", text:"#1e40af" },
+    "메인":       { bg:"#f0fdf4", border:"#bbf7d0", text:"#166534" },
+    "푸시":       { bg:"#faf5ff", border:"#e9d5ff", text:"#6b21a8" },
+  };
+
+  const priorityColors = {
+    "P0": { bg:"#ef4444", text:"#fff" },
+    "P1": { bg:"#f97316", text:"#fff" },
+    "P2": { bg:"#8b5cf6", text:"#fff" },
+  };
+
+  const counts = { P0:0, P1:0, P2:0 };
+  map.forEach(r => counts[r.priority]++);
+
+  return (
+    <>
+      <H1 sub="노션 [Draft] 스냅스 - 장바구니/주문결제 퍼널 개선 v1.0 기준">🎯 데이터 → 정책 매핑</H1>
+
+      {/* 우선순위 요약 */}
+      <Card title="우선순위 분포">
+        <div style={{ display:"flex", gap:14, flexWrap:"wrap" }}>
+          {Object.entries(counts).map(([p, c]) => (
+            <div key={p} style={{ flex:1, minWidth:160, padding:14, background:"#fff", border:"1px solid #e2e8f0", borderRadius:8, textAlign:"center" }}>
+              <div style={{
+                display:"inline-block", padding:"3px 10px", borderRadius:4,
+                background: priorityColors[p].bg, color: priorityColors[p].text,
+                fontSize:12, fontWeight:700, marginBottom:8
+              }}>{p}</div>
+              <div style={{ fontSize:24, fontWeight:800, color:"#1e293b" }}>{c}개</div>
+              <div style={{ fontSize:11, color:"#64748b" }}>
+                {p === "P0" && "우선 진행 (강한 데이터 근거)"}
+                {p === "P1" && "다음 단계 (검증 후 진행)"}
+                {p === "P2" && "후순위"}
+              </div>
+            </div>
+          ))}
+        </div>
+      </Card>
+
+      {/* 전체 매핑 표 */}
+      <Card title="전체 기능 매핑 (10개)">
+        <div style={{ overflowX:"auto" }}>
+          <table style={{ width:"100%", borderCollapse:"collapse", minWidth:880 }}>
+            <thead><tr>
+              <th style={{...th, width:50}}>#</th>
+              <th style={{...th, width:80}}>화면</th>
+              <th style={{...th, textAlign:"left"}}>기능 / 정책</th>
+              <th style={{...th, width:70}}>담당</th>
+              <th style={{...th, width:70}}>우선순위</th>
+              <th style={{...th, textAlign:"left", width:160}}>인사이트 출처</th>
+              <th style={{...th, textAlign:"left"}}>데이터 근거</th>
+              <th style={{...th, width:70}}>가설 강도</th>
+            </tr></thead>
+            <tbody>{map.map(r => {
+              const sc = screenColors[r.screen];
+              const pc = priorityColors[r.priority];
+              return (
+                <tr key={r.n} style={{ background: sc.bg }}>
+                  <td style={{...td, fontWeight:700, color:"#1e293b"}}>{r.n}</td>
+                  <td style={{...td, fontWeight:600, color: sc.text, fontSize:11}}>
+                    <span style={{ display:"inline-block", padding:"2px 6px", background:"#fff", border:`1px solid ${sc.border}`, borderRadius:4 }}>
+                      {r.screen}
+                    </span>
+                  </td>
+                  <td style={{...td, textAlign:"left", fontWeight:500}}>{r.policy}</td>
+                  <td style={{...td, fontSize:11, color:"#64748b"}}>{r.owner}</td>
+                  <td style={td}>
+                    <span style={{
+                      display:"inline-block", padding:"2px 8px", borderRadius:4,
+                      background: pc.bg, color: pc.text, fontWeight:700, fontSize:11
+                    }}>{r.priority}</span>
+                  </td>
+                  <td style={{...td, textAlign:"left", fontSize:11, color:"#1e40af"}}>{r.insight}</td>
+                  <td style={{...td, textAlign:"left", fontSize:11}}>{r.evidence}</td>
+                  <td style={{...td, fontWeight:600, fontSize:11, color: r.strength === "강함" ? "#16a34a" : r.strength === "중간" ? "#f97316" : "#dc2626"}}>
+                    {r.strength}
+                  </td>
+                </tr>
+              );
+            })}</tbody>
+          </table>
+        </div>
+      </Card>
+
+      {/* 화면별 그룹 요약 */}
+      <Card title="화면별 기능 분포">
+        <div style={{ display:"grid", gridTemplateColumns:"repeat(auto-fit, minmax(200px, 1fr))", gap:12 }}>
+          {Object.entries(screenColors).map(([screen, color]) => {
+            const items = map.filter(m => m.screen === screen);
+            return (
+              <div key={screen} style={{ padding:14, background:color.bg, border:`1px solid ${color.border}`, borderRadius:8 }}>
+                <div style={{ fontSize:13, fontWeight:700, color:color.text, marginBottom:8 }}>
+                  {screen} ({items.length}개)
+                </div>
+                <div style={{ fontSize:11, color:color.text, lineHeight:1.7 }}>
+                  {items.map(i => (
+                    <div key={i.n} style={{ marginBottom:3 }}>
+                      <b>#{i.n}</b> {i.policy.length > 24 ? i.policy.slice(0,24)+"..." : i.policy}
+                      <span style={{
+                        marginLeft:4, padding:"1px 5px", borderRadius:3, fontSize:9, fontWeight:700,
+                        background: priorityColors[i.priority].bg, color: priorityColors[i.priority].text
+                      }}>{i.priority}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </Card>
+
+      <Insight>
+        <b>P0 (5개)</b>: 가설 강함 2개(기능 1 쿠폰 가시화·기능 6 결제수단 순서) + 가설 중간 3개(기능 2 미리보기·기능 3 만료 표시·기능 8 배송지 가독성)<br/>
+        <b>P1 (4개)</b>: 가설 강함 1개(기능 7 약관 일괄 동의 — 법무 검토 필요로 P1) + 가설 중간 1개(기능 9 메인 노출) + 가설 약함 2개(기능 4 무료배송·기능 5 PC/MO 통합)<br/>
+        <b>P2 (1개)</b>: 기능 10 푸시 알림 — 가설은 중간이지만 CRM 시스템 통합 필요로 후순위<br/><br/>
+        <b>가설 강도와 우선순위가 1:1 매핑되지 않음</b>에 주의 — P0이라도 추가 검증 필요한 정책 있고(예: 기능 8 배송지 가독성 = 가설 중간), P1 중에도 강한 근거 있는 정책 있음(기능 7 약관 일괄 동의 = 가설 강함, P1인 이유는 법무 검토 필요).
+      </Insight>
+    </>
+  );
+};
+
+
+const root = ReactDOM.createRoot(document.getElementById("root"));
+root.render(<App />);
+</script>
+</body>
+</html>
