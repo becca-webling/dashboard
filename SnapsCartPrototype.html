@@ -45,19 +45,17 @@
     .group-hd { display:flex; align-items:center; gap:8px; padding:14px 16px 8px; }
     .help-icon { width:17px; height:17px; border-radius:50%; border:1.5px solid #A3A3A3; display:flex; align-items:center; justify-content:center; font-size:10px; font-weight:700; color:#737373; flex-shrink:0; }
 
-    /* External screen tabs */
     .ext-tabs { display:flex; gap:4px; margin-bottom:20px; background:#D5D5D5; border-radius:14px; padding:4px; }
     .ext-tab { flex:1; padding:10px 20px; border-radius:10px; border:none; font-family:var(--font-sans); font-size:14px; font-weight:600; cursor:pointer; transition:all 140ms; color:#737373; background:transparent; }
     .ext-tab.active { background:#fff; color:#191919; box-shadow:0 2px 8px rgba(0,0,0,.10); }
 
-    /* Annotation card */
     .ann { background:#fff; border-radius:12px; padding:14px 16px; box-shadow:0 1px 3px rgba(0,0,0,.06); margin-bottom:8px; }
   </style>
 </helmet>
 
 <div style="min-height:100vh; display:flex; flex-direction:column; align-items:center; padding:40px 24px; background:#ECECEC; gap:0;">
 
-  <!-- External screen tabs -->
+  <!-- 외부 탭 + 제목 -->
   <div style="width:100%; max-width:900px; display:flex; align-items:center; justify-content:space-between; margin-bottom:20px;">
     <div>
       <div style="font-size:18px; font-weight:900; color:#191919; letter-spacing:-.02em;">스냅스 결제 퍼널 개선</div>
@@ -67,13 +65,15 @@
       <button class="ext-tab {{ cartTabClass }}" onClick="{{ switchToCart }}">🛒 장바구니</button>
       <button class="ext-tab {{ orderTabClass }}" onClick="{{ switchToOrder }}">💳 주문/결제</button>
     </div>
-  </div><div style="display:flex; align-items:flex-start; gap:40px; width:100%; max-width:900px; flex-wrap:wrap;">
+  </div>
 
-    <!-- Phone shell -->
+  <div style="display:flex; align-items:flex-start; gap:40px; width:100%; max-width:900px; flex-wrap:wrap;">
+
+    <!-- 폰 쉘 -->
     <div style="width:375px; border-radius:44px; background:#191919; padding:10px; box-shadow:0 24px 64px rgba(0,0,0,.22); flex-shrink:0;">
       <div style="background:#fff; border-radius:36px; overflow:hidden; height:812px; display:flex; flex-direction:column; position:relative;">
 
-        <!-- Status bar -->
+        <!-- 상태바 -->
         <div style="height:44px; background:#fff; display:flex; align-items:center; justify-content:space-between; padding:0 24px; flex-shrink:0;">
           <span style="font-size:13px; font-weight:700;">9:41</span>
           <div style="display:flex; gap:6px; align-items:center;">
@@ -82,7 +82,7 @@
           </div>
         </div>
 
-        <!-- App bar -->
+        <!-- 앱바 -->
         <div style="height:48px; display:flex; align-items:center; padding:0 16px; border-bottom:1px solid #F2F2F2; flex-shrink:0; background:#fff;">
           <button style="background:none; border:none; padding:4px; cursor:pointer; margin-right:8px;">
             <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M12 4L6 10L12 16" stroke="#191919" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path></svg>
@@ -90,11 +90,11 @@
           <span style="font-size:16px; font-weight:700; flex:1; text-align:center; margin-right:28px;">{{ appBarTitle }}</span>
         </div>
 
-        <!-- ══ CART SCREEN ══ -->
+        <!-- ══ 장바구니 화면 ══ -->
         <sc-if value="{{ isCart }}" hint-placeholder-val="{{ true }}">
           <div class="scroll-body screen-anim" style="display:flex; flex-direction:column;">
 
-            <!-- Free shipping banner -->
+            <!-- 무료배송 배너 -->
             <div style="background:linear-gradient(90deg,#EDE9FE,#DDD6FE); margin:12px 16px 0; border-radius:12px; padding:11px 16px; display:flex; align-items:center; gap:10px;">
               <div style="width:34px; height:34px; background:#fff; border-radius:50%; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
                 <svg width="18" height="16" viewBox="0 0 20 18" fill="none"><path d="M1 1h10v11H1V1zm10 3h3l3 4v4h-6V4z" stroke="#7C3AED" stroke-width="1.5" stroke-linejoin="round"></path><circle cx="5" cy="14" r="2" stroke="#7C3AED" stroke-width="1.5"></circle><circle cx="14" cy="14" r="2" stroke="#7C3AED" stroke-width="1.5"></circle></svg>
@@ -105,7 +105,10 @@
               </div>
             </div>
 
-            <!-- Select all -->
+            <!-- 최대 혜택 배너 -->
+            
+
+            <!-- 전체 선택 -->
             <div style="display:flex; align-items:center; justify-content:space-between; padding:10px 16px; background:#fff; margin-top:10px; border-top:1px solid #F2F2F2; border-bottom:1px solid #F2F2F2;">
               <div style="display:flex; align-items:center; gap:8px;">
                 <div class="cb on"></div>
@@ -114,9 +117,8 @@
               <button style="background:none; border:1px solid #E5E5E5; border-radius:6px; padding:5px 12px; font-size:13px; color:#525252; cursor:pointer; font-family:var(--font-sans);">삭제</button>
             </div>
 
-            <!-- ── 전체 상품 통합 리스트 ── -->
             <div style="padding:0 16px;">
-              <!-- item 1 (공동 포토북) -->
+              <!-- 공동 포토북 1 -->
               <div class="item-card">
                 <div style="padding:14px 14px 0;">
                   <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:2px;">
@@ -138,18 +140,19 @@
                 </div>
                 <div style="padding:0 14px 10px; display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-size:13px; font-weight:700;">상품 금액</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
+                  <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                    <span style="background:#DC2626; color:#fff; font-size:10px; font-weight:800; padding:2px 5px; border-radius:4px;">10%</span>
                     <span style="font-size:11px; color:#A3A3A3; text-decoration:line-through;">27,900원</span>
-                    <span style="font-size:14px; font-weight:700; color:#EF4444;">25,100원</span>
+                    <span style="font-size:15px; font-weight:800; color:#EF4444;">25,100원</span>
                   </div>
                 </div>
                 <div style="margin:0 14px 12px; background:#FFF7E6; border:1px solid #FFB020; border-radius:8px; padding:7px 10px; display:flex; align-items:center; gap:6px;">
                   <span style="font-size:12px;">🏷</span>
-                  <span style="font-size:11px; font-weight:600; color:#B45309;">굿즈 20% 쿠폰 적용 가능 · <span style="color:#EF4444;">D-2</span></span>
+                  <span style="font-size:11px; font-weight:600; color:#B45309;">굿즈 20% 쿠폰 적용 시 · <span style="color: rgb(239, 68, 68);">D-2</span></span>
                 </div>
               </div>
 
-              <!-- 공동 포토북 item 2 -->
+              <!-- 공동 포토북 2 -->
               <div class="item-card">
                 <div style="padding:14px 14px 0;">
                   <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:2px;">
@@ -171,14 +174,15 @@
                 </div>
                 <div style="padding:0 14px 12px; display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-size:13px; font-weight:700;">상품 금액</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
+                  <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                    <span style="background:#DC2626; color:#fff; font-size:10px; font-weight:800; padding:2px 5px; border-radius:4px;">10%</span>
                     <span style="font-size:11px; color:#A3A3A3; text-decoration:line-through;">27,900원</span>
-                    <span style="font-size:14px; font-weight:700; color:#EF4444;">25,100원</span>
+                    <span style="font-size:15px; font-weight:800; color:#EF4444;">25,100원</span>
                   </div>
                 </div>
               </div>
 
-              <!-- PC item A – 편집 미완료, 구매 가능 -->
+              <!-- PC – 편집 불가 (케이스) -->
               <div class="item-card">
                 <div style="padding:14px 14px 0;">
                   <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:2px;">
@@ -192,7 +196,6 @@
                       <div style="font-size:11px; color:#737373; line-height:1.7;">수량 : 1개<br>최종 편집일 : 2026.02.04</div>
                     </div>
                   </div>
-                  <!-- 편집 불가 안내 (구매는 가능) -->
                   <div style="margin-top:10px; background:#F2F2F2; border-radius:8px; padding:8px 10px; display:flex; align-items:center; gap:6px;">
                     <svg width="13" height="13" viewBox="0 0 13 13" fill="none"><circle cx="6.5" cy="6.5" r="5.5" stroke="#737373" stroke-width="1.2"></circle><path d="M6.5 4V7" stroke="#737373" stroke-width="1.2" stroke-linecap="round"></path><circle cx="6.5" cy="9" r=".6" fill="#737373"></circle></svg>
                     <span style="font-size:11px; color:#737373; line-height:1.4;">PC에서만 편집 가능 · 구매는 가능합니다</span>
@@ -208,7 +211,7 @@
                 </div>
               </div>
 
-              <!-- PC item B – 포토북 (편집 가능) -->
+              <!-- PC – 포토북 (편집 가능) -->
               <div class="item-card">
                 <div style="padding:14px 14px 0;">
                   <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:2px;">
@@ -230,14 +233,15 @@
                 </div>
                 <div style="padding:0 14px 12px; display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-size:13px; font-weight:700;">상품 금액</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
+                  <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                    <span style="background:#DC2626; color:#fff; font-size:10px; font-weight:800; padding:2px 5px; border-radius:4px;">10%</span>
                     <span style="font-size:11px; color:#A3A3A3; text-decoration:line-through;">27,900원</span>
-                    <span style="font-size:14px; font-weight:700; color:#EF4444;">25,100원</span>
+                    <span style="font-size:15px; font-weight:800; color:#EF4444;">25,100원</span>
                   </div>
                 </div>
               </div>
 
-              <!-- 모바일 item 1 -->
+              <!-- 모바일 1 – 아크릴 키링 -->
               <div class="item-card">
                 <div style="padding:14px 14px 0;">
                   <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:2px;">
@@ -266,7 +270,7 @@
                 </div>
               </div>
 
-              <!-- 모바일 item 2 -->
+              <!-- 모바일 2 – 고양이 키링 -->
               <div class="item-card">
                 <div style="padding:14px 14px 0;">
                   <div style="display:flex; align-items:flex-start; gap:8px; margin-bottom:2px;">
@@ -287,47 +291,54 @@
                 </div>
                 <div style="padding:0 14px 12px; display:flex; justify-content:space-between; align-items:center;">
                   <span style="font-size:13px; font-weight:700;">상품 금액</span>
-                  <div style="display:flex; align-items:center; gap:5px;">
+                  <div style="display:flex; align-items:center; gap:5px; flex-wrap:wrap; justify-content:flex-end;">
+                    <span style="background:#DC2626; color:#fff; font-size:10px; font-weight:800; padding:2px 5px; border-radius:4px;">2,312원 할인</span>
                     <span style="font-size:11px; color:#A3A3A3; text-decoration:line-through;">11,560원</span>
-                    <span style="font-size:14px; font-weight:700; color:#EF4444;">9,248원</span>
+                    <span style="font-size:15px; font-weight:800; color:#EF4444;">9,248원</span>
                   </div>
                 </div>
               </div>
 
-            <!-- bottom spacer -->
-            <div style="height:150px; flex-shrink:0;"></div>
-          </div>
+              <div style="height:150px; flex-shrink:0;"></div>
+            </div>
           </div>
 
-          <!-- ── 장바구니 고정 하단 바 ── -->
+          <!-- 장바구니 고정 하단 바 -->
           <div style="position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #E5E5E5; box-shadow:0 -4px 16px rgba(0,0,0,.06);">
-            <!-- 결제 금액 요약 행 (탭으로 펼침) -->
-            <button onClick="{{ togglePrice }}" style="width:100%; background:none; border:none; border-bottom:1px solid #F2F2F2; padding:11px 16px; cursor:pointer; font-family:var(--font-sans); display:flex; align-items:center; gap:6px;">
-              <span style="font-size:12px; font-weight:700; color:#191919; flex:1; text-align:left;">결제 금액 <span style="font-size:11px; font-weight:500; color:#737373;">(총 6개)</span></span>
-              <span style="font-size:11px; color:#A3A3A3; text-decoration:line-through; margin-right:6px;">총 정가 83,250원</span>
-              <span style="font-size:13px; font-weight:700; color:#191919;">76,238원</span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="{{ priceChevronStyle }}"><path d="M3 5L7 9L11 5" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <button onClick="{{ togglePrice }}" style="width:100%; background:none; border:none; border-bottom:1px solid #F2F2F2; padding:11px 16px; cursor:pointer; font-family:var(--font-sans); display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:6px; width:100%;">
+                <span style="font-size:12px; font-weight:700; color:#191919; flex:1; text-align:left;">결제 금액</span>
+                <span style="display:inline-flex; align-items:center; gap:3px; background:#ECFDF5; color:#047857; font-size:10px; font-weight:700; padding:2px 6px; border-radius:5px; flex-shrink:0;">✓ 최대 할인 적용중</span><span style="font-size:11px; font-weight:700; color:#EF4444; flex-shrink:0;">- 7,012원</span><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="{{ priceChevronStyle }}"><path d="M3 5L7 9L11 5" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+              
             </button>
-            <!-- 펼침: 상세 금액 -->
             <sc-if value="{{ priceOpen }}" hint-placeholder-val="{{ false }}">
               <div style="padding:10px 16px; background:#FAFAFA; border-bottom:1px solid #F2F2F2; display:flex; flex-direction:column; gap:7px;">
                 <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#525252;">총 정가 금액</span><span style="color:#A3A3A3; text-decoration:line-through;">83,250원</span></div>
-                <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#525252;">할인 금액</span><span style="font-weight:600; color:#EF4444;">- 7,012원</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#525252;">할인 금액 <span style="background:#ECFDF5; color:#047857; font-size:9px; font-weight:700; padding:1px 5px; border-radius:4px; margin-left:2px;">최대 혜택 자동 적용</span></span><span style="font-weight:600; color:#EF4444;">- 7,012원</span></div>
                 <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#525252;">배송비</span><span style="font-weight:600; color:#059669;">무료</span></div>
                 <div style="display:flex; justify-content:space-between; font-size:12px; border-top:1px solid #E5E5E5; padding-top:8px;"><span style="font-weight:700; color:#191919;">총 결제 금액</span><span style="font-weight:700; color:#191919;">76,238원</span></div>
               </div>
             </sc-if>
-            <!-- 주문하기 버튼 -->
-            <div style="padding:10px 16px 18px;">
-              <button onClick="{{ switchToOrder }}" style="width:100%; padding:14px; background:#191919; color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font-sans); display:flex; align-items:center; justify-content:center; gap:8px;">
-                주문하기
-                <span style="font-size:12px; font-weight:500; color:#FFB020; letter-spacing:-.01em;">7,012원 절약</span>
+            <div style="display: flex; align-items: center; gap: 6px; width: 100%; font-size: 13.3333px">
+                
+                
+                <span style="flex:1;"></span>
+                
+                
+              </div><div style="padding:10px 16px 18px;">
+              <button onClick="{{ switchToOrder }}" style="width:100%; padding:14px 16px; background:#191919; color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font-sans); display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size:12px; font-weight:500; color:rgba(255,255,255,.5); text-decoration:line-through;">83,250원</span>
+                  <span style="font-size:16px; font-weight:800; color:#fff;">76,238원 주문하기</span>
+                </span><span style="font-size: 15px; font-weight: 400">(총 6개)</span>
+                
               </button>
             </div>
           </div>
         </sc-if>
 
-        <!-- ══ ORDER SCREEN ══ -->
+        <!-- ══ 주문/결제 화면 ══ -->
         <sc-if value="{{ isOrder }}" hint-placeholder-val="{{ false }}">
           <div class="scroll-body screen-anim" style="padding-bottom:160px;">
 
@@ -340,41 +351,30 @@
                 </div>
                 <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
               </div>
-              <div style="display:flex; gap:8px; align-items:center; padding:0 16px 14px; border-top:1px solid #F2F2F2;">
-                <div style="width:40px; height:40px; background:#ECFDF5; border-radius:8px; display:flex; align-items:center; justify-content:center; font-size:18px;">📗</div>
-                <div style="font-size:13px; flex:1;">
-                  <div style="font-weight:700; color:#191919;">포토북 외 5건</div>
-                  <div style="color:#737373; margin-top:2px; font-size:12px;">공동 포토북 2 · PC 상품 2 · 모바일 상품 2</div>
-                </div>
-              </div>
+              
             </div>
 
             <!-- 편집자 정보 -->
-            <div style="background:#fff; margin-bottom:8px; padding:16px;">
-              <div style="font-size:14px; font-weight:700; margin-bottom:4px;">편집자 정보</div>
-              <div style="font-size:12px; color:#737373; margin-bottom:12px;">포토북, 캔버스, 캘린더 상품의 마지막 장에 넣어드립니다.</div>
-              <label style="font-size:12px; font-weight:600; color:#525252; display:block; margin-bottom:6px;">이름 <span style="color:#EF4444;">*</span></label>
-              <input class="form-input" placeholder="이름 입력">
-            </div>
-
-            <!-- 주문자 정보 -->
-            <div style="background:#fff; margin-bottom:8px; padding:16px;">
-              <div style="padding:14px 16px; display:flex; align-items:center; justify-content:space-between;">
-                <div style="display:flex; align-items:center; gap:8px;">
-                  <span style="font-size:14px; font-weight:700;">주문자 정보</span>
-                  <span style="font-size:13px; color:#737373;"><br></span>
+            <sc-if value="{{ editorInfoOpen }}" hint-placeholder-val="{{ true }}">
+              <div style="background:#fff; margin-bottom:8px; padding:16px;">
+                <div style="display:flex; align-items:flex-start; justify-content:space-between; margin-bottom:4px;">
+                  <div style="font-size:14px; font-weight:700;">편집자 정보</div>
+                  <button onClick="{{ closeEditorInfo }}" style="background:none; border:none; padding:2px; cursor:pointer; line-height:0;">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                  </button>
                 </div>
-                <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6L8 10L12 6" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+                <div style="font-size:12px; color:#737373; margin-bottom:12px;">포토북, 캔버스, 캘린더 상품의 마지막 장에 넣어드립니다.</div>
+                <label style="font-size:12px; font-weight:600; color:#525252; display:block; margin-bottom:6px;">이름 <span style="color:#EF4444;">*</span></label>
+                <input class="form-input" value="배채윤">
               </div>
-              
-            </div>
+            </sc-if>
 
             <!-- 배송지 -->
             <div style="background:#fff; margin-bottom:8px; padding:16px;">
               <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:12px;">
                 <div style="font-size:14px; font-weight:700;">배송지 정보</div>
                 <div style="display:flex; gap:6px;">
-                  <button style="background:none; border:1px solid #E5E5E5; border-radius:6px; padding:5px 10px; font-size:12px; color:#525252; cursor:pointer; font-family:var(--font-sans);">주문자와 동일</button>
+                  <button style="background:none; border:1px solid #E5E5E5; border-radius:6px; padding:5px 10px; font-size:12px; color:#525252; cursor:pointer; font-family:var(--font-sans);">배송지 목록</button>
                   <button style="background:none; border:1px solid #E5E5E5; border-radius:6px; padding:5px 10px; font-size:12px; color:#525252; cursor:pointer; font-family:var(--font-sans);">신규 배송지</button>
                 </div>
               </div>
@@ -390,9 +390,10 @@
                 <button style="background:none; border:1px solid #D1D1D1; border-radius:6px; padding:6px 12px; font-size:12px; color:#525252; cursor:pointer; font-family:var(--font-sans); white-space:nowrap;">변경</button>
               </div>
               <div style="margin-top:10px;">
-                <label style="font-size:12px; font-weight:600; color:#525252; display:block; margin-bottom:6px;">배송 메시지</label>
+                <div style="font-size:11px; color:#A3A3A3; margin-top:10px; line-height:1.5;">주문/배송 관련 알림톡은 배송지 정보에 입력된 번호로 전달됩니다.</div><label style="font-size:12px; font-weight:600; color:#525252; display:block; margin-bottom:6px;">배송 메시지</label>
                 <input class="form-input" placeholder="배송 메시지 입력">
               </div>
+              
             </div>
 
             <!-- 할인·배송비 -->
@@ -429,7 +430,16 @@
                 </label>
               </div>
               <div style="font-size:10px; font-weight:700; color:#A3A3A3; text-transform:uppercase; letter-spacing:.05em; margin-bottom:8px;">간편결제</div>
-              <div class="pm-row sel"><div class="radio-dot on"></div><div style="width:24px; height:24px; background:#03C75A; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#fff;">N</div><span style="font-size:13px; font-weight:600;">네이버페이</span></div>
+              <div class="pm-row sel" style="margin-bottom:0; border-bottom-left-radius:0; border-bottom-right-radius:0;">
+                <div class="radio-dot on"></div>
+                <div style="width:24px; height:24px; background:#03C75A; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:12px; font-weight:900; color:#fff;">N</div>
+                <span style="font-size:13px; font-weight:600;">네이버페이</span>
+                <span style="margin-left:auto; background:#03C75A; color:#fff; font-size:10px; font-weight:700; padding:2px 7px; border-radius:99px;">최대 1.5% 적립</span>
+              </div>
+              <div style="border:1.5px solid #191919; border-top:none; border-radius:0 0 10px 10px; background:#F0FDF4; padding:9px 14px; margin-bottom:6px; display:flex; align-items:flex-start; gap:7px;">
+                <svg width="14" height="14" viewBox="0 0 16 16" fill="none" style="margin-top:1px; flex-shrink:0;"><circle cx="8" cy="8" r="7" stroke="#03C75A" stroke-width="1.3"></circle><path d="M8 5v4M8 11h.01" stroke="#03C75A" stroke-width="1.4" stroke-linecap="round"></path></svg>
+                <div style="font-size:11px; color:#166534; line-height:1.5;"><b>네이버페이 결제 혜택</b><br>이 주문 결제 시 최대 <b>1,140원(1.5%)</b> 적립 · 머니 충전 결제 시 추가 적립 <span style="color:#059669;">(예시)</span></div>
+              </div>
               <div class="pm-row"><div class="radio-dot"></div><div style="width:24px; height:24px; background:#0064FF; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:#fff;">T</div><span style="font-size:13px;">토스</span></div>
               <div class="pm-row"><div class="radio-dot"></div><div style="width:24px; height:24px; background:#FEE500; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:#191919;">K</div><span style="font-size:13px;">카카오페이</span></div>
               <div style="font-size:10px; font-weight:700; color:#A3A3A3; text-transform:uppercase; letter-spacing:.05em; margin:12px 0 8px;">일반결제</div>
@@ -442,33 +452,49 @@
               </div>
             </div>
 
+            <!-- 최종 결제 금액 -->
+            <div style="background:#fff; margin-bottom:8px; padding:16px;">
+              <div style="font-size:14px; font-weight:700; margin-bottom:12px;">최종 결제 금액</div>
+              <div style="display:flex; flex-direction:column; gap:8px;">
+                <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:#525252;">상품 금액</span><span style="font-weight:600; color:#191919;">83,250원</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:#525252;">할인 금액</span><span style="font-weight:600; color:#EF4444;">- 12,588원</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:#525252;">특별 할인 금액</span><span style="font-weight:600; color:#EF4444;">- 7,012원</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:#525252;">스냅스 머니</span><span style="font-weight:600; color:#191919;">0원</span></div>
+                <div style="display:flex; justify-content:space-between; font-size:13px;"><span style="color:#525252;">배송비</span><span style="font-weight:600; color:#059669;">무료</span></div>
+                <div style="display:flex; justify-content:space-between; border-top:1px solid #E5E5E5; padding-top:10px; margin-top:2px;">
+                  <span style="font-size:15px; font-weight:700;">최종 결제 금액</span>
+                  <span style="font-size:18px; font-weight:900; color:#191919;">63,650원</span>
+                </div>
+              </div>
+            </div>
+
             <!-- 약관 동의 -->
             <div style="background:#fff; padding:16px; margin-bottom:8px;">
               <div style="border:1px solid #E5E5E5; border-radius:10px; padding:12px 14px;">
-                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
-                  
-                  
-                </div>
-                <div style="display:flex; flex-direction:column; gap:7px; padding-left:28px;">
-                  <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:12px; color:#525252;">주문할 상품의 편집정보, 상품정보, 배송정보를 확인하였습니다.</span></div>
-                  <div style="display:flex; align-items:center; gap:8px;"><span style="font-size:12px; color:#525252;">주문취소 및 수정은 결제 후 1시간 이내에만 가능한 것을 확인하였습니다.</span></div>
-                  <div style="display:flex; align-items:center; gap:8px;"></div>
+                <div style="display:flex; flex-direction:column; gap:7px;">
+                  <div style="font-size:12px; color:#525252;">주문할 상품의 편집정보, 상품정보, 배송정보를 확인하였습니다.</div>
+                  <div style="font-size:12px; color:#525252;">주문취소 및 수정은 결제 후 1시간 이내에만 가능한 것을 확인하였습니다.</div>
                 </div>
               </div>
             </div>
             <div style="height:20px;"></div>
           </div>
 
-          <!-- ── 주문/결제 고정 하단 바 ── -->
+          <!-- 주문/결제 고정 하단 바 -->
           <div style="position:absolute; bottom:0; left:0; right:0; background:#fff; border-top:1px solid #E5E5E5; box-shadow:0 -4px 16px rgba(0,0,0,.06);">
-            <!-- 결제 금액 요약 행 (탭으로 펼침) -->
-            <button onClick="{{ togglePrice }}" style="width:100%; background:none; border:none; border-bottom:1px solid #F2F2F2; padding:11px 16px; cursor:pointer; font-family:var(--font-sans); display:flex; align-items:center; gap:6px;">
-              <span style="font-size:12px; font-weight:700; color:#191919; flex:1; text-align:left;">결제 금액 <span style="font-size:11px; font-weight:500; color:#737373;">(총 6개)</span></span>
-              <span style="font-size:11px; color:#A3A3A3; text-decoration:line-through; margin-right:6px;">총 정가 83,250원</span>
-              <span style="font-size:13px; font-weight:700; color:#191919;">63,650원</span>
-              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="{{ priceChevronStyle }}"><path d="M3 5L7 9L11 5" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+            <button onClick="{{ togglePrice }}" style="width:100%; background:none; border:none; border-bottom:1px solid #F2F2F2; padding:11px 16px; cursor:pointer; font-family:var(--font-sans); display:flex; flex-direction:column; gap:6px;">
+              <div style="display:flex; align-items:center; gap:6px; width:100%;">
+                <span style="font-size:12px; font-weight:700; color:#191919; flex:1; text-align:left;">할인 금액</span>
+                <span style="font-size:11px; font-weight:700; color:#EF4444; flex-shrink:0;">- 19,600원</span><svg width="14" height="14" viewBox="0 0 14 14" fill="none" style="{{ priceChevronStyle }}"><path d="M3 5L7 9L11 5" stroke="#737373" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+              </div>
+              <div style="display:flex; align-items:center; gap:6px; width:100%;">
+                
+                
+                <span style="flex:1;"></span>
+                
+                
+              </div>
             </button>
-            <!-- 펼침: 상세 금액 -->
             <sc-if value="{{ priceOpen }}" hint-placeholder-val="{{ false }}">
               <div style="padding:10px 16px; background:#FAFAFA; border-bottom:1px solid #F2F2F2; display:flex; flex-direction:column; gap:7px;">
                 <div style="display:flex; justify-content:space-between; font-size:12px;"><span style="color:#525252;">총 정가 금액</span><span style="color:#A3A3A3; text-decoration:line-through;">83,250원</span></div>
@@ -477,16 +503,24 @@
                 <div style="display:flex; justify-content:space-between; font-size:12px; border-top:1px solid #E5E5E5; padding-top:8px;"><span style="font-weight:700; color:#191919;">총 결제 금액</span><span style="font-weight:700; color:#191919;">63,650원</span></div>
               </div>
             </sc-if>
-            <!-- 결제하기 버튼 -->
             <div style="padding:10px 16px 18px;">
-              <button style="width:100%; padding:14px; background:#191919; color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font-sans);">63,650원 결제하기</button>
+              <button style="width:100%; padding:14px 16px; background:#191919; color:#fff; border:none; border-radius:12px; font-size:15px; font-weight:700; cursor:pointer; font-family:var(--font-sans); display:flex; align-items:center; justify-content:space-between; gap:8px;">
+                <span style="display:flex; align-items:baseline; gap:6px;">
+                  <span style="font-size:12px; font-weight:500; color:rgba(255,255,255,.5); text-decoration:line-through;">83,250원</span>
+                  <span style="font-size:16px; font-weight:800; color:#fff;">63,650원 결제하기</span>
+                </span>
+                <span style="font-size:15px; font-weight:700;"><span style="font-weight: normal;">(총 6개)</span></span>
+              </button>
               <div style="font-size:11px; color:#A3A3A3; text-align:center; line-height:1.6; margin-top:8px;">결제 진행 시 <span style="text-decoration:underline; color:#737373;">개인정보 수집 및 이용</span>에 동의함</div>
             </div>
           </div>
         </sc-if>
 
       </div>
-    </div><div style="flex:1; min-width:260px; padding-top:4px;">
+    </div>
+
+    <!-- 어노테이션 패널 -->
+    <div style="flex:1; min-width:260px; padding-top:4px;">
       <div style="font-size:11px; font-weight:700; color:#737373; text-transform:uppercase; letter-spacing:.08em; margin-bottom:14px;">개선 포인트</div>
 
       <sc-if value="{{ isCart }}" hint-placeholder-val="{{ true }}">
@@ -502,6 +536,14 @@
           <div class="ann" style="border-left:3px solid #EF4444;">
             <div style="font-size:12px; font-weight:700; margin-bottom:4px;">쿠폰 만료 인라인 표시 <span style="background:#EF4444; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P0</span></div>
             <div style="font-size:11px; color:#737373; line-height:1.6;">24h 미만 시:분:초 · 3일 이내 D-N. 상품 카드 하단 앰버 뱃지로 긴급감 전달.</div>
+          </div>
+          <div class="ann" style="border-left:3px solid #059669;">
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">최대 혜택 할인 자동 적용 <span style="background:#EF4444; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P0</span> <span style="background:#059669; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px;">NEW</span></div>
+            <div style="font-size:11px; color:#737373; line-height:1.6;">가능한 최대 할인을 시스템이 자동 적용. <b>프로젝트별</b> 그린 뱃지 + <b>장바구니 전체</b> 상단 배너·요약에 "최대 혜택 적용중" 노출. <span style="color:#B45309;">※ 최적 할인 자동선택 로직은 개발 검토 필요</span></div>
+          </div>
+          <div class="ann" style="border-left:3px solid #F59E0B;">
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">상품 할인가 강조 <span style="background:#F59E0B; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P1</span> <span style="background:#059669; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px;">NEW</span></div>
+            <div style="font-size:11px; color:#737373; line-height:1.6;">할인 상품에 정가 취소선 + 강조가. <b>시안 A</b> 할인율(10%) · <b>시안 B</b> 절약액(2,312원 할인) — 카드에서 두 안 비교 후 택1.</div>
           </div>
           <div class="ann" style="border-left:3px solid #F59E0B;">
             <div style="font-size:12px; font-weight:700; margin-bottom:4px;">무료배송 안내 배너 <span style="background:#F59E0B; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P1</span></div>
@@ -524,6 +566,14 @@
             <div style="font-size:12px; font-weight:700; margin-bottom:4px;">결제수단 순서 변경 <span style="background:#EF4444; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P0</span></div>
             <div style="font-size:11px; color:#737373; line-height:1.6;">간편결제(네이버·토스·카카오) 최상단 배치. 마지막 사용 결제수단 자동 선택 유지.</div>
           </div>
+          <div class="ann" style="border-left:3px solid #059669;">
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">주문자 정보 최소화 + 알림톡 <span style="background:#EF4444; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P0</span> <span style="background:#059669; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px;">NEW</span></div>
+            <div style="font-size:11px; color:#737373; line-height:1.6;">주문자 입력란 제거. <b>본인인증 완료</b> → 인증 번호로 알림톡, 미입력. <b>미인증·비회원</b> → 배송지 연락처로 발송. <span style="color:#B45309;">※ 선물 주문(수령인=배송지) 시 알림 수신처 협의 필요</span></div>
+          </div>
+          <div class="ann" style="border-left:3px solid #F59E0B;">
+            <div style="font-size:12px; font-weight:700; margin-bottom:4px;">결제수단 혜택 안내 <span style="background:#F59E0B; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P1</span> <span style="background:#059669; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px;">NEW</span></div>
+            <div style="font-size:11px; color:#737373; line-height:1.6;">혜택 제공 결제수단(예: 네이버페이) 선택 시 적립·할인 혜택을 인라인 안내. <span style="color:#B45309;">※ 적립률·조건 수치는 제휴 확인 후 확정(현재 예시)</span></div>
+          </div>
           <div class="ann" style="border-left:3px solid #F59E0B;">
             <div style="font-size:12px; font-weight:700; margin-bottom:4px;">약관 동의 간소화 <span style="background:#F59E0B; color:#fff; font-size:9px; padding:1px 5px; border-radius:3px; margin-left:4px;">P1</span></div>
             <div style="font-size:11px; color:#737373; line-height:1.6;">항목 통합 + 결제 버튼 하단 소형 안내 텍스트로 마찰 최소화. <b style="color:#DC2626;">[법무 검토 필요]</b></div>
@@ -535,7 +585,6 @@
         </div>
       </sc-if>
 
-      <!-- Legend -->
       <div style="margin-top:14px; padding:12px 14px; background:#fff; border-radius:10px; display:flex; gap:16px; flex-wrap:wrap;">
         <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:#525252;"><div style="width:10px; height:10px; border-radius:2px; background:#EF4444;"></div>P0 우선</div>
         <div style="display:flex; align-items:center; gap:6px; font-size:11px; color:#525252;"><div style="width:10px; height:10px; border-radius:2px; background:#F59E0B;"></div>P1 다음</div>
@@ -543,20 +592,14 @@
       </div>
     </div>
 
-    <!-- ── Annotation panel ── -->
-    
-
   </div>
-
-  <!-- Main layout: phone + annotations -->
-  
 </div>
 </x-dc>
 <script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;: {&quot;width&quot;: 960, &quot;height&quot;: 920}}">
 class Component extends DCLogic {
-  state = { tab: 'cart', priceOpen: false };
+  state = { tab: 'cart', priceOpen: false, editorInfoOpen: true };
   renderVals() {
-    const { tab, priceOpen } = this.state;
+    const { tab, priceOpen, editorInfoOpen } = this.state;
     return {
       isCart: tab === 'cart',
       isOrder: tab === 'order',
@@ -566,6 +609,8 @@ class Component extends DCLogic {
       switchToCart: () => this.setState({ tab: 'cart', priceOpen: false }),
       switchToOrder: () => this.setState({ tab: 'order', priceOpen: false }),
       priceOpen,
+      editorInfoOpen,
+      closeEditorInfo: () => this.setState({ editorInfoOpen: false }),
       togglePrice: () => this.setState(s => ({ priceOpen: !s.priceOpen })),
       priceChevronStyle: {
         transform: priceOpen ? 'rotate(180deg)' : 'rotate(0deg)',
