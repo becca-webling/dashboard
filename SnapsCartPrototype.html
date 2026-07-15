@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>스냅스 결제 퍼널 개선 — 프로토타입 v3</title>
+<title>스냅스 결제 퍼널 개선 — 프로토타입 v4</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
@@ -92,8 +92,8 @@
 
   /* PC 리스트 */
   .unify-note{font-size:11px;color:var(--grn2);font-weight:600;margin:14px 2px 2px}
-  .plist-head{display:grid;grid-template-columns:24px 1fr 150px 92px 110px;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:10px 2px;font-size:12px;color:var(--g2);font-weight:600}
-  .prow{display:grid;grid-template-columns:24px 1fr 150px 92px 110px;gap:8px;align-items:flex-start;border-bottom:1px solid var(--line2);padding:16px 2px}
+  .plist-head{display:grid;grid-template-columns:22px 1fr 88px 112px;gap:8px;align-items:center;border-bottom:1px solid var(--line);padding:10px 2px;font-size:12px;color:var(--g2);font-weight:600}
+  .prow{display:grid;grid-template-columns:22px 1fr 88px 112px;gap:8px;align-items:flex-start;border-bottom:1px solid var(--line2);padding:16px 2px}
   .thumb{width:74px;height:74px;border-radius:8px;flex-shrink:0;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:26px}
   .pinfo{display:flex;gap:12px}
   .pname{font-size:14px;font-weight:700;margin-bottom:3px}
@@ -133,7 +133,40 @@
   .pmlogo{width:24px;height:24px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:900}
   .eyebrow{font-size:10px;font-weight:700;color:var(--g3);text-transform:uppercase;letter-spacing:.05em;margin:14px 0 8px}
   .newtag{background:var(--grn);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:4px;margin-left:6px}
-  .benefit{border:1.5px solid #191919;border-top:none;border-radius:0 0 10px 10px;background:#F0FDF4;padding:9px 14px;margin:-6px 0 6px;display:flex;gap:7px;font-size:11px;color:var(--grntxt);line-height:1.5}
+  .benefit-card{border:1.5px solid var(--grn);border-radius:12px;background:#F0FDF4;padding:12px;margin:2px 0 8px;display:flex;align-items:center;gap:12px}
+  .benefit-card .bthumb{width:44px;height:56px;border-radius:8px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:900}
+  .benefit-card .binfo{flex:1;min-width:0}
+  .benefit-card .btitle{font-size:13px;font-weight:700;margin-bottom:3px}
+  .benefit-card .bline{font-size:11.5px;color:var(--g1);line-height:1.55}
+  .benefit-card .bline b{color:var(--grntxt)}
+  .benefit-card .bget{flex-shrink:0;border:1px solid var(--g4);background:#fff;border-radius:8px;padding:9px 13px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer;white-space:nowrap}
+  .pm-badge{margin-left:auto;background:#191919;color:#fff;font-size:10px;font-weight:700;padding:3px 9px;border-radius:99px;white-space:nowrap}
+  .pay-guide{display:flex;align-items:center;gap:8px;margin-top:12px;padding:11px 12px;border:1px solid var(--line);border-radius:10px;font-size:12px;color:var(--g1);cursor:pointer}
+  .pay-guide .gtag{background:var(--panel);border:1px solid var(--line);border-radius:6px;font-size:10px;font-weight:700;color:var(--g2);padding:2px 7px}
+  /* 결제 혜택 안내 (이미지 재현) */
+  .pay-toggle{display:flex;align-items:center;justify-content:space-between;margin:2px 0 12px}
+  .pay-toggle .pt-left{display:flex;align-items:center;gap:9px;font-size:13px;font-weight:600;color:var(--ink)}
+  .pay-toggle .pt-right{font-size:12px;color:var(--g2);cursor:pointer}
+  .switch{width:38px;height:22px;border-radius:99px;background:var(--g4);position:relative;flex-shrink:0;transition:background 150ms}
+  .switch::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:50%;background:#fff;transition:left 150ms}
+  .switch.on{background:#2563EB}
+  .switch.on::after{left:18px}
+  .cond-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px}
+  .cond-card{flex:0 0 190px;border:1px solid var(--line);border-radius:12px;padding:13px;background:#fff}
+  .cond-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .cond-logo{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:13px}
+  .cond-flag{background:var(--panel);color:var(--g2);font-size:10px;font-weight:700;padding:3px 8px;border-radius:6px}
+  .cond-amt{font-size:19px;font-weight:900;color:var(--g3)}
+  .cond-name{font-size:12px;font-weight:600;color:var(--g1);margin-top:4px}
+  .cond-cond{font-size:11px;color:var(--g3);margin-top:6px;line-height:1.4}
+  .cond-more{font-size:11px;color:var(--g2);margin-top:10px}
+  .promo-banner{display:flex;align-items:center;gap:12px;background:#00D563;border-radius:12px;padding:14px 16px;cursor:pointer}
+  .promo-banner .pb-ic{font-size:22px;flex-shrink:0}
+  .promo-banner .pb-txt{flex:1;font-size:12px;color:#052e16;line-height:1.5}
+  .promo-banner .pb-txt b{font-size:13.5px;font-weight:800}
+  .promo-banner .pb-arrow{font-size:18px;color:#052e16}
+  .promo-note{font-size:11px;color:var(--g3);margin:8px 2px 2px}
+  .auto-tag{flex-shrink:0;background:var(--grnbg);color:var(--grn2);border:1px solid #A7F3D0;border-radius:99px;padding:6px 11px;font-size:11px;font-weight:700;white-space:nowrap}
 
   .sec{background:#fff;padding:16px}
   .sec-h{font-size:14px;font-weight:700;margin-bottom:12px}
@@ -174,11 +207,23 @@
 
   .obox{border:1px solid var(--line);border-radius:12px;overflow:hidden}
   .obox-h{background:#FAFAFA;border-bottom:1px solid var(--line);padding:12px 16px;font-size:13px;font-weight:700}
-  .otable-head{display:grid;grid-template-columns:1fr 52px 92px 92px 100px 64px;gap:6px;padding:10px 16px;font-size:11px;color:var(--g2);font-weight:600;border-bottom:1px solid var(--line);background:#fff}
-  .orow{display:grid;grid-template-columns:1fr 52px 92px 92px 100px 64px;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line2);font-size:12px;align-items:center}
+  .otable-head{display:grid;grid-template-columns:1fr 46px 122px 120px 52px;gap:6px;padding:10px 16px;font-size:11px;color:var(--g2);font-weight:600;border-bottom:1px solid var(--line);background:#fff}
+  .orow{display:grid;grid-template-columns:1fr 46px 122px 120px 52px;gap:6px;padding:12px 16px;border-bottom:1px solid var(--line2);font-size:12px;align-items:center}
   .orow .oinfo{display:flex;gap:10px;align-items:center}
   .othumb{width:42px;height:42px;border-radius:6px;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:17px;flex-shrink:0}
   .r{text-align:right}
+
+  /* ── v4 동기화 컴포넌트 ── */
+  /* PC 장바구니 상단 고정 결제 요약 */
+  /* PC 주문상품 접기 토글 */
+  .obox-toggle{width:100%;background:#FAFAFA;border:none;padding:13px 16px;display:flex;align-items:center;gap:10px;cursor:pointer;text-align:left}
+  .obox-toggle.open{border-bottom:1px solid var(--line)}
+  .obox-toggle .oh{font-size:13px;font-weight:700;white-space:nowrap}
+  .obox-toggle .prev{font-size:12px;color:var(--g2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .obox-toggle .chev{margin-left:auto;color:var(--g2);transition:transform 200ms}
+  /* PC 배송지 요약 카드 */
+  .addr-card{border:1.5px solid #191919;border-radius:10px;padding:14px;display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+  .addr-card .nm{display:flex;align-items:center;gap:8px;margin-bottom:6px}
 
   /* 어노테이션 */
   .ann-wrap{margin-top:30px}
@@ -203,8 +248,8 @@
 
   <div class="top">
     <div>
-      <div class="title">스냅스 결제 퍼널 개선<span class="ver">프로토타입 v3</span></div>
-      <div class="sub">PC = 실제 스냅스 화면 구조 기준 재구성 · PRD 기능번호 매핑</div>
+      <div class="title">스냅스 결제 퍼널 개선<span class="ver">프로토타입 v4</span></div>
+      <div class="sub">PC ↔ 모바일 사용성 동기화 · 개선 포인트는 하단 설명 참고</div>
     </div>
     <div class="ctrls">
       <div class="seg" id="devseg">
@@ -219,10 +264,11 @@
   </div>
 
   <div class="banner-note">
-    <b>v3 변경점:</b> PC 레이아웃을 실제 화면(글로벌 네비·스텝 인디케이터·테이블형 리스트·우측 결제 요약 카드) 기준으로 재구성.
-    그 위에 PRD 변경만 적용 — 그룹 제거·통합(기능1) · 할인율 뱃지(기능2) · 최대 할인 요약(기능3) · 쿠폰 만료(기능4) ·
-    무료배송 배너/프로그레스(기능5) · 간편결제 최상단(기능6) · 주문자 입력란 제거(기능8) · 약관 표기형(기능10).
-    <b>주문서 최종금액 다단 표기는 PRD "기존 유지"에 따라 원복.</b>
+    <b>v4 변경점 (PC ↔ 모바일 동기화):</b>
+    ① 배송지 입력을 <b>PC도 요약카드 + 변경</b>으로 통일 (구 결정 "PC 폼 유지" → 변경 · 기능9) ·
+    ② PC 장바구니 결제요약을 <b>우측 고정(sticky) 카드</b>로 (주문/결제와 동일 구조) — 금액 내역·최대할인·CTA 상시 노출 ·
+    ③ 주문·결제의 <b>주문상품 테이블은 접힘 기본</b>(탭하면 펼침).
+    <b>PC 리스트/주문상품 테이블형은 유지</b> — 넓은 화면 특성 반영.
   </div>
 
   <div class="stage" id="stage"></div>
@@ -242,9 +288,10 @@
 
 <script>
 // ───── 단일 소스 데이터 ─────
-const SUM = { list:'60,270원', disc:'- 6,955원', total:'53,315원', count:'6' };
+const SUM = { list:'61,770원', disc:'- 7,180원', total:'54,590원', count:'7' };
+const won = v => v.toLocaleString('ko-KR') + '원';
 const ORDER_SUM = [
-  ['상품 금액','60,270원',false],['할인 금액','- 6,955원','red'],['특별 할인 금액','0원',false],
+  ['상품 금액','61,770원',false],['할인 금액','- 7,180원','red'],['특별 할인 금액','0원',false],
   ['제휴카드 할인 금액','0원',false],['스냅스 머니','0원',false],['배송비','무료','grn'],
 ];
 
@@ -256,7 +303,7 @@ const items = [
     name:'2026 우리집 캘린더', opt:'무광지 · 1개', date:'2026.06.20',
     list:'12,900원', price:'10,965원', rate:15, edit:'pc' },
   { emoji:'🖼', bg:'linear-gradient(135deg,#FEF9C3,#FDE68A)', kind:'두명포토카드 (54x86)',
-    name:'Full 이미지', opt:'부광지 · 매수 1', date:'2026.07.07',
+    name:'Full 이미지', opt:'부광지 · 매수 2', date:'2026.07.07', qty:2,
     list:'1,500원', price:'1,275원', rate:15, edit:'both',
     coupon:{ txt:'포토카드 15% 쿠폰 적용 시', tail:'D-2', urgent:false } },
   { emoji:'📌', bg:'linear-gradient(135deg,#E0E7FF,#C7D2FE)', kind:'데코용 핀셋',
@@ -271,14 +318,14 @@ const items = [
     coupon:{ txt:'신규회원 5% 쿠폰', tail:'23:59:42 후 만료', urgent:true } },
 ];
 
-// 주문서 상품 표 (일반 금액=할인, 구매예정가, 배송비)
+// 주문서 상품 표 (상품금액=1개 정가/구매예정가, 구매예정가=단가×수량)
 const orderItems = [
-  { emoji:'📗', name:'포토북 – 정사각 하드 8X8', qty:1, list:'29,070원', disc:'- 4,360원', buy:'24,710원', ship:'무료' },
-  { emoji:'📅', name:'포토 캘린더 – 벽걸이', qty:1, list:'12,900원', disc:'- 1,935원', buy:'10,965원', ship:'무료' },
-  { emoji:'🖼', name:'두명포토카드 (54x86)', qty:1, list:'1,500원', disc:'- 225원', buy:'1,275원', ship:'무료' },
-  { emoji:'📌', name:'데코용 핀셋', qty:1, list:'1,900원', disc:'- 285원', buy:'1,615원', ship:'개별' },
-  { emoji:'⛓️', name:'볼 체인', qty:1, list:'1,000원', disc:'- 150원', buy:'850원', ship:'개별' },
-  { emoji:'📱', name:'투명 폰케이스', qty:1, list:'13,900원', disc:'0원', buy:'13,900원', ship:'무료' },
+  { emoji:'📗', name:'포토북 – 정사각 하드 8X8', qty:1, listU:29070, buyU:24710, ship:'무료' },
+  { emoji:'📅', name:'포토 캘린더 – 벽걸이', qty:1, listU:12900, buyU:10965, ship:'무료' },
+  { emoji:'🖼', name:'두명포토카드 (54x86)', qty:2, listU:1500, buyU:1275, ship:'무료' },
+  { emoji:'📌', name:'데코용 핀셋', qty:1, listU:1900, buyU:1615, ship:'개별' },
+  { emoji:'⛓️', name:'볼 체인', qty:1, listU:1000, buyU:850, ship:'개별' },
+  { emoji:'📱', name:'투명 폰케이스', qty:1, listU:13900, buyU:13900, ship:'무료' },
 ];
 
 const easyPay = [
@@ -310,19 +357,19 @@ const annData = {
       { fn:'기능 6', pri:'P0', star:false, hd:'결제수단 재배열',
         bd:'현재 최하단인 <b>간편결제(네이버·토스·카카오)를 최상단</b>으로. 마지막 사용 수단 자동 선택 유지. 일반결제(신용·체크·실시간계좌·무통장·편의점·휴대폰·스냅스머니)는 하단.' },
       { fn:'기능 7', pri:'P1', star:false, hd:'결제수단 혜택 안내',
-        bd:'혜택 수단에 <b>[혜택] 라벨</b> + 선택 시에만 인라인 안내. 적립률·조건 수치는 제휴 확정 전 <b>예시</b> (Open Q4).' },
+        bd:'적용 가능 할인 <b>토글 + 조건부 즉시할인 카드</b> + <b>혜택 안내 배너</b>. 혜택 수단엔 적립률 뱃지, 선택 시 <b>혜택 카드</b>(썸네일·문구·<b>"자동 적용" 표기</b>) — <b>별도 버튼 없이 결제 시 자동 적용</b>. 하단 "결제수단별 즉시 할인 안내" 링크. 적립률·조건 수치는 제휴 확정 전 <b>예시</b> (Open Q4).' },
       { fn:'기능 8', pri:'P0', star:false, hd:'주문자 정보 자동 생성 · 입력란 미출력',
-        bd:'현재 주문자 <b>이름·연락처·이메일 3개 입력란 제거</b>. 인증 완료→회원정보 / 미인증→배송지 연락처로 자동 생성. 알림톡 발송 안내 병기. <span class="flag">※ 법률 검토 조건부 (Open Q3)</span>' },
-      { fn:'기능 9', pri:'P0', star:true, hd:'입력 배송지 레이아웃',
-        bd:'MO는 저장 배송지를 <b>1–2줄 요약 카드</b> + 1탭 변경. <b>PC는 기존 폼 유지</b>(이 화면). <span class="flag">★ 4-2 상세는 P1 — 확정 필요 · "주문자 정보와 동일" 버튼은 기능8과 함께 재검토</span>' },
+        bd:'주문자 <b>이름·연락처·이메일 3개 입력란 제거</b>. 인증 완료→회원정보 / 미인증→배송지 연락처로 자동 생성. 화면 내 안내 박스는 제거하고 <b>배송지 하단에 "주문/배송 알림톡이 배송지 연락처로 발송" 안내만</b> 유지. <span class="flag">※ 법률 검토 조건부 (Open Q3)</span>' },
+      { fn:'기능 9', pri:'P0', star:true, hd:'저장 배송지 요약 카드 (PC·MO 통일)',
+        bd:'저장 배송지를 <b>1–2줄 요약 카드 + 변경</b>으로 표시. <b>PC도 기존 폼 → 요약 카드로 통일</b>(v4) — 반복 입력 마찰 제거. "주문자 정보와 동일" 버튼은 기능8로 불필요해져 제거. <span class="flag">★ 4-2 상세는 P1 — 확정 필요</span>' },
       { fn:'기능 10', pri:'P0', star:true, hd:'동의 절차 간소화',
-        bd:'필수 동의 체크박스 제거 → <b>표기형</b>(결제 진행=동의 간주). 마케팅 수신만 선택 체크 유지. <span class="flag">※ 법무 승인 조건부 (Open Q2) · ★ 4-2 상세는 P1</span>' },
+        bd:'필수 동의 체크박스 제거 → <b>표기형</b>(결제 진행=동의 간주). <b>마케팅 수신 체크박스도 제거</b>(주문·결제 화면 내 미노출). <span class="flag">※ 법무 승인 조건부 (Open Q2) · ★ 4-2 상세는 P1</span>' },
     ],
   },
 };
 
 // ───── 상태 ─────
-const state = { dev:'pc', scr:'cart', ship:'met', priceOpen:false };
+const state = { dev:'pc', scr:'cart', ship:'met', priceOpen:false, pcOrderOpen:false };
 const PRI = { P0:'var(--p0)', P1:'var(--p1)' };
 
 // 기기별 편집 제한 판정
@@ -389,20 +436,42 @@ function cartSummaryRows(){
     <div class="money-row" style="border-top:1px solid var(--line);padding-top:8px;margin-top:8px"><span style="font-weight:700">총 결제 금액</span><span style="font-weight:700">${SUM.total}</span></div>`;
 }
 function paymentSection(){
+  const condCards = [
+    { logo:'💳', color:'#DBEAFE', name:'제휴카드 즉시할인', amt:'-5,000원', cond:'모든 상품 · 12만원 이상 결제 시' },
+    { logo:'💳', color:'#DCFCE7', name:'간편결제 X 제휴카드', amt:'-5,000원', cond:'모든 상품 · 15만원 이상 결제 시' },
+  ].map(c=>`<div class="cond-card">
+      <div class="cond-top"><div class="cond-logo" style="background:${c.color}">${c.logo}</div><span class="cond-flag">조건 미충족</span></div>
+      <div class="cond-amt">${c.amt}</div><div class="cond-name">${c.name}</div>
+      <div class="cond-cond">${c.cond}</div><div class="cond-more">자세히 ›</div>
+    </div>`).join('');
+
   const easy = easyPay.map(p=>{
     const sel = p.sel?' sel':''; const radio = p.sel?'radio on':'radio';
-    const badge = p.benefit?`<span style="margin-left:auto;background:${p.color};color:${p.fg};font-size:10px;font-weight:700;padding:2px 8px;border-radius:99px">[혜택] ${p.benefit}</span>`:'';
-    let row = `<div class="pm${sel}"${p.sel?' style="margin-bottom:0;border-radius:10px 10px 0 0"':''}><div class="${radio}"></div>
+    const badge = p.benefit?`<span class="pm-badge">${p.benefit}</span>`:'';
+    let row = `<div class="pm${sel}" style="margin-bottom:6px"><div class="${radio}"></div>
       <div class="pmlogo" style="background:${p.color};color:${p.fg}">${p.logo}</div>
       <span style="font-size:13px;font-weight:600">${p.n}</span>${badge}</div>`;
-    if(p.sel) row += `<div class="benefit"><span style="flex-shrink:0;color:${p.color};font-weight:700">ⓘ</span>
-      <div><b>네이버페이 결제 혜택</b><br>이 주문 결제 시 최대 <b>790원(1.5%)</b> 적립 · 머니 충전 결제 시 추가 적립 <span style="color:var(--grn)">(예시)</span></div></div>`;
+    if(p.sel && p.benefit) row += `<div class="benefit-card">
+      <div class="bthumb" style="background:${p.color};color:${p.fg}">${p.logo}</div>
+      <div class="binfo">
+        <div class="btitle">${p.n} 적립 혜택</div>
+        <div class="bline">결제 시 <b>최대 790원(1.5%)</b> 자동 적립 <span style="color:var(--g3)">(예시)</span></div>
+        <div class="bline">머니 충전 결제 시 추가 적립</div>
+      </div>
+      <span class="auto-tag">자동 적용</span>
+    </div>`;
     return row;
   }).join('');
   const normal = normalPay.map(n=>`<div class="pm" style="margin-bottom:0"><div class="radio"></div><span style="font-size:12px">${n}</span></div>`).join('');
-  return `<div class="eyebrow">간편결제 <span class="newtag">최상단 이동</span></div>${easy}
+
+  return `<div class="pay-toggle"><div class="pt-left"><span class="switch on"></span><span>적용 가능한 할인만 보기</span></div><span class="pt-right">전체보기 ›</span></div>
+    <div class="cond-scroll">${condCards}</div>
+    <div class="promo-banner"><div class="pb-ic">🎁</div><div class="pb-txt"><b>간편결제 최대 1.5% 적립 + 즉시 혜택</b><br>결제수단 결제 혜택 <span style="color:#065f46">(예시)</span></div><span class="pb-arrow">›</span></div>
+    <div class="promo-note">혜택은 별도 신청 없이 결제 시 자동 적용돼요. 프로모션은 예산 소진 시 조기 종료될 수 있어요. (예시)</div>
+    <div class="eyebrow">간편결제 <span class="newtag">최상단 이동</span></div>${easy}
     <div class="eyebrow">일반결제</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${normal}</div>
+    <div class="pay-guide"><span class="gtag">안내</span><span>결제수단별 즉시 할인 안내</span><span style="margin-left:auto;color:var(--g3)">›</span></div>
     <label style="display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;color:var(--g1);cursor:pointer"><div class="cb on"></div>지금 선택하신 결제수단 저장</label>`;
 }
 function renderMobile(){
@@ -417,7 +486,7 @@ function renderMobile(){
       <div style="margin:12px 16px 0">${shipBanner()}</div>
       <div style="padding:0 16px">${shipToggle('padding:0')}</div>
       ${selall}
-      <div style="padding:0 16px 8px"><div class="unify-note">그룹 없이 최근 편집일시 순 (기능 1)</div>${list}<div style="height:150px"></div></div>
+      <div style="padding:0 16px 8px"><div class="unify-note">그룹 없이 최근 편집일시 순</div>${list}<div style="height:150px"></div></div>
     </div>${moDock(true)}`;
   } else {
     screen = `<div class="scroll anim" style="padding-bottom:210px">${orderSectionsMO()}</div>${moDock(false)}`;
@@ -462,7 +531,7 @@ function orderSectionsMO(){
         <span class="tagbadge">집</span><span style="font-size:14px;font-weight:700">배채윤</span><span style="font-size:12px;color:var(--g2)">010-0000-0000</span></div>
         <div style="font-size:13px;color:var(--g1);line-height:1.5">서울 마포구 성암로 165<br><span style="color:var(--g3)">상암동 ○○○○ 1501호</span></div></div>
       <button class="chg">변경</button></div>
-    <div style="font-size:11px;color:var(--g3);margin-top:10px;line-height:1.5">주문자 정보는 자동 생성돼요. 알림톡은 위 배송지 연락처로 발송됩니다. <span style="color:var(--ambertxt)">(기능 8)</span></div></div>
+    <div style="font-size:11px;color:var(--g2);margin-top:10px;line-height:1.5">ⓘ 주문/배송 알림톡이 배송지 연락처로 발송됩니다.</div></div>
 
   <div class="sec" style="margin-bottom:8px"><div class="sec-h">결제수단</div>${paymentSection()}</div>
 
@@ -491,59 +560,76 @@ function pcRow(it){
   return `<div class="prow">
     <div class="cb on"></div>
     <div class="pinfo">
-      <div class="thumb" style="background:${it.bg}">${it.emoji}</div>
+      <div class="thumb" style="width:60px;height:60px;font-size:22px;background:${it.bg}">${it.emoji}</div>
       <div><div class="pkind">${it.kind}</div><div class="pname">${it.name}</div>
         <div class="popt">옵션 : ${it.opt} · 최종 편집일 ${it.date}</div>
         ${it.coupon?couponBadge(it):''}
         ${rl?`<div class="restrict"><span>ⓘ</span><span>${rl}</span></div>`:''}
         <div class="plinks">${links}</div></div>
     </div>
-    <div class="pcell">${priceBlock(it,true)}</div>
     <div class="pcell" style="align-items:center"><div class="qty"><button>−</button><span>${it.qty||1}</span><button>+</button></div></div>
-    <div class="pcell"><span class="amt ${it.rate>0?'':'plain'}">${it.price}</span></div>
+    <div class="pcell">${priceBlock(it,true)}</div>
   </div>`;
 }
 function renderPCcart(){
   const list = items.map(pcRow).join('');
+  const side = `<div class="pc-side"><div class="side-card">
+    <div class="side-sum">결제 예상 금액</div>
+    <div class="side-total"><span style="font-size:15px;font-weight:700">합계</span><span class="big">${SUM.total}</span></div>
+    <div class="money-row"><span style="color:var(--g2)">총 정가 금액</span><span class="strike">${SUM.list}</span></div>
+    <div class="money-row" style="margin-top:9px"><span style="color:var(--g2)">할인 금액</span><span style="font-weight:600;color:var(--red)">${SUM.disc}</span></div>
+    <div class="money-row" style="margin-top:9px"><span style="color:var(--g2)">배송비</span><span style="font-weight:600;color:var(--grn)">무료</span></div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--line)"><span class="adopt">✓ 최대 할인 적용중</span></div>
+    <button class="paybtn" onclick="setScr('order')">주문하기 (${SUM.count}개)</button>
+  </div></div>`;
+
+  const main = `<div class="pc-main">
+    <div style="display:flex;gap:6px;margin-bottom:2px"><button class="minibtn">전체 선택</button><button class="minibtn">선택 삭제</button><button class="minibtn">삭제</button></div>
+    <div class="unify-note">그룹 구분 없이 최근 편집일시 순으로 통합 · 우측 요약에 최대 할인 적용중</div>
+    <div class="plist-head"><span></span><span>주문 상품 정보</span><span style="text-align:center">수량</span><span class="r">금액</span></div>
+    ${list}
+    <div style="margin-top:18px;font-size:11px;color:var(--g3);line-height:1.8;border-top:1px solid var(--line);padding-top:14px">
+      · 최종 편입일로부터 1년이 지난 상품은 장바구니에서 삭제됩니다.<br>
+      · 무료배송·개별배송 조건은 상단 배너에서 실시간으로 확인할 수 있어요.</div>
+  </div>`;
+
   return `<div class="pc-page anim">
     ${steps(true)}
     <div class="ptitle" style="padding-top:0">장바구니</div>
-    <div style="margin:0 0 6px">${shipBanner()}</div>
-    ${shipToggle('margin:10px 0 0')}
-    <div class="ctoolbar">
-      <div style="display:flex;gap:6px"><button class="minibtn">전체 선택</button><button class="minibtn">선택 삭제</button><button class="minibtn">삭제</button></div>
-      <div style="display:flex;align-items:center">
-        <span class="paypreview">결제 예상 금액(${SUM.count})<b>${SUM.total}</b></span>
-        <button class="order-btn" onclick="setScr('order')">선택상품 주문하기</button></div>
-    </div>
-    <div class="unify-note">그룹 구분 없이 최근 편집일시 순으로 통합 (기능 1) · 우측 요약에 최대 할인 적용중</div>
-    <div class="plist-head"><span></span><span>주문 상품 정보</span><span class="r">상품 금액</span><span style="text-align:center">수량</span><span class="r">주문금액</span></div>
-    ${list}
-    <div style="display:flex;justify-content:flex-end;align-items:center;gap:14px;margin-top:18px;padding-top:16px;border-top:2px solid #191919">
-      <div style="text-align:right"><div style="font-size:12px;color:var(--g2)">정가 <span class="strike">${SUM.list}</span> · 할인 <span style="color:var(--red);font-weight:700">${SUM.disc}</span></div>
-        <div style="display:flex;align-items:center;gap:8px;justify-content:flex-end;margin-top:4px"><span class="adopt">✓ 최대 할인 적용중</span>
-        <span style="font-size:20px;font-weight:900">총 ${SUM.total}</span></div></div>
-      <button class="order-btn" style="padding:13px 28px;font-size:15px" onclick="setScr('order')">주문하기 (${SUM.count}개)</button>
-    </div>
-    <div style="margin-top:22px;font-size:11px;color:var(--g3);line-height:1.8;border-top:1px solid var(--line);padding-top:14px">
-      · 최종 편입일로부터 1년이 지난 상품은 장바구니에서 삭제됩니다.<br>
-      · 무료배송·개별배송 조건은 상단 배너에서 실시간으로 확인할 수 있어요. (기능 5)</div>
+    <div style="margin:0 0 8px">${shipBanner()}</div>
+    ${shipToggle('margin:0 0 4px')}
+    <div class="pc-cols">${main}${side}</div>
   </div>`;
 }
 function renderPCorder(){
-  const orows = orderItems.map(o=>`<div class="orow">
-    <div class="oinfo"><div class="othumb">${o.emoji}</div><div><div style="font-weight:700;font-size:12px">${o.name}</div></div></div>
-    <div style="text-align:center">${o.qty}</div>
-    <div class="r">${o.list}</div>
-    <div class="r" style="color:var(--red)">${o.disc}</div>
-    <div class="r" style="font-weight:700">${o.buy}</div>
-    <div class="r" style="color:${o.ship==='무료'?'var(--grn)':'var(--g2)'}">${o.ship}</div>
-  </div>`).join('');
+  const orows = orderItems.map(o=>{
+    const priceCell = o.listU>o.buyU
+      ? `<div class="strike" style="font-size:11px">${won(o.listU)}</div><div style="font-weight:700">${won(o.buyU)}</div>`
+      : `<div style="font-weight:700">${won(o.buyU)}</div>`;
+    const lineCell = o.qty>1
+      ? `<div style="font-weight:800">${won(o.buyU*o.qty)}</div><div style="font-size:10px;color:var(--g3)">${won(o.buyU)} × ${o.qty}</div>`
+      : `<div style="font-weight:800">${won(o.buyU*o.qty)}</div>`;
+    return `<div class="orow">
+      <div class="oinfo"><div class="othumb">${o.emoji}</div><div><div style="font-weight:700;font-size:12px">${o.name}</div></div></div>
+      <div style="text-align:center">${o.qty}</div>
+      <div class="r">${priceCell}</div>
+      <div class="r">${lineCell}</div>
+      <div class="r" style="color:${o.ship==='무료'?'var(--grn)':'var(--g2)'}">${o.ship}</div>
+    </div>`;
+  }).join('');
+
+  const orderOpen = state.pcOrderOpen;
+  const orderBox = `<div class="obox">
+      <button class="obox-toggle ${orderOpen?'open':''}" onclick="togglePcOrder()">
+        <span class="oh">주문상품 (${SUM.count}개)</span>
+        ${orderOpen?'':`<span class="prev">${orderItems[0].name} 외 ${orderItems.length-1}건 · 총 ${SUM.total}</span>`}
+        <span class="chev" style="transform:${orderOpen?'rotate(180deg)':'none'}">⌄</span>
+      </button>
+      ${orderOpen?`<div class="otable-head"><span>주문 상품 정보</span><span style="text-align:center">수량</span><span class="r">상품 금액 (1개)</span><span class="r">구매예정가</span><span class="r">배송비</span></div>${orows}`:''}
+    </div>`;
 
   const main = `<div class="pc-main">
-    <div class="obox"><div class="obox-h">주문상품 (${SUM.count}개)</div>
-      <div class="otable-head"><span>주문 상품 정보</span><span style="text-align:center">수량</span><span class="r">상품 금액</span><span class="r">할인 금액</span><span class="r">구매예정가</span><span class="r">배송비</span></div>
-      ${orows}</div>
+    ${orderBox}
 
     <div class="obox"><div style="padding:16px">
       <div class="sec-h">편집자 정보 <span style="font-size:10px;font-weight:600;color:var(--g3)">(주문자 정보 아님 · 기존 유지)</span></div>
@@ -554,22 +640,19 @@ function renderPCorder(){
 
     <div class="obox"><div style="padding:16px">
       <div class="sec-h">배송 정보</div>
-      <div class="autobox" style="margin-bottom:16px">
-        <b>주문자 정보는 자동으로 설정돼요 (기능 8)</b><br>
-        본인인증 완료 시 회원정보, 미인증 시 아래 배송지 연락처를 사용합니다. 주문·배송 알림톡은 배송지 연락처로 발송돼요.
-        <span style="color:var(--ambertxt)">※ 이름·연락처·이메일 입력란 제거 · 법률 검토 조건부</span></div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700">배송지 정보 <span style="font-size:10px;color:var(--g3);font-weight:500">(PC 기존 폼 유지 · 기능 9)</span></div>
+        <div style="font-size:13px;font-weight:700">배송지 정보 <span style="font-size:10px;color:var(--grn2);font-weight:600">(모바일과 동일 · 요약 카드형)</span></div>
         <div style="display:flex;gap:6px"><button class="chg">배송지 목록</button><button class="chg">신규 배송지</button></div></div>
-      <div style="display:flex;flex-direction:column;gap:10px">
-        <div><label class="flabel">받으시는 분 <span class="req">*</span></label><input class="input" value="배채윤"></div>
-        <div><label class="flabel">연락처 <span class="req">*</span></label><input class="input" value="010-0000-0000"></div>
-        <div><label class="flabel">주소 <span class="req">*</span></label>
-          <div style="display:flex;gap:6px"><input class="input" style="max-width:120px" value="03995"><button class="chg">우편번호 조회</button></div>
-          <input class="input" style="margin-top:6px" value="서울 마포구 성암로 165"><input class="input" style="margin-top:6px" value="상암동 ○○○○ 1501호"></div>
-        <div><label class="flabel">배송 메시지</label><input class="input" placeholder="배송 메시지를 입력해 주세요"></div>
+      <div class="addr-card">
+        <div style="flex:1">
+          <div class="nm"><span class="tagbadge">집</span><span style="font-size:14px;font-weight:700">배채윤</span><span style="font-size:12px;color:var(--g2)">010-0000-0000</span></div>
+          <div style="font-size:13px;color:var(--g1);line-height:1.5">서울 마포구 성암로 165<br><span style="color:var(--g3)">상암동 ○○○○ 1501호 · 03995</span></div>
+        </div>
+        <button class="chg">변경</button>
       </div>
+      <div style="margin-top:12px"><label class="flabel">배송 메시지</label><input class="input" placeholder="배송 메시지를 입력해 주세요"></div>
+      <div style="font-size:11px;color:var(--g2);margin-top:10px;line-height:1.5">ⓘ 주문/배송 알림톡이 배송지 연락처로 발송됩니다.</div>
     </div></div>
 
     <div class="obox"><div style="padding:16px">
@@ -591,7 +674,6 @@ function renderPCorder(){
     ${ORDER_SUM.map(r=>`<div class="money-row"><span style="color:var(--g2)">${r[0]}</span><span style="font-weight:600;color:${r[2]==='red'?'var(--red)':r[2]==='grn'?'var(--grn)':'var(--ink)'}">${r[1]}</span></div>`).join('')}
     <div class="consent">
       <div class="state">결제를 진행하면 <b>구매조건 확인 및 개인정보 수집·이용</b>에 동의하는 것으로 간주됩니다. <a>약관보기</a><br><span style="color:var(--g3)">· 주문취소·수정은 결제 후 1시간 이내 가능</span></div>
-      <label class="opt"><div class="cb"></div>특가·쿠폰 등 이벤트 알림 수신 동의 (선택)</label>
     </div>
     <button class="paybtn">${SUM.total} 결제하기</button>
   </div></div>`;
@@ -628,6 +710,7 @@ function render(){
 function setScr(s){ state.scr=s; state.priceOpen=false; render(); }
 function setShip(s){ state.ship=s; render(); }
 function togglePrice(){ state.priceOpen=!state.priceOpen; render(); }
+function togglePcOrder(){ state.pcOrderOpen=!state.pcOrderOpen; render(); }
 document.getElementById('devseg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;state.dev=b.dataset.dev;state.priceOpen=false;render();});
 document.getElementById('scrseg').addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;setScr(b.dataset.scr);});
 render();
