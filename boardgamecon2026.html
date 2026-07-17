@@ -1,0 +1,729 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>2026 보드게임콘 부스 지도</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Black+Han+Sans&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+
+<style>
+  :root{
+    --ink:#0E1520;
+    --ink-2:#3C4A5C;
+    --ink-3:#7B8896;
+    --paper:#EDF0F3;
+    --card:#FFFFFF;
+    --line:#CBD3DA;
+    --corp:#BEE3F4;      /* 공식 배치도 기업 블루 */
+    --corp-2:#F7C7D8;    /* 공식 배치도 핑크 */
+    --artist:#F6D3A0;    /* 작가존 오렌지 */
+    --hot:#D7263D;       /* 선택/강조 */
+    --hot-soft:#FDE6E9;
+    --ok:#1B7F5A;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    font-family:Pretendard,-apple-system,BlinkMacSystemFont,system-ui,sans-serif;
+    background:var(--paper);color:var(--ink);
+    -webkit-font-smoothing:antialiased;
+    background-image:linear-gradient(var(--line) 1px,transparent 1px),linear-gradient(90deg,var(--line) 1px,transparent 1px);
+    background-size:28px 28px;background-position:-1px -1px;
+  }
+  body::before{content:"";position:fixed;inset:0;background:var(--paper);opacity:.72;pointer-events:none;z-index:0}
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:20px 16px 64px}
+
+  /* ---- head ---- */
+  header{border:2px solid var(--ink);background:var(--card);padding:18px 20px;margin-bottom:14px}
+  .kicker{font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.14em;color:var(--hot);font-weight:600}
+  h1{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:clamp(30px,7vw,52px);line-height:.98;letter-spacing:-.01em;margin:6px 0 10px}
+  h1 em{font-style:normal;color:var(--hot)}
+  .meta{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:13px;color:var(--ink-2)}
+  .meta b{font-family:'IBM Plex Mono',monospace;color:var(--ink);font-weight:600}
+
+  /* ---- controls ---- */
+  .controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+  .tabs{display:flex;border:2px solid var(--ink);background:var(--card)}
+  .tabs button{font:inherit;font-weight:700;font-size:13px;padding:9px 18px;background:transparent;border:0;cursor:pointer;color:var(--ink-2)}
+  .tabs button+button{border-left:2px solid var(--ink)}
+  .tabs button[aria-selected="true"]{background:var(--ink);color:#fff}
+  .search{flex:1;min-width:200px;position:relative}
+  .search input{width:100%;font:inherit;font-size:14px;padding:10px 12px 10px 34px;border:2px solid var(--ink);background:var(--card)}
+  .search input:focus{outline:3px solid var(--hot);outline-offset:-1px}
+  .search svg{position:absolute;left:10px;top:11px;width:16px;height:16px;stroke:var(--ink-3);fill:none;stroke-width:2}
+  .chips{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+  .chip{font:inherit;font-size:12px;font-weight:600;padding:6px 11px;border:1.5px solid var(--line);background:var(--card);color:var(--ink-2);cursor:pointer;border-radius:999px}
+  .chip[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:#fff}
+  .chip:focus-visible,.tabs button:focus-visible{outline:3px solid var(--hot);outline-offset:2px}
+
+  /* ---- map ---- */
+  .mapbox{border:2px solid var(--ink);background:var(--card);padding:10px;overflow:auto}
+  .maphint{font-size:12px;color:var(--ink-3);padding:2px 4px 8px}
+  svg.plan{display:block;width:100%;min-width:660px;height:auto}
+  .booth{cursor:pointer}
+  .booth rect{stroke:var(--ink);stroke-width:1.2;transition:fill .12s}
+  .booth:hover rect{fill:var(--hot-soft)!important;stroke-width:2}
+  .booth.sel rect{fill:var(--hot)!important;stroke-width:2.4}
+  .booth.sel text{fill:#fff!important}
+  .booth.dim{opacity:.22}
+  .booth .bn{font-family:'IBM Plex Mono',monospace;font-size:7px;font-weight:600;fill:var(--ink-2)}
+  .booth .bname{font-size:8.5px;font-weight:700;fill:var(--ink);text-anchor:middle}
+  .booth .bname.sm{font-size:6.6px}
+  .structure{fill:#E4E8EC;stroke:#C3CBD3;stroke-width:1}
+  .stext{font-size:8px;fill:var(--ink-3);text-anchor:middle;font-weight:600}
+  .zonelab{font-family:'IBM Plex Mono',monospace;font-size:9px;letter-spacing:.12em;fill:var(--ink-3);font-weight:600}
+
+  /* ---- list ---- */
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px}
+  .item{border:2px solid var(--ink);background:var(--card);padding:12px 13px;cursor:pointer;text-align:left;font:inherit}
+  .item:hover{background:var(--hot-soft)}
+  .item .row1{display:flex;align-items:center;gap:8px;margin-bottom:5px}
+  .num{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;padding:2px 6px;border:1.5px solid var(--ink);color:var(--ink)}
+  .item h3{font-size:15px;font-weight:800}
+  .item p{font-size:12px;color:var(--ink-3);line-height:1.45;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+  .flags{display:flex;gap:4px;margin-top:7px;flex-wrap:wrap}
+  .flag{font-size:10px;font-weight:700;padding:2px 6px;border-radius:3px;background:var(--paper);color:var(--ink-2)}
+  .flag.ev{background:var(--hot-soft);color:var(--hot)}
+  .flag.cp{background:#E3F1EC;color:var(--ok)}
+  .flag.ms{background:#EDE5F7;color:#5B3B94}
+  .empty{padding:40px;text-align:center;color:var(--ink-3);border:2px dashed var(--line);background:var(--card)}
+
+  /* ---- detail sheet ---- */
+  .scrim{position:fixed;inset:0;background:rgba(14,21,32,.5);z-index:20;opacity:0;pointer-events:none;transition:opacity .18s}
+  .scrim.on{opacity:1;pointer-events:auto}
+  .sheet{position:fixed;z-index:21;background:var(--card);border:2px solid var(--ink);
+    right:16px;bottom:16px;top:16px;width:min(430px,calc(100% - 32px));
+    display:flex;flex-direction:column;transform:translateX(calc(100% + 24px));transition:transform .22s cubic-bezier(.2,.7,.3,1)}
+  .sheet.on{transform:none}
+  @media(max-width:640px){
+    .sheet{left:0;right:0;bottom:0;top:auto;width:100%;max-height:88vh;border-width:2px 0 0 0;transform:translateY(100%)}
+  }
+  .sh-head{padding:16px 18px 12px;border-bottom:2px solid var(--ink);position:relative;flex:none}
+  .sh-head .num{margin-bottom:8px;display:inline-block}
+  .sh-head h2{font-family:'Black Han Sans',sans-serif;font-weight:400;font-size:26px;line-height:1.1;padding-right:34px}
+  .sh-head .sub{font-size:12px;color:var(--ink-3);margin-top:5px;line-height:1.5}
+  .close{position:absolute;top:14px;right:14px;width:28px;height:28px;border:1.5px solid var(--ink);background:var(--card);cursor:pointer;font-size:16px;line-height:1}
+  .close:hover{background:var(--hot);color:#fff;border-color:var(--hot)}
+  .sh-body{overflow-y:auto;padding:16px 18px 26px;flex:1}
+  .sec{margin-bottom:20px}
+  .sec>h4{font-family:'IBM Plex Mono',monospace;font-size:10px;letter-spacing:.16em;color:var(--hot);font-weight:600;margin-bottom:9px;padding-bottom:5px;border-bottom:1.5px solid var(--line)}
+  .game{padding:8px 0;border-bottom:1px dashed var(--line)}
+  .game:last-child{border-bottom:0}
+  .game b{font-size:13.5px;font-weight:700}
+  .game span{display:block;font-size:12px;color:var(--ink-2);line-height:1.5;margin-top:2px}
+  .game .tagnew{font-family:'IBM Plex Mono',monospace;font-size:9px;font-weight:600;color:var(--hot);border:1px solid var(--hot);padding:0 4px;margin-left:5px;vertical-align:1px}
+  ul.ev{list-style:none}
+  ul.ev li{font-size:13px;line-height:1.55;padding-left:15px;position:relative;margin-bottom:5px;color:var(--ink-2)}
+  ul.ev li::before{content:"";position:absolute;left:0;top:8px;width:5px;height:5px;background:var(--hot)}
+  ul.ev li b{color:var(--ink)}
+  .links{display:flex;flex-direction:column;gap:6px}
+  .lnk{display:flex;align-items:center;gap:9px;padding:10px 12px;border:1.5px solid var(--ink);text-decoration:none;color:var(--ink);font-size:13px;font-weight:700;background:var(--card)}
+  .lnk:hover{background:var(--ink);color:#fff}
+  .lnk .k{font-family:'IBM Plex Mono',monospace;font-size:10px;color:var(--ink-3);font-weight:600;margin-left:auto}
+  .lnk:hover .k{color:#9AA6B2}
+  .lnk.guess{border-style:dashed;border-color:var(--ink-3);color:var(--ink-2);font-weight:600}
+  .lnk.guess:hover{background:var(--ink-2);color:#fff}
+  .note{font-size:12px;line-height:1.55;color:var(--ink-2);background:var(--paper);border-left:3px solid var(--ink-3);padding:9px 11px}
+
+  /* ---- comps table ---- */
+  .comps{border:2px solid var(--ink);background:var(--card);padding:14px 16px}
+  .day{font-family:'Black Han Sans',sans-serif;font-size:20px;margin:16px 0 8px}
+  .day:first-of-type{margin-top:4px}
+  .crow{display:grid;grid-template-columns:78px 1fr auto;gap:10px;padding:9px 0;border-top:1px dashed var(--line);align-items:baseline}
+  .crow .t{font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;color:var(--hot)}
+  .crow .n{font-size:13.5px;font-weight:700}
+  .crow .n small{display:block;font-weight:500;color:var(--ink-3);font-size:11.5px;margin-top:2px}
+  .crow .r{font-family:'IBM Plex Mono',monospace;font-size:10.5px;color:var(--ink-3);text-align:right;white-space:nowrap}
+  .crow .r .closed{color:var(--hot)}
+
+  footer{margin-top:26px;font-size:11.5px;color:var(--ink-3);line-height:1.6}
+  footer a{color:var(--ink-2)}
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="kicker">COEX HALL B1 · 2026.07.16 THU — 07.19 SUN</div>
+    <h1>2026 보드게임콘<br><em>부스 지도</em></h1>
+    <div class="meta">
+      <span>기업 <b>30</b></span>
+      <span>작가존 <b>27</b></span>
+      <span>전시 <b>600+</b>종</span>
+      <span>운영 <b>10:00–18:00</b></span>
+      <span>입장 <b>무료</b></span>
+    </div>
+  </header>
+
+  <div class="controls">
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-view="map">지도</button>
+      <button role="tab" aria-selected="false" data-view="list">목록</button>
+      <button role="tab" aria-selected="false" data-view="comp">대회</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4"/></svg>
+      <input id="q" placeholder="부스명, 게임 제목, 부스 번호로 찾기" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="chips" id="chips"></div>
+
+  <div id="view-map">
+    <div class="mapbox">
+      <div class="maphint">부스를 누르면 판매 게임 · 이벤트 · 링크가 열려요. 검색이나 필터를 쓰면 해당 부스만 지도에 남습니다.</div>
+      <div id="planholder"></div>
+    </div>
+  </div>
+
+  <div id="view-list" hidden><div class="grid" id="grid"></div></div>
+
+  <div id="view-comp" hidden><div class="comps" id="comps"></div></div>
+
+  <footer>
+    출처: 보드게임콘 공식 홈페이지·주최측 자료·업체/작가 공식 발표를 정리한 커뮤니티 총정리 글(2026.07.13 기준)과 공식 배치도.
+    현장 변경·조기 소진이 있을 수 있어요. 공식 안내는
+    <a href="https://www.boardgamecon.com/" target="_blank" rel="noopener">boardgamecon.com</a>에서 확인하세요.<br>
+    링크에 <b>점선</b> 표시가 있으면 공식 채널을 확인하지 못해 검색 결과로 연결되는 링크예요.
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="sheet" id="sheet" role="dialog" aria-modal="true" aria-labelledby="shname">
+  <div class="sh-head">
+    <span class="num" id="shnum">B000</span>
+    <h2 id="shname">부스</h2>
+    <div class="sub" id="shsub"></div>
+    <button class="close" id="shclose" aria-label="닫기">✕</button>
+  </div>
+  <div class="sh-body" id="shbody"></div>
+</aside>
+
+<script>
+/* ============ 데이터 ============ */
+const S = n => ({label:"이름으로 검색", url:"https://www.google.com/search?q=" + encodeURIComponent(n + " 보드게임"), guess:true});
+
+const B = [
+/* ---------- 기업존 ---------- */
+{id:"B001",n:"보드피아",alt:"다이스트리게임즈",zone:"corp",x:761,y:15,w:87,h:117,
+ games:[["세티: 외계 지성체를 찾아서","탐사선·신호·기술로 외계 생명체를 찾는 우주 엔진빌딩"],["모던 아트","가치가 계속 변하는 미술품을 여러 방식으로 경매하는 경제게임"],["위너스 서클","경주마에 베팅하고 결과를 예측하는 경마게임"]],
+ news:[["세티: 우주 기관","비대칭 우주기관 11개, 신규 외계종족 3종, 신규 프로젝트를 더하는 확장"],["엠버하트","일꾼을 배치해 드래곤을 구조·훈련하고 밀렵꾼과 싸우는 전략게임"],["죄악의 카니발","일곱 죄악 카드를 비밀리에 골라 주사위를 가져오는 블러핑게임"]],
+ ev:["세티 본판 재입고"],
+ links:[["공식 홈페이지","https://boardpia.co.kr","HOME"],["인스타그램","https://www.instagram.com/dicetreegames/","IG"],["링크 모음","https://linktr.ee/dicetreegames","LINK"]]},
+
+{id:"B002",n:"언더독게임즈",zone:"pink",x:731,y:15,w:30,h:117,
+ games:[["아쿠아가든","수족관을 이동하며 해양생물을 모으고 전시하는 전략게임"],["아쿠아가든: 비치코밍","해변 생물과 요소를 추가하는 확장"],["웬디, 어른이 되렴","인물의 동기와 사건을 추리하는 머더미스터리"],["시체와 온천","온천을 무대로 진상을 밝히는 머더미스터리"],["포켓·미니 머더미스터리","소형 머더미스터리 제품군"]],
+ ev:["행사장 한정 특별판 미스터리게임 판매","태국 퍼블리셔 관계자·작가 현장 참여","게임 체험"],
+ note:"태국 작품명과 특별판 가격은 아직 공개되지 않았어요.",mystery:true,
+ links:[S("언더독게임즈")]},
+
+{id:"B003",n:"코리아보드게임즈",zone:"corp",x:298,y:15,w:433,h:117,
+ games:[["카탄","개척지를 건설하고 자원을 교환하는 가족 전략게임"],["스플렌더","보석 토큰을 모아 개발 카드를 확보하는 엔진빌딩"],["커피 러시","주문에 맞춰 재료를 모으고 음료를 완성하는 전략게임"],["할리갈리","같은 과일 다섯 개면 종을 치는 순발력 게임"]],
+ news:[["새우깡 잡기","같은 새우깡 카드를 짝지어 버리고 갈매기를 피하는 가족 카드게임"],["손이 가요 새우깡","손가락을 지정된 자리에 놓으며 버티는 손가락 액션게임"],["블러핏","숨긴 카드와 상대의 선택을 읽어 중앙 카드를 가져오는 블러핑게임"],["두냐자드의 모험","90초 안에 이야기와 맞는 타일을 함께 찾는 협력게임"],["데스 스테이션","진행자가 숨긴 함정을 피해 제한시간 안에 안전한 곳을 찾는 게임"]],
+ ev:["250종 이상 쇼핑 · 신작 체험 테이블 33개","발매 예정작 미리보기","신작 리뷰 이벤트 · 할인 판매","체험작: 아브라카 후, 내주세요, 색감과 직감 등","7/17–19 제9회 피칭데이"],
+ comps:["스플렌더 그랑프리 초등부 예선 (7/18)","바다숲 대회 (7/19)"],mystery:true,
+ links:[["공식 스토어","https://www.koreaboardgames.com/store","HOME"],["인스타그램","https://www.instagram.com/koreaboardgames/","IG"],["카카오 스토어","https://store.kakao.com/kbg","STORE"]]},
+
+{id:"B004",n:"만두게임즈",zone:"corp",x:125,y:15,w:173,h:117,
+ games:[["카르디아","두 사람이 카드를 동시에 내는 2인 심리전. 높은 카드는 인장, 낮은 카드는 능력"],["베일 오브 이터니티","환상 생물을 포획·소환해 연계 엔진을 만드는 카드 전략게임"],["사그라다","색색의 주사위로 스테인드글라스 창을 완성하는 퍼즐게임"],["컴파일: 메인 1","인공지능 테마 덱으로 세 전선을 두고 겨루는 2인 카드게임"],["꼬치의 달인","주문 카드와 같은 꼬치를 빠르게 완성하는 실시간 게임"]],
+ ev:["만두게임즈 로고 뱃지 이벤트"],
+ comps:["카르디아 대회 (7/18)"],
+ note:"《카르디아: 야생의 수호자들》은 대회 4강 진출자에게 주는 출시 예정 확장이에요. 현장 판매 확정작은 아닙니다.",
+ links:[["공식 홈페이지","https://www.mandoogames.com/","HOME"],["인스타그램","https://www.instagram.com/mandoogames/","IG"],["카카오 스토어","https://store.kakao.com/mandoogames","STORE"]]},
+
+{id:"B005",n:"조엔",zone:"corp",x:732,y:157,w:119,h:59,
+ games:[["헥서스","육각형 공간에서 말을 배치하고 연결하는 추상전략"],["포켓알까기","손가락으로 말을 튕겨 상대 말을 떨어뜨리는 휴대용 덱스터리티"],["카프잼","오픈 메이커 방식으로 개발된 가족게임"],["스페이스-X","알까기에 우주 테마와 변형 규칙을 더한 게임"]],
+ ev:["포켓알까기 할인"],
+ links:[["공식 홈페이지","https://www.joen.co.kr","HOME"]]},
+
+{id:"B006",n:"보드엠",zone:"corp",x:732,y:216,w:119,h:56,
+ games:[["파러웨이","8장의 여정을 만든 뒤 마지막 카드부터 역순으로 계산하는 카드게임"],["포션 폭발","구슬을 꺼내 연쇄 폭발을 일으켜 물약을 완성하는 퍼즐게임"],["기즈모","구슬을 모아 발명품 연쇄 엔진을 구축하는 전략게임"],["럭키 넘버스","숫자 타일을 오름차순으로 배치하는 추상 퍼즐"],["브라스: 랭커셔","산업혁명기 산업·운하·철도망을 건설하는 경제 전략게임"]],
+ news:[["플라워즈","숫자 카드의 등장 빈도와 배치 조건으로 꽃밭을 만드는 카드게임"],["P.I.","경쟁자보다 먼저 자신의 사건을 해결하는 경쟁형 추리게임"],["스타일 마스터","제시된 패턴과 조건을 빠르게 찾아내는 관찰·순발력 게임"],["북 타워","고양이와 책을 떨어뜨리지 않게 함께 쌓는 협력 덱스터리티"],["테이크 타임","제한된 의사소통으로 숫자 카드를 시계 둘레에 배치하는 협력게임"]],
+ ev:["신작 할인 · 게임 체험 · 챌린지 · 뽑기 이벤트","7월 넷째 주 온라인 보드게임콘 예정"],
+ comps:["파러웨이 챔피언십 (7/19)"],
+ links:[["공식 쇼핑몰","https://boardm.co.kr/","HOME"]]},
+
+{id:"B007",n:"옐로우스타게임즈",zone:"corp",x:613,y:157,w:119,h:59,
+ games:[["어스","식물과 서식지 카드로 생태계 엔진을 구축하는 전략게임"],["왕의 딜레마","왕국의 정치적 결정을 이어가는 레거시게임"],["터미너스","지하철 노선을 건설하고 승객을 운송하는 전략게임"],["오스티아","만칼라식 자원 운용으로 무역과 항해를 진행하는 게임"],["마이셀리아","버섯 균사체 네트워크를 확장하는 전략게임"]],
+ ev:["구매 이벤트 · 현장 할인"],
+ note:"제니스와 비밀요원 확장, 어스: 애니멀 킹덤은 온라인 행사 공개작이라 현장 라인업과는 별개예요. 안드로메다 엣지·제네시스 확장은 제작 중(11월 전달 예정).",
+ links:[["스마트스토어","https://smartstore.naver.com/yellowstargames","STORE"],["인스타그램","https://www.instagram.com/yellowstargameshop/","IG"]]},
+
+{id:"B008",n:"MTS게임즈",zone:"corp",x:613,y:216,w:119,h:56,
+ games:[["잊혀진 대륙의 철도들","철도망을 건설하고 회사를 운영하는 경제 전략게임"],["하트 오브 크라운","공주를 옹립하고 덱을 성장시키는 덱빌딩"],["에이전트 애비뉴","카드의 숫자와 이동을 읽어 상대 요원을 추적하는 2인 심리전"],["레츠 고 투 재팬","여행 일정을 구성해 일본 관광을 즐기는 카드 드래프팅"],["원드러스 크리처","일꾼과 생물 능력을 연계해 엔진을 만드는 전략게임"],["카르누타","주술과 동물을 소재로 한 전략게임"],["시계탑에 흐른 피","선과 악이 섞여 정보를 추론하는 대규모 소셜 디덕션"]],
+ ev:["신작 할인 · 구매 사은품 · 한정판 프로모션"],
+ comps:["에이전트 애비뉴 본선 (7/19)","카르누타 본선 (7/19)"],mystery:true,
+ note:"햐리 작가의 《추카추카》는 보드게임콘 종료 뒤 연내 MTS게임즈로 출시 예정이에요. 이번 콘 판매 확정작은 아닙니다.",
+ links:[["공식 스토어","https://mtsgames.kr/","HOME"], S("MTS게임즈")]},
+
+{id:"B009",n:"보드붐",zone:"corp",x:471,y:157,w:115,h:29,
+ games:[["다이스택","주사위를 조건에 맞춰 빠르게 쌓는 덱스터리티"],["점핑다이스 / 점핑다이스 컬러","주사위의 색과 숫자 조건을 빠르게 판단하는 순발력 게임"],["퀵 딜리버리","주문에 맞춰 물건을 빠르게 전달하는 실시간 게임"],["벌레가 싫어","벌레를 피하거나 제거하며 목표를 완성하는 가족게임"]],
+ ev:["전 제품 35% 할인"],
+ note:"《스퀘어 메이커》는 공식 카탈로그상 Coming Soon 제품이라 아직 판매작으로 보긴 어려워요.",
+ links:[S("보드붐")]},
+
+{id:"B010",n:"매직빈게임즈",zone:"corp",x:471,y:186,w:115,h:86,
+ games:[["오목체스: 백년전쟁","오목의 연결 규칙에 서로 다른 이동 능력의 말을 결합한 추상전략"],["포켓몬 코드톡","9개 영역에서 승리 조건을 완성하는 확장형 틱택토"],["신라: 천년의 미소","신라 문화와 유물을 소재로 한 역사 복원형 게임"],["식스틴","숫자 타일의 배치와 조합을 이용하는 추상전략"]],
+ ev:["대회 연계 오목체스 50% 할인","신작·기존작 현장 할인 판매"],
+ comps:["오목체스: 백년전쟁 첫 공식 대회 (7/18, 접수 종료)"],
+ links:[["공식 홈페이지","https://magicbeangame.com","HOME"]]},
+
+{id:"B011",n:"게임올로지 · PLAYTE",zone:"corp",x:356,y:157,w:115,h:59,
+ games:[["스컬킹","자신이 딸 트릭 수를 정확히 예측해야 하는 해적 트릭테이킹"],["도메모","다른 사람에게만 보이는 자신의 숫자 타일을 추론하는 논리게임"],["캔트스탑 L보드","주사위로 산을 오르며 전진할지 멈출지 정하는 푸시유어럭"],["Fenceology·펜쏠로지","울타리 타일로 구역을 닫고 차지하는 영역 구성게임"],["네뷸라 컬러스","별 조각으로 세트와 연속 숫자를 만드는 2인 카드게임"]],
+ ev:["<b>셀렉트 컨테이너 채우기</b> — 뚜껑만 닫히면 OK. 1개 119,000원 / 2개 229,000원(+아티스트박스 '스컬' 증정)","포테이토맨·실버마인·플레이트랙·독일 NSV 카드게임·피자의 사탑도 컨테이너에 담을 수 있어요","<b>구 버전 교환 서비스</b> — 구성물 100% 완비 시 새 버전 교환 (고다고다, 베니스커넥션, 포테이토맨, 클럽언락, 에이다의 도서관, 고집센당나귀, 익스프레스크로스, 오라파마인 AS구성물)","구매 고객 전원 플레이트 로고 볼펜 증정 (재고 소진 시까지)"],
+ comps:["제1회 오라파 마인 대회 32강 (부스 내 특설 테이블)"],
+ note:"콘 전용 가격, 최근 공개작 2종의 현장 판매 여부는 미공개예요.",
+ links:[["공식 홈페이지","https://www.playte.com/","HOME"],["인스타그램","https://www.instagram.com/playte_games/","IG"]]},
+
+{id:"B012",n:"놀이속의세상",zone:"corp",x:356,y:216,w:115,h:56,
+ games:[["루미큐브","숫자 타일을 그룹이나 연속 묶음으로 내려놓는 클래식게임"],["피라미도","도미노 타일을 층층이 쌓고 보석 영역을 연결하는 타일게임"],["제로 히어로","숫자의 합과 차를 빠르게 판단하는 가족 카드게임"],["고스트","좋은 유령과 나쁜 유령의 정체를 추리하는 2인 전략게임"]],
+ comps:["루미큐브 초등부 (7/19, 접수 마감)","루미큐브 일반부 (7/19, 접수 마감)"],
+ links:[S("놀이속의세상 루미큐브")]},
+
+{id:"B013",n:"피스크래프트",zone:"pink",x:298,y:157,w:30,h:59,
+ games:[["미니와일드 3부작","동물과 생태계 카드를 조합하는 소형 카드게임 시리즈"],["곤충채집","곤충 카드를 모아 세트를 완성하는 셋컬렉션"],["토끼와 거북이","동물에게 베팅하며 경기 결과를 예측하는 레이싱게임"],["잘그락 왕국","구성물을 활용하는 가족게임"],["라퓨타","공중도시를 소재로 한 전략게임"]],
+ ev:["한정 보드게임 판매","피규어·티셔츠 등 굿즈 프로모션"],mystery:true,
+ note:"콘 전용 신작 제목은 아직 공개되지 않았어요.",
+ links:[S("피스크래프트 보드게임")]},
+
+{id:"B014",n:"미스터리게임즈",zone:"pink",x:298,y:216,w:30,h:56,
+ games:[["남극점 X","남극 탐험대의 사건을 해결하는 5인 머더미스터리"],["밀레니엄 가든","제한된 정보로 사건의 진상을 밝히는 2인 미스터리"],["히든 스토리 H","이야기 속 단서와 진실을 맞히는 추리게임"],["미스터리 파티","역할과 정보를 나누어 사건을 해결하는 미스터리 제품군"]],
+ ev:["<b>무료 체험</b> — 멍탐정 푸들(1인·10분) / 미스터리 맨션(2인·20분). 하나 완료+인증 시 UZU 350코인(약 5,000원) 지급","현장 판매: 데드박스를 제외한 자사 제품 + 엘피 작가 《0719》 + 《북부대공을 암살하는 법》","현장 할인 · SNS 팔로우 이벤트"],
+ note:"《DHD》(근미래 2인 머더미스터리)는 펀딩 종료 후 9월 말 발송 예정인 제작 중 작품이에요. 현재 일반 판매작은 아닙니다.",
+ links:[["스마트스토어","https://smartstore.naver.com/mysterygames","STORE"],["유튜브","https://www.youtube.com/channel/UC4HW07Co06crr2EgoustvQg/videos","YT"]]},
+
+{id:"B015",n:"라쿤펀치",zone:"pink",x:271,y:157,w:27,h:59,
+ games:[["엠버: 옵시디언 프로토콜","서로 다른 기체와 장비를 조합해 교전하는 SF 메카 미니어처 전투게임"]],
+ ev:["현장 구매 할인"],
+ note:"할인율과 정확한 판매 제품군은 미공개예요.",
+ links:[S("라쿤펀치 엠버 옵시디언 프로토콜")]},
+
+{id:"B016",n:"업앤업",zone:"pink",x:271,y:216,w:27,h:56,
+ games:[["Plan Bee","벌과 생태계를 주제로 한 환경교육 게임"],["슬기로운 분리배출 카드","쓰레기 종류와 올바른 분리배출법을 익히는 교육게임"],["밤윷","전통 윷놀이를 현대적으로 변형한 게임"],["허니비","벌집과 꿀을 소재로 한 가족게임"],["비틀레이싱","곤충을 전진시키는 가벼운 레이싱게임"]],
+ ev:["할인 판매"],
+ links:[S("업앤업 보드게임")]},
+
+{id:"B017",n:"미미월드",zone:"pink",x:126,y:157,w:117,h:59,
+ games:[["억만장자게임","부동산과 자산을 모으며 최고의 부자가 되는 가족 경제게임"],["탈출학교괴담","학교에 숨은 장치와 단서를 풀어 탈출하는 공포·추리게임"],["배틀X건 2.0","장난감 총과 표적 장치를 활용하는 대전형 액션게임"],["포켓몬 빙고게임","포켓몬 캐릭터로 즐기는 가족용 빙고게임"]],
+ ev:["자사몰·SNS 후기 이벤트"],
+ links:[S("미미월드 보드게임")]},
+
+{id:"B018",n:"하비게임몰",zone:"corp",x:126,y:216,w:117,h:29,
+ games:[["미플 서커스","음악에 맞춰 미플로 곡예 구조물을 만드는 덱스터리티"],["가짜 예술가 뉴욕에 가다","한 명의 가짜 화가를 찾아내는 그림·정체 추리게임"],["쿠","역할 카드와 거짓말로 상대를 탈락시키는 블러핑게임"],["오버시어스 / 미션 007",""],["카드 슬리브·보드게임 액세서리",""]],
+ ev:["신작 할인 판매"],
+ links:[S("하비게임몰")]},
+
+{id:"B019",n:"데블다이스",zone:"corp",x:126,y:245,w:117,h:27,
+ games:[["데드 바이 데이라이트: 보드게임","살인마 1명과 생존자들이 발전기와 탈출을 두고 겨루는 비대칭 생존게임"],["페이퍼 던전","주사위를 배치해 던전을 탐험하고 몬스터와 싸우는 롤앤라이트"],["상인들의 항구","각자 완전히 다른 상인을 맡아 상품을 생산·판매하는 비대칭 전략게임"]],
+ news:[["데드 바이 데이라이트 빅박스","본판·확장·구성물을 정리하는 대형 수납 제품. 실물 최초 공개. 현장 선주문가 87,000원 (선주문 특전: 공물 카드 프로모)"]],
+ ev:["신규 살인마 '조련사' 전시","컬렉터스 에디션 하루 20개 최종 판매 — 현장가 149,000원","할인 판매 · 럭키드로우"],
+ links:[["공식 쇼핑몰","http://www.devildice.co.kr/","HOME"],["인스타그램","https://www.instagram.com/devildice_/","IG"]]},
+
+{id:"B020",n:"아스모디코리아",zone:"corp",x:613,y:303,w:238,h:112,
+ games:[["도블","같은 그림 하나를 가장 먼저 찾는 관찰·순발력 게임"],["티켓 투 라이드","노선 카드를 모아 도시 사이에 철도를 연결하는 가족 전략게임"],["스플렌더","보석 토큰을 모아 개발 카드를 확보하는 엔진빌딩"],["팬데믹","역할을 나누어 세계적 감염병을 막는 협력게임"],["딕싯","그림 카드와 이야기 단서로 서로의 생각을 추리하는 파티게임"]],
+ news:[["태그 팀: 아서왕 전설","미리 구성한 카드 순서가 자동으로 전투를 벌이는 2인 덱빌딩 오토배틀러. 기존 캐릭터와 호환되지만 독립 플레이 가능"]],
+ ev:["출시 특가 · 구매 수량별 추가 할인 · 타임 특가"],
+ comps:["아스모플레이: 드제코 챌린지 (7/18)"],
+ note:"《언매치드 어드벤처: 닌자 거북이》와 《캐치스케치: 롤&메스》(확장)는 7/17 온라인콘 출시작이에요. 현장 출시가 아닙니다. 문라이트 게임즈의 《평화주의 레이드》는 아스모디코리아와 관계가 없습니다.",
+ links:[["공식 홈페이지","https://www.asmodee.co.kr/ko_KR/","HOME"],["인스타그램","https://www.instagram.com/asmodee_korea/","IG"],["카카오 스토어","https://store.kakao.com/asmodeekorea","STORE"]]},
+
+{id:"B021",n:"행복한바오밥",zone:"corp",x:356,y:303,w:230,h:112,
+ games:[["오키도키 원정대","제한된 의사소통으로 카드를 올바른 순서에 놓는 협력게임"],["해녀","산소를 관리하며 제주 바다에서 해산물을 채취하는 위험관리 게임"],["메모리듬","이미지·리듬·연상을 이용해 정보를 기억하는 게임"],["고피쉬 / 셈셈 시리즈","언어와 수학 학습을 게임으로 풀어낸 교육 제품군"]],
+ news:[["해녀 미니 확장","해녀 본판에 새로운 요소를 더하는 소형 확장"],["탑텐 TV 시트콤","질문에 1~10 강도의 답을 말하고 팀이 순서를 맞히는 협력 파티게임"],["다다다","소리와 그림을 연결해 즉석 언어를 만드는 연상게임"],["매치? 매치!","제시어를 보고 팀원과 같은 이미지를 고르는 팀 파티게임"],["플레이제주","만칼라식 자원 운용과 엔진빌딩을 결합한 제주 배경 전략게임"],["이레이저","다음 사람에게 전달할 때 단서를 하나씩 지우는 단어 추리게임"],["컬러로","방향 토큰이 가리키는 행·열에서 종이접기 토큰을 모으는 2인 셋컬렉션"]],
+ ev:["단품 할인","1·3·5·7개 구매 단계별 할인"],
+ comps:["정고 대회 (7/18, 초등·청소년부 / 성인부)"],
+ links:[["공식 홈페이지","https://www.happybaobab.com/","HOME"],["네이버 브랜드스토어","https://brand.naver.com/happybaobab","STORE"],["인스타그램","https://www.instagram.com/happy_baobab/","IG"]]},
+
+{id:"B022",n:"초이스",zone:"pink",x:299,y:303,w:29,h:56,
+ games:[["어리스메틱","숫자와 연산을 조합해 목표를 완성하는 수학 퍼즐게임"],["에볼루션 푸드체인","생물의 진화와 먹이사슬을 이용하는 생태 전략게임"],["한강","삼국시대를 배경으로 한 역사게임 (세부 규칙 제한 공개)"],["코레아 우라!","한국 역사와 문화 테마 작품"],["별주부전: 토끼의 죽음","별주부전 인물이 등장하는 5인 머더미스터리"]],
+ ev:["작품 체험과 판매 · 현장 할인","인스타그램 팔로우 이벤트","테스트플레이 SNS 업로드 이벤트"],mystery:true,
+ note:"큐리어스클라우드와의 협업 히든 게임은 제목·규칙 모두 미공개예요. 별주부전은 이미 펀딩한 작품이라 콘 최초 공개작은 아닙니다.",
+ links:[S("초이스 보드게임 별주부전")]},
+
+{id:"B023",n:"메이즐링",zone:"pink",x:299,y:359,w:29,h:56,
+ games:[["메이즐링 Vol.1","종이를 접어 떨어져 있던 미로 길을 연결하는 공간 퍼즐"],["메이즐링-Q","단계별 문제를 풀어가는 접기형 미로 퍼즐 제품군"]],
+ ev:["체험용 5,000개 증정 (증정 조건 미공개)","할인 판매"],
+ note:"메이즐링-Q는 과거 펀딩 제품이라 판매 재고는 현장에서 확인해야 해요.",
+ links:[S("메이즐링 퍼즐")]},
+
+{id:"B024",n:"보드마카브라더스",zone:"pink",x:270,y:303,w:29,h:56,
+ games:[["라스트 캠퍼","한정된 자원으로 생존자를 관리하는 캠핑 생존 카드게임"],["레드 룸","폐쇄된 공간에서 탈출과 생존을 겨루는 배틀로얄·추리게임"],["더 콜렉터","보물을 모으면서 상대 계획을 방해하는 공격적 셋컬렉션"]],
+ ev:["현장 한정 리워드","할인 판매"],
+ note:"《노 워터》는 펀딩 종료 후 제작 중이며 8월 발송 예정이에요. 현재 일반 판매작은 아닙니다.",
+ links:[S("보드마카브라더스")]},
+
+{id:"B025",n:"실버건게임즈",zone:"pink",x:270,y:359,w:29,h:56,
+ games:[["스윙앤롤","투수와 타자의 선택, 주사위 결과를 결합한 2인 야구 심리전"],["도리도리 미어캣","미어캣의 행동을 이용해 상대를 속이는 블러핑게임"],["부릉부릉 쿼카","카드 트릭의 결과로 쿼카가 전진하는 레이싱·트릭테이킹"]],
+ ev:["<b>스윙앤롤 올해 마지막 50개</b> — A/S용 물량 제외. 추가 생산 계획이 없어 조기 소진 가능성이 큽니다","동물 시리즈(부릉부릉 쿼카·도리도리 미어캣) 행사 특가 + 변경된 최신 규칙으로 체험 가능","<b>중고 보드게임 럭키드로우</b> — 5,000원 / 10,000원 두 종류. 카드를 뽑으면 해당 번호의 중고 게임 증정 (여러 개 구성도 있음). 판매금 전액 보육원 기부"],
+ links:[S("실버건게임즈 스윙앤롤")]},
+
+{id:"B026",n:"올린스튜디오",zone:"pink",x:242,y:303,w:28,h:56,
+ games:[["에이전트 블랙","단서를 이용해 숨은 인물이나 정체를 찾아내는 추리게임"],["와리가리 레이스","말을 앞뒤로 움직이며 순위를 겨루는 가족 레이싱게임"],["로테이트","구성물을 회전시켜 목표 형태나 위치를 만드는 추상전략"]],
+ ev:["3종 모두 체험 가능","구매 금액별 할인","SNS 공유 이벤트"],
+ links:[S("올린스튜디오 보드게임")]},
+
+{id:"B027",n:"보드팝",zone:"pink",x:242,y:359,w:28,h:56,
+ games:[["미스터리 로얄 01~04","호텔·미술관·크루즈·카지노를 무대로 하는 1~4인 협력 머더미스터리"],["해독불가 트로이메라이","세 사람이 역할과 정보를 나누어 진상을 밝히는 머더미스터리"],["나 혼자 만렙 뉴비 / 역대급 영지 설계사","웹소설·웹툰 IP를 이용한 게임"]],
+ ev:["머더미스터리 작품 판매","킥스타터 준비 중인 신규 게임 전시"],
+ note:"신규 게임의 제목과 현장 판매 여부는 미공개예요.",
+ links:[["스마트스토어","https://smartstore.naver.com/manogames","STORE"]]},
+
+{id:"B028",n:"서월보드게임즈",zone:"pink",x:183,y:303,w:27,h:112,
+ games:[["조폐국의 비밀","조폐국을 둘러싼 후속 머더미스터리 상품"],["끄적끄적 해적단","공유 지도에 항로와 세력권을 그리는 플립앤라이트"],["스택 스톡","카드를 관리하며 주가 변화를 읽고 투자 수익을 노리는 주식게임"],["붉은미궁","엔티티에게 잡아먹히지 않도록 트릭과 손패를 관리하는 생존형 트릭테이킹"],["백귀야행 / 셀라루스",""]],
+ ev:["<b>미스터리 스퀘어 시즌3 주관</b> — 등록·안내·진행은 서월 부스에서만 합니다","SNS 경품 이벤트"],mystery:true,
+ note:"《조폐국 위조지폐 사건》은 현장 오프라인 추리 프로그램이고, 《조폐국의 비밀》은 그 후속 머더미스터리 상품이에요. 이름이 비슷하니 헷갈리지 마세요.",
+ links:[["공식 홈페이지","https://seowolboardgames.com/","HOME"],["인스타그램","https://www.instagram.com/seowol_boardgames/","IG"],["텀블벅","https://tumblbug.com/u/seowolboardgames","FUND"]]},
+
+{id:"B029",n:"보드라이브",zone:"corp",x:156,y:303,w:27,h:112,
+ games:[],
+ note:"공식 참가 심사 결과(기업 30곳)에는 없지만 최신 배치도에 추가로 표시된 부스예요. 대신 나비타월드·디다노니아의 부스 표기가 배치도에서 보이지 않습니다. 행사 직전 최종 배치도를 다시 확인하는 게 좋아요.",
+ links:[S("보드라이브 보드게임")]},
+
+/* ---------- 작가존 ---------- */
+{id:"C001",n:"U:MUR · 유머",zone:"artist",x:652,y:440,w:42,h:21,
+ games:[],note:"작가존 참가만 확정됐어요. 팀 구성, 작품명, 인원·시간, 체험·판매 정보는 모두 미공개입니다.",
+ links:[S("U:MUR 보드게임")]},
+
+{id:"C002",n:"계피디",zone:"artist",x:652,y:461,w:42,h:21,
+ news:[["더 플래머","이번 보드게임콘에서 최초 공개되며 직접 플레이할 수 있어요"]],
+ note:"인원, 플레이 시간, 장르, 핵심 규칙은 미공개예요.",
+ links:[S("계피디 보드게임 더 플래머")]},
+
+{id:"C003",n:"구름병아리",zone:"artist",x:652,y:482,w:42,h:21,
+ games:[["가챠즈 듀얼!","뽑기로 카드를 얻고 덱을 강화해 싸우는 2인 전용 덱빌딩 카드배틀. 2024 보드게임 비콘 어워드 1위"],["가챠즈 파티!","푸시유어럭 성격의 시연작"]],
+ note:"딱지게임연구소에서 10년 이상 카드게임을 기획·개발한 작가예요. 정확한 체험·판매작은 미공개.",
+ links:[S("구름병아리 가챠즈 듀얼")]},
+
+{id:"C004",n:"돌핀엔돌핀",zone:"artist",x:652,y:503,w:42,h:21,
+ games:[["스타폴: 왕관전쟁","2~6인 · 약 40~120분. 카드·주사위·캐릭터 능력으로 왕관을 향해 달리는 TCG풍 판타지 전략 레이싱"]],
+ mystery:true,note:"디자이너 오스칼. 모드와 인원에 따라 플레이 시간 편차가 커요. 할인·판매 정보는 미공개.",
+ links:[S("돌핀엔돌핀 스타폴 왕관전쟁")]},
+
+{id:"C005",n:"드로우 · Drawanything",zone:"artist",x:652,y:524,w:42,h:21,
+ games:[["끄적끄적 해적단","2~4인 · 약 30분 · 14세 이상. 해적 두목이 되어 공유 지도에 항로와 영향력을 그리는 플립앤라이트"],["하트 여왕의 정원","작품명은 공개됐지만 세부 규칙은 미공개"]],
+ news:[["플립 던전","주사위 20개와 카드 9장으로 구성된 초소형 던전 탐험 게임. 던전 카드 6장을 클리어하고 보스를 처치하면 승리. 예정가 5,000원대"],["원카드 배틀","플립 던전과 함께 판매 예정인 초소형 카드게임"]],
+ links:[["보드라이프 공지","https://boardlife.co.kr/bbs_detail.php?tb=board_community&bbs_num=78252&view=new","POST"], S("드로우 Drawanything")]},
+
+{id:"C006",n:"디미디움",zone:"artist",x:652,y:545,w:42,h:21,
+ games:[["쿡팟!","공유 주방과 개인 주방의 주사위를 조합해 재료를 모으는 요리 셋컬렉션"],["우리 집 돼지저금통을 훔쳤다!","2~6인 순발력 파티게임. 간식 가격에 맞는 동전을 가장 먼저 꺼내야 해요"],["완벽한 던전 청소 가이드","던전을 한붓그리기 퍼즐로 청소하는 1인 스토리 게임북"],["럭키 네이버스","이웃 타일을 배치하고 관계로 수익을 만드는 타일게임"]],
+ note:"디자이너 소금, 게임개발자 이재웅, 제작·PM 박예린 등이 활동하는 소규모 스튜디오. 출품·판매작은 미공개.",
+ links:[S("디미디움 보드게임 쿡팟")]},
+
+{id:"C007",n:"떱떠비 랩",zone:"artist",x:652,y:566,w:42,h:21,
+ games:[],mystery:true,
+ note:"\"똑똑한 척하지만 나사 하나씩 빠진 두 덤앤더머의 우당탕탕 보드게임 연구소\"라고 소개한 2인 창작팀. 작품명, 인원·시간, 판매 여부 모두 미공개예요. 'Dumb Derby!'는 확정된 작품명으로 보기 어렵습니다.",
+ links:[S("떱떠비 랩 보드게임")]},
+
+{id:"C008",n:"래비 · 김범희",zone:"artist",x:610,y:440,w:42,h:21,
+ games:[["붉은미궁","3~5인 · 15~20분 · 14세 이상. 백룸을 모티브로, 엔티티에게 잡아먹히지 않도록 트릭과 손패를 관리하는 생존형 트릭테이킹"],["여우신령","3~5인 퍼즐형 트릭테이킹"],["그래피티","2~4인 · 15~20분 · 14세 이상. 그래피티를 모으는 셋컬렉션"],["인형찾기 / 코르세어 / 백신연구소",""]],
+ note:"정확한 출품·판매작은 미공개예요.",
+ links:[S("김범희 래비 보드게임 붉은미궁")]},
+
+{id:"C009",n:"렛츠게임 스튜디오",zone:"artist",x:610,y:461,w:42,h:21,
+ games:[["렛츠타코 (공동작)","2~4인 · 약 20분. 한 손만 사용해 주문과 같은 재료 블록을 타코에 담는 실시간 덱스터리티. 2025 보드게임 비콘 공개"],["비버하우스·르 카스토르 (오감)","2인 · 약 15분. 주사위가 교차하는 지점에 나무를 쌓아 비버 집을 만드는 추상전략. 2024 비콘 어워드 2위"],["플라멩코 (너트구리)","2~5인 · 20~30분 · 9세 이상. 박자를 나누어 카드를 내며 손패를 터는 리듬형 클라이밍게임"],["스위치 온! (너트구리)","1~6인 · 15~20분. 이동할 때마다 뒤집히는 토큰으로 목표 전구 패턴을 최소 이동에 완성하는 퍼즐게임"]],
+ note:"오감 작가와 너트구리 작가의 협업 부스예요. 정확한 현장 출품작은 미공개.",
+ links:[S("렛츠게임 스튜디오 렛츠타코")]},
+
+{id:"C010",n:"마인블러썸",zone:"artist",x:610,y:482,w:42,h:21,
+ games:[["퍼펙트 캐스팅 (햐리)","2~8인. 친구에게 가장 잘 어울리는 역할을 골라 캐스팅하는 관계형 파티게임"],["어워즈 파티 (햐리)","2~8인. 상의 이름과 내용을 만들고 누가 그 상의 주인공인지 맞히는 게임. 공식 페이지엔 《시상식 파티》로도 표기"],["미스터리 선물상자 (햐리)","2~10인. 좋은 선물과 나쁜 선물이 섞인 상자를 받을지 선택하는 파티게임"],["서치마크 (마인스위퍼)","1~4인. 주사위 숫자로 빈칸 속 지뢰를 찾는 롤앤라이트"],["쿠이쿠이 숫자마작 (마인스위퍼)","2~4인. 마작 테마 숫자빙고"],["17보 종이마작 (마인스위퍼)","2~4인. 공간과 마작패 없이 종이로 즐기는 간소화 17보 마작"]],
+ ev:["<b>체험 예약</b> 7/16–19 · 10:30 / 11:30 / 12:30 / 13:30 / 14:30 / 15:30 / 16:30","<b>예약판매</b> 서치마크 3,000원(재고 30) · 쿠이쿠이 숫자마작 4,000원(재고 20) · 17보 종이마작 2장 2,000원(재고 30)","<b>굿즈</b> 마작 캐릭터 키링, 아크릴 스탠드, 역만부적 키링, 자석·자석집게, 아크릴 볼펜, 보게머의 삶 뱃지, 나는 보드게이머다 키링 (약 4,000~7,000원, 소량 제품 다수)"],
+ note:"햐리 작가와 마인스위퍼 작가의 협업 부스. 이번 콘 출품작 총 6종. 예약에 따라 재고가 변할 수 있어요. 햐리 작가의 《추카추카》는 콘 종료 뒤 연내 MTS게임즈로 출시 예정.",
+ links:[["공식 행사 페이지","http://noranora.net/mineblossom/","HOME"]]},
+
+{id:"C011",n:"문라이트 게임즈",zone:"artist",x:610,y:503,w:42,h:21,
+ games:[["평화주의 레이드","3~4인 · 약 40~70분. 마왕 1명과 용사 다수가 포위·도망·예측·회피를 반복하는 비대칭 심리전략 추격게임"],["알카포네","평화주의 레이드의 게임 양상을 바꾸는 성장형 캐릭터 확장"]],
+ ev:["<b>행사 전용 체험 모드</b> — 기존 '신속 게임'보다 더 짧게 구성한 보드게임콘 전용 규칙","<b>체험 레이드 성공 시</b> 1,000원 할인 쿠폰 + 금화(초콜릿) 쿠폰 증정","본판·알카포네 확장 행사 특별가 판매 + 캐릭터 굿즈 증정","마왕 작가와 포토타임 (함께 촬영 가능)","<b>현장 수령 예약</b> 7/15까지 — 특별 할인가 + 한정 굿즈 + 방문일 수량 보존"],
+ note:"2004년생 친구들이 만든 독립 스튜디오예요. 펀딩 달성률 1,194% (약 597만원, 후원자 118명). 《평화주의 레이드》는 문라이트 게임즈의 독립 작품이며 아스모디코리아와 관계가 없습니다.",
+ links:[["현장 수령 예약 폼","https://forms.gle/gr4XUYKDT6dJKBgTA","FORM"],["텀블벅 (평화주의 레이드)","https://tumblbug.com/peceful_raid","FUND"],["보드라이프 공지","https://boardlife.co.kr/bbs_detail.php?tb=board_community&bbs_num=78765&view=new&pg=2","POST"]]},
+
+{id:"C012",n:"보드게임 park",zone:"artist",x:610,y:524,w:42,h:21,
+ games:[],note:"작가존 참가만 확정됐어요. 작품명, 작가 구성, 인원·시간, 체험·판매 정보는 모두 미공개입니다.",
+ links:[S("보드게임 park")]},
+
+{id:"C013",n:"쇼하우스게임즈 · 서진우",zone:"artist",x:610,y:545,w:42,h:21,
+ games:[["퀸테스·Qintess","2~5인 · 15~20분. 홀덤을 바탕으로 5장의 조합을 예측하고 베팅·블러핑하는 파티게임"],["나니 던전","혼자 던전을 탐험하는 1인 파우치 퍼즐·RPG. 확장 《심연 미궁》 있음"],["카운트 업","비밀 숫자 5개를 고른 뒤 1부터 50까지 세며 단독 적중과 중복 보너스를 겨루는 눈치게임. 2019 비콘 대상"],["로스팅 패닉","카페 주문을 완성하기 위해 주사위로 장비 사용권을 다투는 다이스 파티게임"]],
+ note:"정확한 시연·판매작은 미공개예요.",
+ links:[S("쇼하우스게임즈 서진우 퀸테스")]},
+
+{id:"C014",n:"엔조이더게임 · 한비람",zone:"artist",x:610,y:566,w:42,h:21,
+ games:[["픽스토리","50편의 전래동화와 전통놀이 화가투를 결합한 가족·교육 카드게임. 문장이나 이야기 단서를 보고 해당 동화 카드를 찾습니다"]],
+ note:"2023년 텀블벅 프로젝트는 무산됐지만 이후 2024년 신작과 출시 소개가 확인됐어요. 체험·판매, 신작 공지는 미공개.",
+ links:[S("엔조이더게임 한비람 픽스토리")]},
+
+{id:"C015",n:"오타메이커",zone:"artist",x:538,y:440,w:40,h:21,
+ games:[["난 오타쿠가 아니야!!","2~5인 · 15~20분. 공개된 단어 카드 3장을 조합해 애니메이션이나 캐릭터를 연상하고 맞히는 파티게임"],["루멘콘덴서","공격·가드·상중하 판정·속도 프레임·콤보와 캐치를 카드로 옮긴 1대1 대전격투 B-TCG"]],
+ note:"서브컬처·TCG 중심 '오타쿠를 위한 메이커'. 《난 오타쿠가 아니야!!》는 펀딩 달성률 1,933%(약 967만원, 후원자 276명)였지만 6월 말 제작 지연 공지가 있어 현장 판매는 확정으로 보기 어려워요. 체험·출품은 가능.",
+ links:[S("오타메이커 난 오타쿠가 아니야")]},
+
+{id:"C016",n:"유메카라",zone:"artist",x:538,y:461,w:40,h:21,
+ games:[["문학가의 집","3~4인 · 40분~1시간 · 추리게임(베이스볼 게임 기반) · 현장접수. 일본 미스터리 문호인 플레이어들이 살인마의 현장 묘사를 표절해 소설을 썼다는 설정. 별장에서 시체와 가면 쓴 살인마를 마주하고 마지막 인터뷰로 트릭을 밝힙니다. 2025 코리아보드게임즈 공모전 1차 통과 7작"],["그 날, 그 밤 속의 살인마","2~4인 · 40분~1시간 · 순발력/심리전 · 현장접수. 적국 요원의 눈을 피해 정보를 암호화하고 내각정보조사실의 첩자를 찾는 추리게임"]],
+ ev:["미니게임 1·2 운영 (어린이 대상 난이도 조절)","선착순 200명 — 미니게임 성공 시 가라폰 추첨 기회","유카타 부원을 찾으면 추가 간식 증정"],mystery:true,
+ note:"인천대학교 일어일문학과 보드게임 제작 소모임·창업동아리예요. 대표 김하늘 외 학생들이 활동합니다.",
+ links:[["보드라이프 공지","https://boardlife.co.kr/bbs_detail.php?tb=board_community&bbs_num=78776&view=new","POST"]]},
+
+{id:"C017",n:"이주화",zone:"artist",x:538,y:482,w:40,h:21,
+ games:[["라스트 메시지","범인은 그림 타일 속에 숨고, 피해자는 제한시간에 단서를 남기며, 수사관은 범인을 찾는 비대칭 추리게임"],["다크 호스","말의 능력과 주사위·카드로 순위를 뒤집는 경마 레이싱·베팅게임"],["웨일 스트리트","시장 가격의 변화를 읽고 투자하는 주식·경제게임"],["던전365","1인용 달력 던전게임. 달력의 하루 한 칸을 몬스터로 삼아 매일 한 번 전투. 월별 생명 8개를 관리하며 연간 365점에 도전"],["드래곤 이츠","개발·프로토타입 작품 (세부 미공개)"]],
+ note:"한국보드게임작가협회 협회장. 보드게임 카페 운영자이자 다수의 국내외 게임을 개발한 작가예요. 출품·판매·시연작은 미공개.",
+ links:[S("이주화 작가 보드게임 라스트 메시지")]},
+
+{id:"C018",n:"차워닉스",zone:"artist",x:538,y:503,w:40,h:21,
+ games:[["한상차림","2~4인 · 약 20분 · 8세 이상. 손님이 원하는 한식 조합을 모으고 복불복과 견제로 상대보다 알찬 상을 만드는 셋컬렉션"],["케미몬스터","오픈월드형 몬스터 수집·육성·전투 전략 프로토타입. 2025 인디마켓과 2026년 4월 페스타에서 시연"]],
+ note:"'차원 너머의 게임'을 지향하는 창작팀. 미나콩 홍민아 작가, 재성 작가 등이 활동해요. 최종 판매·시연작은 미공개.",
+ links:[S("차워닉스 한상차림 보드게임")]},
+
+{id:"C019",n:"최준혁",zone:"artist",x:538,y:524,w:40,h:21,
+ games:[],note:"작가존 참가는 확정됐지만, 동명이인이 많아 공개 자료만으로 특정 작품을 신뢰성 있게 연결하기 어려워요. 대표작, 인원·시간, 콘 출품작 모두 미공개.",
+ links:[S("최준혁 작가 보드게임")]},
+
+{id:"C020",n:"코카트리스",zone:"artist",x:538,y:545,w:40,h:21,
+ games:[["렛츠런!","2~5인 · 10~20분. 고양이를 피해 간식을 얻는 생쥐들의 주사위·눈치 베팅게임"],["다이스다이버","2~4인 · 약 10분. 잠수하며 보물을 모으고 위험을 관리하는 주사위 셋컬렉션"],["굿드림","2~4인 · 약 10분 · 8세 이상. 동물 인형으로 아이의 악몽을 막는 푸시유어럭·셋컬렉션"],["엘리멘탈 코덱스","2~4인 · 약 20분 · 10세 이상. 다섯 속성 보석으로 소환수를 불러내는 마법학교 테마 프로토타입"]],
+ note:"2021년 결성된 인디 창작팀. 정확한 체험작과 판매 라인업은 미공개예요.",
+ links:[S("코카트리스 보드게임 렛츠런")]},
+
+{id:"C021",n:"큐리어스클라우드",zone:"artist",x:538,y:566,w:40,h:21,
+ games:[["타로투나","타로 카드를 조합하고 세트를 만들어 행운 점수를 겨루는 게임. '20분에 한 번의 인생'"],["유니버스","반려동물 타로를 테마로 토큰 드로와 카드 능력·조합을 사용하는 운명 여행게임"]],
+ ev:["초이스와 히든 게임 협업 (제목·규칙 미공개)"],mystery:true,
+ note:"타로마스터 '큐리'를 중심으로 타로를 게임으로 풀어내는 창작팀이에요. 정확한 판매작과 대표작의 인원·시간은 미공개.",
+ links:[S("큐리어스클라우드 타로투나")]},
+
+{id:"C022",n:"크로롬",zone:"artist",x:498,y:440,w:40,h:21,
+ games:[["전투! 용병의 시대","2~4인 · 15~30분 · 14세 이상. 용병을 골라 덱을 구성하고 카드 공방으로 상대 생명력을 0으로 만드는 합턴제 전투게임"],["Season 2: Off-Road","여왕과 신규 용병을 추가하는 후속작. 펀딩 달성률 201%, 7/31 발송 예정"]],
+ note:"딱지게임연구소에서 카드게임을 연구·제작하는 개발자예요. 시즌2의 현장 판매 여부는 미공개.",
+ links:[S("크로롬 전투 용병의 시대")]},
+
+{id:"C023",n:"타스",zone:"artist",x:498,y:461,w:40,h:21,
+ games:[["탐정이 너무 많다","3~5인 · 약 15분 · 14세 이상. 눈보라 속 저택 살인사건에서 제한된 정보와 알리바이로 범인을 찾는 카드 추리게임. 해외에서는 PLAYTE를 통해 유통"],["막타2","1~3인 캐주얼 전략 RPG. 강력한 드래곤에게 마지막 일격을 차지하려는 카드게임"]],
+ note:"정확한 체험·판매작은 미공개예요.",
+ links:[S("타스 탐정이 너무 많다 보드게임")]},
+
+{id:"C024",n:"테이블플래닛",zone:"artist",x:498,y:482,w:40,h:21,
+ games:[["터닝 포인트","2인 · 15~20분 · 8세 이상. 흑백 타일을 놓고 뒤집되 색이 아니라 문양으로 사목을 완성하는 추상전략. 상대가 뒤집은 타일을 기억해야 해 심리전과 기억 요소가 함께 작동. 펀딩 달성률 252%(후원자 92명)"]],
+ note:"낙천 박승민 작가의 제작팀. 판매·이벤트 정보는 미공개예요.",
+ links:[S("테이블플래닛 터닝 포인트 보드게임")]},
+
+{id:"C025",n:"플루토게임즈",zone:"artist",x:498,y:503,w:40,h:21,
+ games:[["매직넘버일레븐","2인 · 약 30분 · 14세 이상. 공격·수비·패스 아이콘을 조합해 공격력 합계 11의 원더골을 노리는 축구 전술게임"],["항로개척자","1인 · 약 30분. 항구 발견, 교역, 선원 관리, 괴혈병과 해적 위험을 다루는 항해 탐험게임"],["프레지던트 메이커","2~4인 · 30~45분 · 14세 이상. 평행세계의 한국 대통령 선거를 압축한 파티형 선거 시뮬레이션"]],
+ news:[["항로개척자: 리마스터","그래픽을 전면 개선하고 2인 모드를 추가. 1~2인 · 30~40분. 체험 확정, 곧 펀딩 시작 예정"]],
+ note:"주봉환 작가가 2023년 창립한 1인 중심 스튜디오. 기존작 판매·할인 여부는 미공개예요.",
+ links:[S("플루토게임즈 항로개척자 보드게임")]},
+
+{id:"C026",n:"허리피자",zone:"artist",x:498,y:524,w:40,h:21,
+ games:[["허리피자","공개된 주문과 같은 피자 토핑을 빠르게 조합하는 실시간 공간지각·순발력 게임. 촉각적 경험, 어린이 공간인지, 로컬 협업 요소를 결합한 출시 전 프로토타입"]],
+ note:"서강대학교 아트&테크놀로지학과 프로젝트·창업팀 X205가 개발. 2026 월드 ESG 포럼 대학생 창업경시대회 최우수상. 체험 예상되나 인원·시간·판매 여부는 미공개.",
+ links:[S("허리피자 보드게임 X205")]},
+
+{id:"C027",n:"황기영",zone:"artist",x:498,y:545,w:40,h:21,
+ games:[["문화의 시대","1~5인 · 인당 약 30분. 피라미드형 액션 배치로 문명을 성장시키는 전략게임"],["Card City","일꾼을 배치해 도시를 건설하는 게임"],["Stack Stock","핸드 관리로 주가와 투자 수익을 다루는 경제게임"],["CBG RUN!","2~4인 · 약 30분. 십이지신 캐릭터가 카드 장수만큼 달리고 고유 능력을 사용하는 레이싱게임"],["Gembit","보석을 소재로 상대의 선택을 읽는 블러핑게임"]],
+ news:[["펭라오 코드","2인 이상 협력게임. 펭귄 파라오의 명령에 따라 제한된 정보로 피라미드를 완성하는 협력 퍼즐게임. 2장 PNP 협력게임 공모전 출품작을 카드게임으로 제작"]],
+ ev:["체험 가능 · 현장 구매 가능"],
+ links:[["보드라이프 공지","https://boardlife.co.kr/bbs_detail.php?tb=board_community&bbs_num=78355&view=new","POST"]]},
+
+/* ---------- 배치도 미표기 (공식 참가 명단에는 포함) ---------- */
+{id:"—",n:"나비타월드",zone:"corp",noMap:true,x:0,y:0,w:0,h:0,
+ games:[["슈퍼 라이노","카드를 쌓아 건물을 만들고 라이노 말을 올리는 균형게임"],["동물 쌓기","나무 동물을 쓰러뜨리지 않게 쌓는 어린이 덱스터리티"],["몬자","색깔 주사위를 조합해 자동차를 움직이는 어린이 레이싱게임"],["3×4 파리채","곱셈 결과에 맞는 파리를 빠르게 찾는 교육·순발력 게임"],["최근 상품","선인장 왕 / 쇼다운 / 카미 카멜레온 / 워터 드래곤 / 주사위의 왕"]],
+ note:"독일 어린이 보드게임 브랜드 HABA의 국내 공식 유통사예요. 공식 기업 참가 명단에는 있지만 최신 배치도에 부스 표기가 보이지 않습니다. 행사 직전 최종 배치도를 다시 확인하세요.",
+ links:[S("나비타월드 HABA 보드게임")]},
+
+{id:"—",n:"디다노니아",zone:"corp",noMap:true,x:0,y:0,w:0,h:0,
+ games:[["렉시오","숫자 타일로 족보를 만들어 먼저 손을 터는 클라이밍게임"],["레피디마","캐릭터를 성장시키며 전투와 모험을 진행하는 판타지 RPG 전략게임"],["CID","대화와 비밀 임무를 활용하는 커뮤니케이션게임"],["THE BOOK 3927 / 7DAYS","성경 이야기와 메시지를 게임으로 풀어낸 작품군"]],
+ note:"공식 기업 참가 명단에는 있지만 최신 배치도에 부스 표기가 보이지 않습니다. 콘 전용 신작, 할인 행사, 체험 프로그램 모두 미공개예요. 행사 직전 최종 배치도를 다시 확인하세요.",
+ links:[S("디다노니아 렉시오 보드게임")]},
+];
+
+/* 미스터리 스퀘어 협업 부스 (문서 기준) */
+const MS = ["B028","B003","B008","B022","B013","C004","C007","C021","B019"];
+MS.forEach(id=>{const b=B.find(x=>x.id===id); if(b) b.mystery=true;});
+
+const COMPS = [
+ {day:"7월 18일 토요일", rows:[
+  {t:"12:00–14:00",n:"정고 · 초등·청소년부",h:"행복한바오밥 · 남308호",r:"64강"},
+  {t:"13:00–16:00",n:"스플렌더 그랑프리 초등부 예선",h:"코리아보드게임즈 · 남318호",r:"최대 64명 (저학년 32 / 고학년 32)"},
+  {t:"13:00–16:50",n:"아스모플레이: 드제코 챌린지",h:"아스모디코리아 · 남318호",r:"64명"},
+  {t:"14:00–16:00",n:"정고 · 성인부",h:"행복한바오밥 · 남308호",r:"64강"},
+  {t:"14:00–15:50",n:"카르디아",h:"만두게임즈 · 남308호",r:"32명"},
+  {t:"16:00–17:50",n:"오목체스: 백년전쟁",h:"매직빈게임즈 · 남308호",r:"32명",closed:"접수 종료"},
+ ]},
+ {day:"7월 19일 일요일", rows:[
+  {t:"11:00–12:50",n:"루미큐브 초등부",h:"놀이속의세상 · 남308호",r:"64명",closed:"접수 마감"},
+  {t:"11:00–14:00",n:"파러웨이 챔피언십",h:"보드엠 · 남318호",r:"64명"},
+  {t:"11:00–13:50",n:"에이전트 애비뉴 본선",h:"MTS게임즈 · 남318호",r:"32강"},
+  {t:"14:00–16:50",n:"루미큐브 일반부",h:"놀이속의세상 · 남308호",r:"64명",closed:"접수 마감"},
+  {t:"14:00–17:00",n:"바다숲 대회",h:"코리아보드게임즈 · 남318호",r:"최대 64명"},
+  {t:"14:00–17:00",n:"카르누타 본선",h:"MTS게임즈 · 남318호",r:"32강"},
+ ]},
+];
+
+/* ============ 지도 렌더 ============ */
+const FILL = {corp:"var(--corp)", pink:"var(--corp-2)", artist:"var(--artist)"};
+
+function planSVG(){
+  const structs = [
+    {x:112,y:361,w:26,h:40,t:"피칭존"},
+  ];
+  let s = `<svg class="plan" viewBox="0 0 880 600" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="보드게임콘 부스 배치도">`;
+  s += `<text class="zonelab" x="125" y="9">HALL B1 · 기업존</text>`;
+  s += `<text class="zonelab" x="498" y="432">작가존 C001–C027</text>`;
+  structs.forEach(o=>{ s+=`<rect class="structure" x="${o.x}" y="${o.y}" width="${o.w}" height="${o.h}"/><text class="stext" x="${o.x+o.w/2}" y="${o.y+o.h/2+3}">${o.t}</text>`; });
+  B.filter(b=>!b.noMap).forEach(b=>{
+    const big = b.w>=60 && b.h>=40;
+    const mid = b.w>=35 && b.h>=18;
+    s += `<g class="booth" data-id="${b.id}" tabindex="0" role="button" aria-label="${b.id} ${b.n}">`;
+    s += `<rect x="${b.x}" y="${b.y}" width="${b.w}" height="${b.h}" fill="${FILL[b.zone]}"/>`;
+    if(b.w>16) s += `<text class="bn" x="${b.x+2.5}" y="${b.y+7}">${b.id}</text>`;
+    const cx = b.x + b.w/2;
+    const cy = b.y + b.h/2 + (b.h>24?5:3.5);
+    const name = b.n.replace(/ · .*/,"").replace(/·.*/,"");
+    if(big||mid){
+      const parts = wrapName(name, big?9:7);
+      parts.forEach((p,i)=>{
+        s += `<text class="bname${big?"":" sm"}" x="${cx}" y="${cy + (i - (parts.length-1)/2)*(big?9:6)}">${esc(p)}</text>`;
+      });
+    } else {
+      const parts = wrapName(name, 4);
+      parts.slice(0,3).forEach((p,i)=>{
+        s += `<text class="bname sm" x="${cx}" y="${b.y+11 + i*6}" style="font-size:5px">${esc(p)}</text>`;
+      });
+    }
+    s += `</g>`;
+  });
+  s += `</svg>`;
+  return s;
+}
+function wrapName(n, per){
+  const out=[]; let cur="";
+  for(const ch of n){ if((cur+ch).length>per){out.push(cur);cur=ch;} else cur+=ch; }
+  if(cur) out.push(cur);
+  return out;
+}
+function esc(t){return t.replace(/&/g,"&amp;").replace(/</g,"&lt;");}
+
+document.getElementById("planholder").innerHTML = planSVG();
+
+/* ============ 필터 / 검색 ============ */
+const FILTERS = [
+  {k:"corp", t:"기업존", f:b=>b.zone!=="artist"},
+  {k:"artist", t:"작가존", f:b=>b.zone==="artist"},
+  {k:"ev", t:"이벤트 진행", f:b=>(b.ev||[]).length>0},
+  {k:"new", t:"신작·콘 출시작", f:b=>(b.news||[]).length>0},
+  {k:"comp", t:"대회 운영", f:b=>(b.comps||[]).length>0},
+  {k:"ms", t:"미스터리 스퀘어", f:b=>!!b.mystery},
+];
+let active = new Set(); let q = "";
+
+const chips = document.getElementById("chips");
+FILTERS.forEach(f=>{
+  const el=document.createElement("button");
+  el.className="chip"; el.type="button"; el.textContent=f.t;
+  el.setAttribute("aria-pressed","false"); el.dataset.k=f.k;
+  el.onclick=()=>{ active.has(f.k)?active.delete(f.k):active.add(f.k);
+    el.setAttribute("aria-pressed", active.has(f.k)); render(); };
+  chips.appendChild(el);
+});
+
+function textOf(b){
+  return [b.id,b.n,b.alt||"",...(b.games||[]).flat(),...(b.news||[]).flat(),...(b.ev||[]),...(b.comps||[]),b.note||""].join(" ").toLowerCase();
+}
+function match(b){
+  for(const k of active){ const f=FILTERS.find(x=>x.k===k); if(!f.f(b)) return false; }
+  if(q && !textOf(b).includes(q)) return false;
+  return true;
+}
+
+function render(){
+  const hits = B.filter(match);
+  const ids = new Set(hits.filter(b=>!b.noMap).map(b=>b.id));
+  const filtering = active.size>0 || q.length>0;
+  document.querySelectorAll(".booth").forEach(g=>{
+    g.classList.toggle("dim", filtering && !ids.has(g.dataset.id));
+  });
+  const grid=document.getElementById("grid");
+  grid.innerHTML="";
+  if(!hits.length){ grid.innerHTML=`<div class="empty" style="grid-column:1/-1">조건에 맞는 부스가 없어요. 검색어나 필터를 줄여보세요.</div>`; return; }
+  hits.forEach(b=>{
+    const el=document.createElement("button");
+    el.className="item"; el.dataset.i=B.indexOf(b);
+    const g=(b.games||[]).concat(b.news||[]).map(x=>x[0]).slice(0,4).join(" · ") || "출품 정보 미공개";
+    const flags=[];
+    if((b.ev||[]).length) flags.push(`<span class="flag ev">이벤트 ${b.ev.length}</span>`);
+    if((b.news||[]).length) flags.push(`<span class="flag">신작 ${b.news.length}</span>`);
+    if((b.comps||[]).length) flags.push(`<span class="flag cp">대회</span>`);
+    if(b.mystery) flags.push(`<span class="flag ms">미스터리 스퀘어</span>`);
+    el.innerHTML=`<div class="row1"><span class="num">${b.noMap?"배치도 미표기":b.id}</span><h3>${esc(b.n)}</h3></div><p>${esc(g)}</p>${flags.length?`<div class="flags">${flags.join("")}</div>`:""}`;
+    el.onclick=()=>openBooth(B.indexOf(b));
+    grid.appendChild(el);
+  });
+}
+
+document.getElementById("q").addEventListener("input",e=>{ q=e.target.value.trim().toLowerCase(); render(); });
+
+/* ============ 상세 시트 ============ */
+const sheet=document.getElementById("sheet"), scrim=document.getElementById("scrim");
+function openBooth(ref){
+  const b = typeof ref==="number" ? B[ref] : B.find(x=>x.id===ref && !x.noMap); if(!b) return;
+  document.querySelectorAll(".booth").forEach(g=>g.classList.toggle("sel", g.dataset.id===b.id && !b.noMap));
+  document.getElementById("shnum").textContent = b.noMap ? "배치도 미표기" : b.id;
+  document.getElementById("shname").textContent=b.n;
+  document.getElementById("shsub").textContent=b.alt?`${b.alt}`:"";
+  let h="";
+  if(b.news&&b.news.length){
+    h+=`<div class="sec"><h4>콘 신작 · 출시작</h4>`;
+    b.news.forEach(([n,d])=>{h+=`<div class="game"><b>${esc(n)}<span class="tagnew">NEW</span></b>${d?`<span>${esc(d)}</span>`:""}</div>`;});
+    h+=`</div>`;
+  }
+  if(b.games&&b.games.length){
+    h+=`<div class="sec"><h4>대표작</h4>`;
+    b.games.forEach(([n,d])=>{h+=`<div class="game"><b>${esc(n)}</b>${d?`<span>${esc(d)}</span>`:""}</div>`;});
+    h+=`</div>`;
+  }
+  if(b.ev&&b.ev.length){
+    h+=`<div class="sec"><h4>현장 이벤트</h4><ul class="ev">${b.ev.map(e=>`<li>${e}</li>`).join("")}</ul></div>`;
+  }
+  if(b.comps&&b.comps.length){
+    h+=`<div class="sec"><h4>대회</h4><ul class="ev">${b.comps.map(e=>`<li>${esc(e)}</li>`).join("")}</ul></div>`;
+  }
+  if(b.links&&b.links.length){
+    h+=`<div class="sec"><h4>링크</h4><div class="links">`;
+    b.links.forEach(l=>{
+      if(!l) return;
+      const isObj = !Array.isArray(l);
+      const label = isObj ? l.label : l[0];
+      const url = isObj ? l.url : l[1];
+      const kind = isObj ? "SEARCH" : (l[2]||"LINK");
+      const guess = isObj ? true : !!l[3];
+      h+=`<a class="lnk${guess?" guess":""}" href="${url}" target="_blank" rel="noopener">${esc(label)}<span class="k">${kind}</span></a>`;
+    });
+    h+=`</div></div>`;
+  }
+  if(b.note) h+=`<div class="sec"><div class="note">${esc(b.note)}</div></div>`;
+  if(!h) h=`<div class="empty">아직 공개된 정보가 없어요.</div>`;
+  document.getElementById("shbody").innerHTML=h;
+  document.getElementById("shbody").scrollTop=0;
+  sheet.classList.add("on"); scrim.classList.add("on");
+}
+function closeBooth(){ sheet.classList.remove("on"); scrim.classList.remove("on"); document.querySelectorAll(".booth.sel").forEach(g=>g.classList.remove("sel")); }
+document.getElementById("shclose").onclick=closeBooth;
+scrim.onclick=closeBooth;
+document.addEventListener("keydown",e=>{ if(e.key==="Escape") closeBooth(); });
+document.getElementById("planholder").addEventListener("click",e=>{
+  const g=e.target.closest(".booth"); if(g) openBooth(g.dataset.id);
+});
+document.getElementById("planholder").addEventListener("keydown",e=>{
+  const g=e.target.closest(".booth");
+  if(g && (e.key==="Enter"||e.key===" ")){ e.preventDefault(); openBooth(g.dataset.id); }
+});
+
+/* ============ 대회 탭 ============ */
+const comps=document.getElementById("comps");
+comps.innerHTML = COMPS.map(d=>`<div class="day">${d.day}</div>` + d.rows.map(r=>
+  `<div class="crow"><div class="t">${r.t}</div><div class="n">${esc(r.n)}<small>${esc(r.h)}</small></div><div class="r">${esc(r.r)}${r.closed?`<br><span class="closed">${r.closed}</span>`:""}</div></div>`
+).join("")).join("") + `<div style="margin-top:18px" class="note">대회장은 코엑스 3층 남308호·남318호예요. 같은 대회장 안에 여러 경기 구역이 있어 일부 시간이 겹칩니다. 주최 측 종합표와 업체 세부 공지의 종료 시각이 조금 다른 대회가 있어요.</div>`;
+
+/* ============ 탭 전환 ============ */
+document.querySelectorAll(".tabs button").forEach(btn=>{
+  btn.onclick=()=>{
+    document.querySelectorAll(".tabs button").forEach(b=>b.setAttribute("aria-selected", b===btn));
+    ["map","list","comp"].forEach(v=>{ document.getElementById("view-"+v).hidden = (v!==btn.dataset.view); });
+    document.querySelector(".chips").hidden = (btn.dataset.view==="comp");
+    document.querySelector(".search").style.visibility = (btn.dataset.view==="comp")?"hidden":"visible";
+  };
+});
+
+render();
+</script>
