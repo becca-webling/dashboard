@@ -167,6 +167,25 @@
   .promo-banner .pb-arrow{font-size:18px;color:#052e16}
   .promo-note{font-size:11px;color:var(--g3);margin:8px 2px 2px}
   .auto-tag{flex-shrink:0;background:var(--grnbg);color:var(--grn2);border:1px solid #A7F3D0;border-radius:99px;padding:6px 11px;font-size:11px;font-weight:700;white-space:nowrap}
+  /* 할인 / 배송비 (이미지 재현) */
+  .ds-link{font-size:12px;color:var(--g3);cursor:pointer}
+  .ds-box{min-width:80px;height:36px;border:1px solid var(--line);border-radius:8px;background:var(--panel);display:inline-flex;align-items:center;justify-content:flex-end;padding:0 11px;font-size:14px;font-weight:700;color:var(--ink)}
+  .ds-box.red{color:var(--red)}
+  .ds-unit{font-size:13px;color:var(--g1)}
+  .ds-btn{border:1px solid var(--g4);background:#fff;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:600;color:var(--ink);white-space:nowrap;cursor:pointer}
+  .ds-btn.off{color:var(--g3);background:var(--panel)}
+  .ds-note{font-size:11px;color:var(--g3)}
+  .ds-info{font-size:12px;color:var(--red);margin-top:8px;line-height:1.6;display:flex;gap:6px;align-items:flex-start}
+  .ds-info span:first-child{flex-shrink:0}
+  .ds-row{display:flex;align-items:center;gap:10px;padding:11px 0;border-bottom:1px solid var(--line2)}
+  .ds-row .ds-label{width:72px;text-align:right;font-size:13px;font-weight:700;flex-shrink:0}
+  .ds-row .ds-box{width:138px}
+  .dsm-row{padding:12px 0;border-bottom:1px solid var(--line2)}
+  .dsm-line{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .dsm-label{font-size:13px;font-weight:700}
+  .dsm-right{display:flex;align-items:center;gap:6px}
+  .dsm-right .ds-box{width:92px;height:34px;font-size:13px}
+  .dsm-note{font-size:11px;color:var(--g3);margin-top:7px}
 
   .sec{background:#fff;padding:16px}
   .sec-h{font-size:14px;font-weight:700;margin-bottom:12px}
@@ -292,7 +311,7 @@ const SUM = { list:'61,770원', disc:'- 7,180원', total:'54,590원', count:'7' 
 const won = v => v.toLocaleString('ko-KR') + '원';
 const ORDER_SUM = [
   ['상품 금액','61,770원',false],['할인 금액','- 7,180원','red'],['특별 할인 금액','0원',false],
-  ['제휴카드 할인 금액','0원',false],['스냅스 머니','0원',false],['배송비','무료','grn'],
+  ['제휴카드 할인 금액','0원',false],['스냅스 머니','0원',false],['배송비 v','무료','grn'],
 ];
 
 const items = [
@@ -305,7 +324,7 @@ const items = [
   { emoji:'🖼', bg:'linear-gradient(135deg,#FEF9C3,#FDE68A)', kind:'두명포토카드 (54x86)',
     name:'Full 이미지', opt:'부광지 · 매수 2', date:'2026.07.07', qty:2,
     list:'1,500원', price:'1,275원', rate:15, edit:'both',
-    coupon:{ txt:'포토카드 15% 쿠폰 적용 시', tail:'D-2', urgent:false } },
+    coupon:{ txt:'포토카드 15% 쿠폰', tail:'D-2', urgent:false } },
   { emoji:'📌', bg:'linear-gradient(135deg,#E0E7FF,#C7D2FE)', kind:'데코용 핀셋',
     name:'데코 핀셋 – 잉크', opt:'1개', date:'2026.02.04',
     list:'1,900원', price:'1,615원', rate:15, edit:'none' },
@@ -437,12 +456,13 @@ function cartSummaryRows(){
 }
 function paymentSection(){
   const condCards = [
-    { logo:'💳', color:'#DBEAFE', name:'제휴카드 즉시할인', amt:'-5,000원', cond:'모든 상품 · 12만원 이상 결제 시' },
-    { logo:'💳', color:'#DCFCE7', name:'간편결제 X 제휴카드', amt:'-5,000원', cond:'모든 상품 · 15만원 이상 결제 시' },
+    { logo:'💳', color:'#DBEAFE', name:'제휴카드 즉시할인', amt:'-5,000원', cond:'모든 상품 · 12만원 이상 결제 시', met:false },
+    { logo:'💳', color:'#DCFCE7', name:'간편결제 X 제휴카드', amt:'-5,000원', cond:'모든 상품 · 15만원 이상 결제 시', met:false },
+    { logo:'N', color:'#03C75A', fg:'#fff', name:'네이버페이 최대 1.5% 적립 + 즉시 혜택', amt:'최대 1.5% 적립', cond:'결제수단 결제 혜택 (예시)', met:true },
   ].map(c=>`<div class="cond-card">
-      <div class="cond-top"><div class="cond-logo" style="background:${c.color}">${c.logo}</div><span class="cond-flag">조건 미충족</span></div>
-      <div class="cond-amt">${c.amt}</div><div class="cond-name">${c.name}</div>
-      <div class="cond-cond">${c.cond}</div><div class="cond-more">자세히 ›</div>
+      <div class="cond-top"><div class="cond-logo" style="background:${c.color};color:${c.fg||'inherit'}">${c.logo}</div><span class="cond-flag" style="${c.met?'color:var(--grn2);background:var(--grnbg);border-color:#A7F3D0':''}">${c.met?'조건 충족':'조건 미충족'}</span></div>
+      <div class="cond-amt" style="${c.met?'color:var(--red)':''}">${c.amt}</div><div class="cond-name">${c.name}</div>
+      <div class="cond-cond">${c.cond}</div>
     </div>`).join('');
 
   const easy = easyPay.map(p=>{
@@ -464,15 +484,42 @@ function paymentSection(){
   }).join('');
   const normal = normalPay.map(n=>`<div class="pm" style="margin-bottom:0"><div class="radio"></div><span style="font-size:12px">${n}</span></div>`).join('');
 
-  return `<div class="pay-toggle"><div class="pt-left"><span class="switch on"></span><span>적용 가능한 할인만 보기</span></div><span class="pt-right">전체보기 ›</span></div>
+  return `<div class="pay-toggle"><div class="pt-left"><span class="switch on"></span><span>적용 가능한 할인만 보기</span></div></div>
     <div class="cond-scroll">${condCards}</div>
-    <div class="promo-banner"><div class="pb-ic">🎁</div><div class="pb-txt"><b>간편결제 최대 1.5% 적립 + 즉시 혜택</b><br>결제수단 결제 혜택 <span style="color:#065f46">(예시)</span></div><span class="pb-arrow">›</span></div>
     <div class="promo-note">혜택은 별도 신청 없이 결제 시 자동 적용돼요. 프로모션은 예산 소진 시 조기 종료될 수 있어요. (예시)</div>
     <div class="eyebrow">간편결제 <span class="newtag">최상단 이동</span></div>${easy}
     <div class="eyebrow">일반결제</div>
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px">${normal}</div>
     <div class="pay-guide"><span class="gtag">안내</span><span>결제수단별 즉시 할인 안내</span><span style="margin-left:auto;color:var(--g3)">›</span></div>
     <label style="display:flex;align-items:center;gap:7px;margin-top:12px;font-size:12px;color:var(--g1);cursor:pointer"><div class="cb on"></div>지금 선택하신 결제수단 저장</label>`;
+}
+// ── 할인 / 배송비 (이미지 재현, PC·MO 공용) ──
+const DS_DATA = [
+  { label:'할인 금액', val:()=>SUM.disc.replace('원','').trim(), red:true, btn:'쿠폰 변경', off:false, note:'사용 쿠폰 2장 / 사용 가능 쿠폰 2장' },
+  { label:'스냅스 머니', val:()=>'0', red:false, btn:'전액 사용', off:true, note:'보유 스냅스 머니 0원' },
+  { label:'배송비', val:()=>'0', red:false, btn:'배송비 쿠폰', off:true, note:'무료배송 적용 · 사용 가능 배송 쿠폰 0장' },
+];
+const DS_NOTES = `<div class="ds-info"><span>ⓘ</span><span>기본배송비는 3,000원이며, 총 결제 금액이 50,000원 이상일 경우 무료배송입니다.</span></div>
+  <div class="ds-info"><span>ⓘ</span><span>개별 배송비는 출고지별로 부과되오니 배송비를 꼭 확인해 주세요.</span></div>`;
+function dsHead(){
+  return `<div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><div class="sec-h" style="margin:0">할인 / 배송비</div><span class="ds-link">사용 가능한 쿠폰을 확인해 보세요</span></div>`;
+}
+function discountPC(){
+  const rows = DS_DATA.map(r=>`<div class="ds-row">
+    <div class="ds-label">${r.label}</div>
+    <div class="ds-box ${r.red?'red':''}">${r.val()}</div><span class="ds-unit">원</span>
+    <button class="ds-btn ${r.off?'off':''}">${r.btn}</button>
+    <span class="ds-note">(${r.note})</span>
+  </div>`).join('');
+  return `${dsHead()}${rows}${DS_NOTES}`;
+}
+function discountMO(){
+  const rows = DS_DATA.map(r=>`<div class="dsm-row">
+    <div class="dsm-line"><span class="dsm-label">${r.label}</span>
+      <div class="dsm-right"><span class="ds-box ${r.red?'red':''}">${r.val()}</span><span class="ds-unit">원</span><button class="ds-btn ${r.off?'off':''}">${r.btn}</button></div></div>
+    <div class="dsm-note">(${r.note})</div>
+  </div>`).join('');
+  return `${dsHead()}${rows}${DS_NOTES}`;
 }
 function renderMobile(){
   const isCart = state.scr==='cart';
@@ -533,6 +580,8 @@ function orderSectionsMO(){
       <button class="chg">변경</button></div>
     <div style="font-size:11px;color:var(--g2);margin-top:10px;line-height:1.5">ⓘ 주문/배송 알림톡이 배송지 연락처로 발송됩니다.</div></div>
 
+  <div class="sec" style="margin-bottom:8px">${discountMO()}</div>
+
   <div class="sec" style="margin-bottom:8px"><div class="sec-h">결제수단</div>${paymentSection()}</div>
 
   <div class="sec" style="margin-bottom:8px"><div class="sec-h">최종 결제 금액</div>
@@ -585,7 +634,6 @@ function renderPCcart(){
 
   const main = `<div class="pc-main">
     <div style="display:flex;gap:6px;margin-bottom:2px"><button class="minibtn">전체 선택</button><button class="minibtn">선택 삭제</button><button class="minibtn">삭제</button></div>
-    <div class="unify-note">그룹 구분 없이 최근 편집일시 순으로 통합 · 우측 요약에 최대 할인 적용중</div>
     <div class="plist-head"><span></span><span>주문 상품 정보</span><span style="text-align:center">수량</span><span class="r">금액</span></div>
     ${list}
     <div style="margin-top:18px;font-size:11px;color:var(--g3);line-height:1.8;border-top:1px solid var(--line);padding-top:14px">
@@ -594,8 +642,8 @@ function renderPCcart(){
   </div>`;
 
   return `<div class="pc-page anim">
-    ${steps(true)}
     <div class="ptitle" style="padding-top:0">장바구니</div>
+    ${steps(true)}
     <div style="margin:0 0 8px">${shipBanner()}</div>
     ${shipToggle('margin:0 0 4px')}
     <div class="pc-cols">${main}${side}</div>
@@ -642,7 +690,7 @@ function renderPCorder(){
       <div class="sec-h">배송 정보</div>
 
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
-        <div style="font-size:13px;font-weight:700">배송지 정보 <span style="font-size:10px;color:var(--grn2);font-weight:600">(모바일과 동일 · 요약 카드형)</span></div>
+        <div style="font-size:13px;font-weight:700">배송지 정보</div>
         <div style="display:flex;gap:6px"><button class="chg">배송지 목록</button><button class="chg">신규 배송지</button></div></div>
       <div class="addr-card">
         <div style="flex:1">
@@ -655,13 +703,7 @@ function renderPCorder(){
       <div style="font-size:11px;color:var(--g2);margin-top:10px;line-height:1.5">ⓘ 주문/배송 알림톡이 배송지 연락처로 발송됩니다.</div>
     </div></div>
 
-    <div class="obox"><div style="padding:16px">
-      <div class="sec-h">할인 / 배송비</div>
-      <div style="display:flex;justify-content:space-between;align-items:center;font-size:13px">
-        <span style="color:var(--g1)">할인 금액 <span style="font-size:11px;color:var(--g3);margin-left:4px">사용 쿠폰 7장 / 사용 가능 쿠폰 1장</span></span>
-        <div style="display:flex;align-items:center;gap:8px"><span style="font-weight:700;color:var(--red)">${SUM.disc}</span><button class="chg">쿠폰 변경</button></div></div>
-      <div style="font-size:11px;color:var(--g3);margin-top:12px;line-height:1.6">ⓘ 기본배송비 3,000원 · 총 결제금액 50,000원 이상 무료배송. 개별배송 상품은 출고지별 부과.</div>
-    </div></div>
+    <div class="obox"><div style="padding:16px">${discountPC()}</div></div>
 
     <div class="obox"><div style="padding:16px">
       <div class="sec-h">결제수단</div>${paymentSection()}
@@ -678,7 +720,7 @@ function renderPCorder(){
     <button class="paybtn">${SUM.total} 결제하기</button>
   </div></div>`;
 
-  return `<div class="pc-page anim">${steps(false)}<div class="ptitle" style="padding-top:0">주문·결제</div>
+  return `<div class="pc-page anim"><div class="ptitle" style="padding-top:0">주문·결제</div>${steps(false)}
     <div class="pc-cols">${main}${side}</div></div>`;
 }
 function renderPC(){
